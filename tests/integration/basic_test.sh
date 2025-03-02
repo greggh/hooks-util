@@ -8,11 +8,23 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TEST_DIR=$(mktemp -d)
 
 cleanup() {
-  rm -rf "$TEST_DIR"
-  echo "Cleaned up test directory"
+  if [ -n "$TEST_DIR" ] && [ -d "$TEST_DIR" ]; then
+    rm -rf "$TEST_DIR"
+    echo "Cleaned up test directory: $TEST_DIR"
+  fi
 }
 
-trap cleanup EXIT
+# Only clean up on successful exit
+success_cleanup() {
+  if [ $? -eq 0 ]; then
+    cleanup
+  else
+    echo "Test failed - not cleaning up directory: $TEST_DIR"
+    echo "You may want to inspect it for debugging"
+  fi
+}
+
+trap success_cleanup EXIT
 
 echo "=== hooks-util Basic Functionality Test ==="
 echo "Creating test Git repository in $TEST_DIR"
