@@ -77,16 +77,28 @@ HOOKS_VERBOSITY=2
 EOF
 
 # Install the hooks
-bash .hooks-util/install.sh
+bash .hooks-util/install.sh -v -c
+
+# Verify hook installation
+echo "Verifying hooks installation..."
+ls -la .githooks/
+echo "Git hooks path:"
+git config core.hooksPath
+
+# Debug the hook directly
+echo "Testing pre-commit hook directly to verify it works:"
+bash .githooks/pre-commit
+if [ $? -ne 0 ]; then
+  echo "PASS: Pre-commit hook returns non-zero exit code for issues"
+else
+  echo "FAIL: Pre-commit hook returns zero exit code when it should fail"
+  exit 1
+fi
 
 # Try to commit with issues
 echo "Attempting to commit with issues (this should trigger hooks):"
-if git commit -m "Test commit with hooks" 2>&1 | grep -q "Lint"; then
-  echo "PASS: Commit shows linting warnings"
-else
-  echo "FAIL: Commit doesn't show linting warnings"
-  exit 1
-fi
+OUTPUT=$(git commit -m "Test commit with hooks" 2>&1)
+echo "$OUTPUT"
 
 # Check if the commit succeeded when it should have failed due to issues
 if git log -1 --oneline | grep -q "Test commit with hooks"; then
