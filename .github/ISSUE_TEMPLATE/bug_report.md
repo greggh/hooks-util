@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Create a report to help us improve
+about: Create a report to help us improve Neovim Hooks Utilities
 title: '[BUG] '
 labels: bug
 assignees: ''
@@ -21,15 +21,26 @@ assignees: ''
 ## Actual Behavior
 <!-- What actually happened instead -->
 
-## Screenshots
-<!-- If applicable, add screenshots to help explain your problem -->
+## Log Output
+<!-- If applicable, add log output (set HOOKS_VERBOSITY=2 for more detailed logs) -->
+```
+Paste log output here
+```
 
 ## Environment
 <!-- Please fill in the following information -->
 - OS: [e.g. Ubuntu 22.04, Windows 11, macOS 13.0]
-- Version: [e.g. v1.2.3]
-- Browser (if applicable): [e.g. Chrome 108, Firefox 106]
-- Other relevant environment details:
+- Bash Version: [e.g. 5.1.16]
+- Neovim Version: [e.g. 0.9.1]
+- Hooks Utilities Version: [e.g. 0.1.0]
+- StyLua Version: [e.g. 0.18.0]
+- Luacheck Version: [e.g. 1.1.0]
+
+## Configuration
+<!-- If applicable, include your .hooksrc configuration -->
+```bash
+# Paste your .hooksrc configuration here
+```
 
 ## Additional Context
 <!-- Add any other context about the problem here -->
