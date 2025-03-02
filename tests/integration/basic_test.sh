@@ -79,7 +79,7 @@ EOF
 # Create the minimal test directory structure needed
 echo "Setting up simplified test environment..."
 mkdir -p .githooks/lib/
-cp .hooks-util/hooks/pre-commit .githooks/
+cp .hooks-util/tests/integration/test-pre-commit .githooks/pre-commit
 chmod +x .githooks/pre-commit
 cp -r .hooks-util/lib/* .githooks/lib/
 
