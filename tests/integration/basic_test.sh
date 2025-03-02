@@ -108,9 +108,10 @@ echo "Testing pre-commit hook directly to verify it works:"
 bash .githooks/pre-commit
 HOOK_EXIT=$?
 if [ $HOOK_EXIT -ne 0 ]; then
-  echo "PASS: Pre-commit hook returns non-zero exit code ($HOOK_EXIT) for issues"
+  echo "PASS: Pre-commit hook returns non-zero exit code ($HOOK_EXIT) for issues (as expected)"
 else
-  echo "PASS: Pre-commit hook passed initial test run"
+  echo "FAIL: Pre-commit hook should fail with these test files"
+  exit 1
 fi
 
 # Try to commit with issues
