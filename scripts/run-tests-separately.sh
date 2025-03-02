@@ -22,7 +22,6 @@ declare -a TEST_ORDER=(
   "basic_test.sh"
   "neovim_config_test.sh" 
   "plugin_test.sh"
-  "tool_validation_test.sh"
 )
 
 # Run tests in specified order
@@ -51,4 +50,17 @@ for test_name in "${TEST_ORDER[@]}"; do
   echo ""
 done
 
+# Run the tool validation test with special handling
+echo -e "${YELLOW}Running test: tool_validation_test.sh (special handling)${NC}"
+"$SCRIPT_DIR/run-tool-validation-test.sh"
+exit_code=$?
+
+# Report the result
+if [ $exit_code -eq 0 ]; then
+  echo -e "${GREEN}✓ tool_validation_test.sh passed${NC}"
+else
+  echo -e "${RED}✗ tool_validation_test.sh failed (Exit code: $exit_code)${NC}"
+fi
+
+echo ""
 echo "All tests completed!"
