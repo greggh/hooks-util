@@ -24,12 +24,14 @@ run_test() {
   local test_name=$(basename "$test_script" .sh)
   
   echo -e "${YELLOW}Running test: ${test_name}${NC}"
+  echo -e "${YELLOW}Test script: ${test_script}${NC}"
   ((TESTS_TOTAL++))
   
-  # Run with verbosity for better debugging
+  # Run test script with verbose output
   HOOKS_VERBOSITY=2 bash "$test_script"
-  
   local exit_code=$?
+  
+  # Check the exit code
   if [ $exit_code -eq 0 ]; then
     echo -e "${GREEN}✓ ${test_name} passed${NC}"
     ((TESTS_PASSED++))
