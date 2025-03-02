@@ -17,9 +17,24 @@ echo -e "${YELLOW}Running hooks-util Integration Tests${NC}"
 echo "=================================================="
 echo ""
 
-# Run each test separately
-for test_script in $(find "${INTEGRATION_TEST_DIR}" -name "*.sh" | sort); do
-  test_name=$(basename "$test_script" .sh)
+# Define test order
+declare -a TEST_ORDER=(
+  "basic_test.sh"
+  "neovim_config_test.sh" 
+  "plugin_test.sh"
+  "tool_validation_test.sh"
+)
+
+# Run tests in specified order
+for test_name in "${TEST_ORDER[@]}"; do
+  test_script="${INTEGRATION_TEST_DIR}/${test_name}"
+  
+  # Skip if test doesn't exist
+  if [ ! -f "$test_script" ]; then
+    echo -e "${YELLOW}Warning: Test $test_name not found, skipping${NC}"
+    continue
+  fi
+  
   echo -e "${YELLOW}Running test: ${test_name}${NC}"
   
   # Run the test with verbose output
