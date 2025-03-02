@@ -32,7 +32,7 @@ cd .hooks-util
 mkdir -p .hooks-util
 
 # Download and extract the utilities
-curl -L https://github.com/greggh/hooks-util/archive/refs/tags/v0.1.0.tar.gz | tar -xz --strip-components=1 -C .hooks-util
+curl -L https://github.com/greggh/hooks-util/archive/refs/tags/v0.2.0.tar.gz | tar -xz --strip-components=1 -C .hooks-util
 
 # Run the installation script
 cd .hooks-util

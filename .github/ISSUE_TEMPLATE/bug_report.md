@@ -32,7 +32,7 @@ Paste log output here
 - OS: [e.g. Ubuntu 22.04, Windows 11, macOS 13.0]
 - Bash Version: [e.g. 5.1.16]
 - Neovim Version: [e.g. 0.9.1]
-- Hooks Utilities Version: [e.g. 0.1.0]
+- Hooks Utilities Version: [e.g. 0.2.0]
 - StyLua Version: [e.g. 0.18.0]
 - Luacheck Version: [e.g. 1.1.0]
 
