@@ -1,52 +1,21 @@
 #!/bin/bash
-# Test pre-commit hook for integration tests
-set -eo pipefail  # Exit on error, error on pipeline failures
+# Ultra simple test pre-commit hook for integration tests
+set -e
 
-# Don't use relative paths, use the full path to the hook directory
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-HOOKS_DIR="$(cd "${REPO_ROOT}/.githooks" && pwd)"
-LIB_DIR="${HOOKS_DIR}/lib"
+# Simple checks that don't rely on library functions
+echo "=== Testing Pre-commit Hook ==="
 
-# Include library files
-source "${LIB_DIR}/common.sh"
-source "${LIB_DIR}/error.sh"
-source "${LIB_DIR}/path.sh"
-source "${LIB_DIR}/stylua.sh"
-source "${LIB_DIR}/luacheck.sh"
-source "${LIB_DIR}/shellcheck.sh"
-source "${LIB_DIR}/test.sh"
-source "${LIB_DIR}/quality.sh"
-
-# Print banner
-hooks_print_header "Neovim Hooks Utilities Test Pre-commit Hook v${HOOKS_UTIL_VERSION}"
-
-# Get the top level of the git repository (this should be the test repo)
-TOP_LEVEL=$(hooks_git_root)
-cd "$TOP_LEVEL" || exit 1
-
-# Load configuration from .hooksrc if present 
-HOOKS_STYLUA_ENABLED=true
-HOOKS_LUACHECK_ENABLED=true
-HOOKS_TESTS_ENABLED=false
-HOOKS_QUALITY_ENABLED=true
-HOOKS_VERBOSITY=2  # Verbose for tests
-
-# Basic checks for test files
+# Check for issues in Lua file
 if grep -q "unused_var" test.lua; then
-  hooks_error "Unused variable found in test.lua"
-  ((HOOKS_ERROR_COUNT++))
-fi
-
-if grep -q "\`ls" test.sh; then
-  hooks_error "Deprecated backtick found in test.sh"
-  ((HOOKS_ERROR_COUNT++))
-fi
-
-# Print error summary and exit with appropriate code
-hooks_print_error_summary
-if [ ${HOOKS_ERROR_COUNT} -gt 0 ]; then
+  echo "ERROR: Unused variable found in test.lua"
   exit 1
-else
-  exit 0
 fi
+
+# Check for issues in shell script
+if grep -q "\`ls" test.sh; then
+  echo "ERROR: Deprecated backtick found in test.sh"
+  exit 1
+fi
+
+echo "All checks passed!"
+exit 0
