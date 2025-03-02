@@ -4,18 +4,25 @@ set -e
 
 # Simple checks that don't rely on library functions
 echo "=== Testing Pre-commit Hook ==="
+ERROR_COUNT=0
 
 # Check for issues in Lua file
-if grep -q "unused_var" test.lua; then
+if grep -q "unused_var" test.lua 2>/dev/null; then
   echo "ERROR: Unused variable found in test.lua"
-  exit 1
+  ERROR_COUNT=$((ERROR_COUNT+1))
 fi
 
 # Check for issues in shell script
-if grep -q "\`ls" test.sh; then
+if grep -q "\`ls" test.sh 2>/dev/null; then
   echo "ERROR: Deprecated backtick found in test.sh"
-  exit 1
+  ERROR_COUNT=$((ERROR_COUNT+1))
 fi
 
-echo "All checks passed!"
-exit 0
+# Exit with proper code
+if [ $ERROR_COUNT -gt 0 ]; then
+  echo "Found $ERROR_COUNT issues"
+  exit 1
+else
+  echo "All checks passed!"
+  exit 0
+fi
