@@ -76,23 +76,24 @@ HOOKS_QUALITY_ENABLED=true
 HOOKS_VERBOSITY=2
 EOF
 
-# Directly install the pre-commit hook
-echo "Installing pre-commit hook directly..."
-mkdir -p .git/hooks/
-cp .hooks-util/hooks/pre-commit .git/hooks/
-chmod +x .git/hooks/pre-commit
+# Create the minimal test directory structure needed
+echo "Setting up simplified test environment..."
+mkdir -p .githooks/lib/
+cp .hooks-util/hooks/pre-commit .githooks/
+chmod +x .githooks/pre-commit
+cp -r .hooks-util/lib/* .githooks/lib/
 
-# Copy library files
-mkdir -p .git/hooks/lib/
-cp -r .hooks-util/lib/* .git/hooks/lib/
+# Configure git to use our hooks directory
+git config core.hooksPath .githooks
 
 # Verify hook installation
 echo "Verifying hooks installation..."
-ls -la .git/hooks/
+ls -la .githooks/
+echo "Git hooks path: $(git config core.hooksPath)"
 
 # Debug the hook directly
 echo "Testing pre-commit hook directly to verify it works:"
-bash .git/hooks/pre-commit
+bash .githooks/pre-commit
 if [ $? -ne 0 ]; then
   echo "PASS: Pre-commit hook returns non-zero exit code for issues"
 else
