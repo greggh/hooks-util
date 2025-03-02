@@ -26,11 +26,15 @@ run_test() {
   echo -e "${YELLOW}Running test: ${test_name}${NC}"
   ((TESTS_TOTAL++))
   
-  if bash "$test_script"; then
+  # Run with verbosity for better debugging
+  HOOKS_VERBOSITY=2 bash "$test_script"
+  
+  local exit_code=$?
+  if [ $exit_code -eq 0 ]; then
     echo -e "${GREEN}✓ ${test_name} passed${NC}"
     ((TESTS_PASSED++))
   else
-    echo -e "${RED}✗ ${test_name} failed${NC}"
+    echo -e "${RED}✗ ${test_name} failed (Exit code: $exit_code)${NC}"
     ((TESTS_FAILED++))
   fi
   
