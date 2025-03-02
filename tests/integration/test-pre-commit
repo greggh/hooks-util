@@ -6,15 +6,15 @@ set -e
 echo "=== Testing Pre-commit Hook ==="
 ERROR_COUNT=0
 
-# Check for issues in Lua file
-if grep -q "unused_var" test.lua 2>/dev/null && ! grep -q "_unused_var" test.lua 2>/dev/null; then
-  echo "ERROR: Unused variable found in test.lua"
+# Check for issues in any Lua file
+if grep -r "unused_var" --include="*.lua" . 2>/dev/null | grep -v "_unused_var"; then
+  echo "ERROR: Unused variable found in Lua files"
   ERROR_COUNT=$((ERROR_COUNT+1))
 fi
 
-# Check for issues in shell script
-if grep -q "\`ls" test.sh 2>/dev/null; then
-  echo "ERROR: Deprecated backtick found in test.sh"
+# Check for issues in any shell script
+if grep -r "\`" --include="*.sh" . 2>/dev/null; then
+  echo "ERROR: Deprecated backtick found in shell scripts"
   ERROR_COUNT=$((ERROR_COUNT+1))
 fi
 
