@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced configuration loading with priority ordering
 - Improved installation script that copies example configuration files
 
+### Changed
+- Comprehensive documentation updates:
+  - Expanded DEVELOPMENT.md with detailed installation instructions for all platforms
+  - Enhanced SECURITY.md with hook-specific security considerations
+  - Updated SUPPORT.md with community resources and troubleshooting tips
+  - Improved docs/README.md with hook development best practices
+  - Customized GitHub issue and PR templates for the hooks utility project
+
 ## [0.1.0] - 2025-03-02
 
 ### Added
