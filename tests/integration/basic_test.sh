@@ -76,22 +76,23 @@ HOOKS_QUALITY_ENABLED=true
 HOOKS_VERBOSITY=2
 EOF
 
-# Copy configuration example files
-cp .hooks-util/templates/hooksrc.template .hooksrc.local.example
-cp .hooks-util/templates/hooksrc.template .hooksrc.user.example
+# Directly install the pre-commit hook
+echo "Installing pre-commit hook directly..."
+mkdir -p .git/hooks/
+cp .hooks-util/hooks/pre-commit .git/hooks/
+chmod +x .git/hooks/pre-commit
 
-# Install the hooks (use -f to force overwrite)
-bash .hooks-util/install.sh -v -c -f
+# Copy library files
+mkdir -p .git/hooks/lib/
+cp -r .hooks-util/lib/* .git/hooks/lib/
 
 # Verify hook installation
 echo "Verifying hooks installation..."
-ls -la .githooks/
-echo "Git hooks path:"
-git config core.hooksPath
+ls -la .git/hooks/
 
 # Debug the hook directly
 echo "Testing pre-commit hook directly to verify it works:"
-bash .githooks/pre-commit
+bash .git/hooks/pre-commit
 if [ $? -ne 0 ]; then
   echo "PASS: Pre-commit hook returns non-zero exit code for issues"
 else
