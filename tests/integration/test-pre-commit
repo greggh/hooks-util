@@ -7,8 +7,14 @@ echo "=== Testing Pre-commit Hook ==="
 ERROR_COUNT=0
 
 # Check for issues in any Lua file
-if grep -r "unused_var" --include="*.lua" . 2>/dev/null | grep -v "_unused_var"; then
+if grep -r "unused_var\|local result" --include="*.lua" . 2>/dev/null | grep -v "_unused_var"; then
   echo "ERROR: Unused variable found in Lua files"
+  ERROR_COUNT=$((ERROR_COUNT+1))
+fi
+
+# Check for trailing whitespace in Lua files
+if grep -r "\s$" --include="*.lua" . 2>/dev/null; then
+  echo "ERROR: Trailing whitespace found in Lua files"
   ERROR_COUNT=$((ERROR_COUNT+1))
 fi
 
