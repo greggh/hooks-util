@@ -242,7 +242,31 @@ end
 return M
 EOF
 
-git add lua/test-plugin/commands.lua
+# Fix the init.lua file to remove trailing whitespace
+cat > lua/test-plugin/init.lua << 'EOF'
+-- Main plugin init file
+local M = {}
+
+function M.setup(opts)
+  opts = opts or {}
+
+  -- Set default options
+  M.options = {
+    enabled = opts.enabled ~= false,
+    verbose = opts.verbose or false,
+    auto_setup = opts.auto_setup ~= false
+  }
+
+  -- Load components
+  require("test-plugin.utils")
+
+  return M
+end
+
+return M
+EOF
+
+git add lua/test-plugin/commands.lua lua/test-plugin/init.lua
 
 # Create a test file
 mkdir -p tests/spec
