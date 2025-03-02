@@ -105,6 +105,9 @@ if git commit -m "This should fail"; then
 else
   echo "PASS: Commit correctly failed due to missing tools"
   EXPECTED_FAIL=true
+  
+  # Unset the special git hooks path before exiting to prevent errors
+  git config --unset core.hooksPath || true
 fi
 
 echo "Tool validation test passed!"
