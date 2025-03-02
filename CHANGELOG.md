@@ -13,14 +13,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration tests now run successfully with proper error handling
 - Fixed path handling issues in test environment
 - Added proper error tracking and reporting in hooks
+- Improved code quality checks for whitespace and unused variables
+- Fixed test reliability issues with consistent cleanup
 
 ### Added
 - Comprehensive integration test suite:
   - Basic functionality tests for core hook features
   - Neovim configuration project integration tests
   - Plugin project integration tests
-- Test pre-commit hook for reliable testing
-- Improved test runner with better diagnostic output
+- Test pre-commit hook for reliable testing with:
+  - Improved error detection and reporting
+  - Better whitespace and code style checking
+  - Enhanced pattern matching for issues
+- Multiple test runner options:
+  - Standard test runner for CI environments
+  - Simplified runner for better debugging
+  - Individual test execution support
 - Release candidate tagging for pre-release testing
 
 ## [0.2.0] - 2025-03-02
