@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './lib'
+          severity: error
+          
+      - name: Run ShellCheck on hooks
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './hooks'
+          severity: error
+          
+  test:
+    name: Test Hooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install StyLua
+        run: |
+          mkdir -p bin
+          curl -L https://github.com/JohnnyMorganz/StyLua/releases/download/v0.17.1/stylua-linux-x86_64.zip -o stylua.zip
+          unzip stylua.zip -d bin
+          chmod +x bin/stylua
+          echo "$PWD/bin" >> $GITHUB_PATH
+          
+      - name: Install Luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          sudo luarocks install luacheck
+      
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/*.sh
+          chmod +x tests/integration/*.sh
+          
+      - name: Run unit tests
+        run: ./scripts/run_tests.sh
+          
+      - name: Run integration tests
+        run: ./scripts/run_integration_tests.sh
+          
+  cross-platform:
+    name: Cross-Platform Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Test installation script
+        run: |
+          ./install.sh --dry-run
+          
+      - name: Check environment detection
+        run: |
+          bash -c 'source ./lib/path.sh && hooks_normalize_path "~/test"'

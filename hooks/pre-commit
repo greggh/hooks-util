@@ -1,5 +1,6 @@
 #!/bin/bash
 # Pre-commit hook for Neovim Lua projects
+set -eo pipefail  # Exit on error, error on pipeline failures
 
 # Determine the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,6 +11,10 @@ source "${LIB_DIR}/common.sh"
 source "${LIB_DIR}/error.sh"
 source "${LIB_DIR}/path.sh"
 source "${LIB_DIR}/stylua.sh"
+source "${LIB_DIR}/luacheck.sh"
+source "${LIB_DIR}/shellcheck.sh"
+source "${LIB_DIR}/test.sh"
+source "${LIB_DIR}/quality.sh"
 
 # Print banner
 hooks_print_header "Neovim Hooks Utilities Pre-commit Hook v${HOOKS_UTIL_VERSION}"
@@ -21,6 +26,14 @@ cd "$TOP_LEVEL" || exit 1
 
 # Load configuration
 hooks_load_config
+
+# Fix code quality issues in staged files if enabled
+if [ "${HOOKS_QUALITY_ENABLED}" = true ]; then
+  hooks_fix_staged_quality
+  hooks_handle_error $? "Code quality fixes failed"
+else
+  hooks_debug "Code quality fixes are disabled in configuration"
+fi
 
 # Process staged Lua files with StyLua if enabled
 if [ "${HOOKS_STYLUA_ENABLED}" = true ]; then
@@ -37,12 +50,55 @@ else
   hooks_debug "StyLua formatting is disabled in configuration"
 fi
 
-# TODO: Add the following integrations:
-# 1. Luacheck for linting
-# 2. Test runner for Neovim test suites
-# 3. Fix whitespace and newline issues
-# 4. Handle unused variables (prefixing with _)
-# 5. Add missing module imports (like Snacks)
+# Run Luacheck on staged Lua files if enabled
+if [ "${HOOKS_LUACHECK_ENABLED}" = true ]; then
+  # Check for luacheck
+  if ! hooks_command_exists luacheck; then
+    hooks_warning "Luacheck is not installed. Please install it to lint Lua code."
+    hooks_warning "You can install it via LuaRocks: luarocks install luacheck"
+  else
+    # Lint all staged Lua files
+    hooks_luacheck_staged
+    hooks_handle_error $? "Luacheck validation failed"
+  fi
+else
+  hooks_debug "Luacheck validation is disabled in configuration"
+fi
+
+# Run ShellCheck on staged shell script files
+# Always run ShellCheck on shell scripts as they are essential to the project
+if ! hooks_command_exists shellcheck; then
+  hooks_warning "ShellCheck is not installed. Please install it to validate shell scripts."
+  hooks_warning "You can install it via your package manager: apt-get install shellcheck, brew install shellcheck, etc."
+else
+  # Lint all staged shell script files
+  hooks_shellcheck_staged
+  hooks_handle_error $? "ShellCheck validation failed"
+fi
+
+# Run tests if enabled
+if [ "${HOOKS_TESTS_ENABLED}" = true ]; then
+  # Check if Neovim is available
+  if ! hooks_command_exists nvim; then
+    hooks_warning "Neovim is not installed. Skipping tests."
+  else
+    # Run tests
+    hooks_run_tests_precommit "$TOP_LEVEL"
+    hooks_handle_error $? "Tests failed"
+  fi
+else
+  hooks_debug "Tests are disabled in configuration"
+fi
+
+# Success message if no errors
+if [ "${HOOKS_ERROR_COUNT}" -eq 0 ]; then
+  hooks_success "All checks passed successfully!"
+fi
+
+# Future integrations:
+# 1. Add missing module imports (like Snacks)
+# 2. Pre-push hook implementation 
+# 3. Post-checkout hook implementation
 
 # Print error summary and exit with appropriate code
 hooks_print_error_summary

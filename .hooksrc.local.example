@@ -6,9 +6,16 @@
 # The .hooksrc.local file is loaded after the main .hooksrc configuration.
 #
 
+# Enable/disable components based on local environment
+HOOKS_STYLUA_ENABLED=true
+HOOKS_LUACHECK_ENABLED=true
+HOOKS_TESTS_ENABLED=true
+HOOKS_QUALITY_ENABLED=true
+
 # Custom local tool paths
 HOOKS_STYLUA_PATH=/home/username/bin/stylua
 HOOKS_LUACHECK_PATH=/home/username/.luarocks/bin/luacheck
+HOOKS_SHELLCHECK_PATH=/usr/bin/shellcheck
 HOOKS_NEOVIM_PATH=/usr/local/bin/nvim
 
 # Preferred verbosity for your local environment

@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Look for GitHub Actions workflow files in the `.github/workflows` directory
+    directory: "/"
+    # Check for updates once a week (on Monday)
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Assign PRs to repository maintainers
+    assignees:
+      - "greggh"
+    # Add labels to PRs
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Set a limit for the number of open PRs Dependabot can have
+    open-pull-requests-limit: 5
+    # Set a version update strategy
+    versioning-strategy: increase-if-necessary

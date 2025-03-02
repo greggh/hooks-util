@@ -1,0 +1,71 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'DEVELOPMENT.md'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'DEVELOPMENT.md'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+jobs:
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run markdownlint-cli
+        uses: nosborn/github-action-markdown-cli@v3.3.0
+        with:
+          files: '**/*.md'
+          config_file: '.github/markdownlint.json'
+          ignore_files: 'node_modules/**'
+
+  check-links:
+    name: Check Links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v1.8.0
+        with:
+          args: --verbose --no-progress '**/*.md'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  validate-examples:
+    name: Validate Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check bash code blocks in markdown
+        run: |
+          find . -type f -name "*.md" -exec grep -l '```bash' {} \; | while read -r file; do
+            echo "Checking bash snippets in $file"
+            grep -n -A 1 '```bash' "$file" | grep -v '```bash' | grep -v '^--$' | \
+            while read -r line; do
+              line_num=$(echo "$line" | cut -d- -f1)
+              code_line=$(echo "$line" | cut -d: -f2-)
+              if [ -n "$code_line" ] && [ "$code_line" != "```" ]; then
+                # Extract the bash snippet and save to temporary file
+                temp_file=$(mktemp)
+                sed -n "/^$line_num:/,/^\`\`\`$/p" "$file" | sed '1d;$d' > "$temp_file"
+                # Check syntax
+                bash -n "$temp_file" || echo "Syntax error in $file around line $line_num"
+              fi
+            done
+          done

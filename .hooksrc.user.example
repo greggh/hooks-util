@@ -10,6 +10,7 @@
 HOOKS_STYLUA_ENABLED=true
 HOOKS_LUACHECK_ENABLED=false  # Disable luacheck for this user
 HOOKS_TESTS_ENABLED=true
+HOOKS_QUALITY_ENABLED=true    # Enable code quality fixes
 
 # User-specific options
 HOOKS_AUTO_STAGE=true         # Automatically stage fixed files

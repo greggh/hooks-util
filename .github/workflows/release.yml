@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          
+      - name: Verify version matches
+        run: |
+          VERSION_FILE=$(grep -oP 'HOOKS_UTIL_VERSION="\K[^"]+' lib/version.sh)
+          if [ "v$VERSION_FILE" != "${{ github.ref_name }}" ]; then
+            echo "Error: Version in version.sh ($VERSION_FILE) does not match tag (${{ github.ref_name }})"
+            exit 1
+          fi
+          
+      - name: Create Release ZIP
+        run: |
+          mkdir -p release
+          zip -r release/hooks-util-${{ steps.get_version.outputs.VERSION }}.zip \
+            hooks/ lib/ templates/ examples/ \
+            install.sh LICENSE README.md CHANGELOG.md .hooksrc.local.example .hooksrc.user.example
+            
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v4.0.1
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+            
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            # Neovim Hooks Utilities v${{ steps.get_version.outputs.VERSION }}
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ## Installation
+            
+            ```bash
+            # Option 1: Git submodule (Recommended)
+            git submodule add https://github.com/greggh/hooks-util.git .hooks-util
+            cd .hooks-util
+            ./install.sh
+            
+            # Option 2: Direct download
+            mkdir -p .hooks-util
+            curl -L https://github.com/greggh/hooks-util/releases/download/${{ github.ref_name }}/hooks-util-${{ steps.get_version.outputs.VERSION }}.zip -o hooks-util.zip
+            unzip hooks-util.zip -d .hooks-util
+            cd .hooks-util
+            ./install.sh
+            ```
+            
+            See the [README.md](https://github.com/greggh/hooks-util/blob/main/README.md) for more details.
+          files: |
+            release/hooks-util-${{ steps.get_version.outputs.VERSION }}.zip
+          draft: false
+          prerelease: false

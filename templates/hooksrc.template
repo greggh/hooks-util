@@ -9,10 +9,12 @@
 HOOKS_STYLUA_ENABLED=true
 HOOKS_LUACHECK_ENABLED=true
 HOOKS_TESTS_ENABLED=true
+HOOKS_QUALITY_ENABLED=true
 
 # Tool paths (uncomment and set if not in PATH)
 #HOOKS_STYLUA_PATH=/path/to/stylua
 #HOOKS_LUACHECK_PATH=/path/to/luacheck
+#HOOKS_SHELLCHECK_PATH=/path/to/shellcheck
 #HOOKS_NEOVIM_PATH=/path/to/nvim
 
 # Test settings

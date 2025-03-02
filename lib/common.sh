@@ -25,6 +25,7 @@ export HOOKS_DEFAULT_VERBOSITY=${HOOKS_VERBOSITY_NORMAL}
 export HOOKS_DEFAULT_STYLUA_ENABLED=true
 export HOOKS_DEFAULT_LUACHECK_ENABLED=true
 export HOOKS_DEFAULT_TESTS_ENABLED=true
+export HOOKS_DEFAULT_QUALITY_ENABLED=true
 export HOOKS_DEFAULT_TEST_TIMEOUT=60000  # 60 seconds
 
 # Current verbosity level
@@ -96,6 +97,7 @@ hooks_load_config() {
   HOOKS_STYLUA_ENABLED=${HOOKS_DEFAULT_STYLUA_ENABLED}
   HOOKS_LUACHECK_ENABLED=${HOOKS_DEFAULT_LUACHECK_ENABLED}
   HOOKS_TESTS_ENABLED=${HOOKS_DEFAULT_TESTS_ENABLED}
+  HOOKS_QUALITY_ENABLED=${HOOKS_DEFAULT_QUALITY_ENABLED}
   HOOKS_TEST_TIMEOUT=${HOOKS_DEFAULT_TEST_TIMEOUT}
   HOOKS_VERBOSITY=${HOOKS_DEFAULT_VERBOSITY}
   
@@ -137,6 +139,7 @@ hooks_load_config() {
   export HOOKS_STYLUA_ENABLED
   export HOOKS_LUACHECK_ENABLED
   export HOOKS_TESTS_ENABLED
+  export HOOKS_QUALITY_ENABLED
   export HOOKS_TEST_TIMEOUT
   export HOOKS_VERBOSITY
 }
@@ -153,10 +156,46 @@ hooks_is_lua_file() {
   [[ "$1" == *.lua ]]
 }
 
+# Function to check if a file is a shell script
+# Usage: hooks_is_shell_file "filename"
+hooks_is_shell_file() {
+  local file="$1"
+  
+  # Check extension first
+  if [[ "$file" == *.sh || "$file" == *.bash ]]; then
+    return 0
+  fi
+  
+  # For files without extension, check shebang line
+  if [ -f "$file" ]; then
+    local first_line
+    first_line=$(head -n 1 "$file")
+    if [[ "$first_line" == "#!/bin/sh" || "$first_line" == "#!/bin/bash" || "$first_line" == "#!/usr/bin/env bash" ]]; then
+      return 0
+    fi
+  fi
+  
+  return 1
+}
+
 # Function to get all staged Lua files
 # Usage: hooks_get_staged_lua_files
 hooks_get_staged_lua_files() {
   git diff --cached --name-only --diff-filter=ACM | grep -E '\.lua$'
+}
+
+# Function to get all staged shell script files
+# Usage: hooks_get_staged_shell_files
+hooks_get_staged_shell_files() {
+  local staged_files
+  staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+  
+  # Filter for shell scripts (both by extension and by checking shebang)
+  for file in $staged_files; do
+    if hooks_is_shell_file "$file"; then
+      echo "$file"
+    fi
+  done
 }
 
 # Function to print a header for a section
@@ -179,5 +218,7 @@ export -f hooks_set_verbosity
 export -f hooks_load_config
 export -f hooks_git_root
 export -f hooks_is_lua_file
+export -f hooks_is_shell_file
 export -f hooks_get_staged_lua_files
+export -f hooks_get_staged_shell_files
 export -f hooks_print_header

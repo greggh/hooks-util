@@ -7,20 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-03-02
+
 ### Added
-- Advanced configuration system with layered configuration files:
-  - `.hooksrc.local.example` for machine-specific settings
-  - `.hooksrc.user.example` for user-specific preferences
-- Enhanced configuration loading with priority ordering
-- Improved installation script that copies example configuration files
+- Luacheck integration for linting Lua files:
+  - Automatic configuration discovery
+  - Support for different Luacheck config file formats
+  - Clean error reporting and handling
+  - Integration with pre-commit hook
+- ShellCheck integration for validating shell scripts:
+  - Automatic shell script detection (extension and shebang)
+  - Standard error reporting
+  - Required validation for all shell script commits
+  - Cross-platform compatibility
+- Test runner for Neovim projects:
+  - Automatic test framework detection (Plenary, Makefile, Busted)
+  - Support for different project structures
+  - Configuration options for timeout and verbosity
+  - Pre-commit integration for test verification
+- Code quality improvement utilities:
+  - Fix trailing whitespace automatically
+  - Ensure proper line endings (LF not CRLF)
+  - Add final newline to files
+  - Prefix unused variables with underscore
+  - Staged file fix-up before commit
+- GitHub workflows and CI/CD integration:
+  - CI workflow for shell script testing
+  - Documentation testing and validation
+  - Release automation workflow
+  - Dependabot configuration for dependencies
+- Testing infrastructure:
+  - Unit testing framework for shell scripts
+  - Integration test runners
+  - Test helper functions and assertions
+  - Example tests for core functionality
+- Community management tools:
+  - Saved replies for common interactions
+  - Issue and PR response process documentation
+  - Structured markdown documentation
 
 ### Changed
-- Comprehensive documentation updates:
-  - Expanded DEVELOPMENT.md with detailed installation instructions for all platforms
-  - Enhanced SECURITY.md with hook-specific security considerations
-  - Updated SUPPORT.md with community resources and troubleshooting tips
-  - Improved docs/README.md with hook development best practices
-  - Customized GitHub issue and PR templates for the hooks utility project
+- Enhanced the configuration system:
+  - Added layered configuration files (`.hooksrc.local.example` and `.hooksrc.user.example`)
+  - Implemented priority-based configuration loading
+  - Improved configuration option documentation
+- Expanded documentation with:
+  - API references for all modules
+  - Usage examples with complete code
+  - Configuration reference guide
+  - Hook type explanations
+  - Error code lookup and troubleshooting
+  - Detailed installation instructions for all platforms
+  - Hook-specific security considerations
+  - Community resources and troubleshooting tips
+
+### Improved
+- Core error handling with better context reporting
+- Path resolution for cross-platform compatibility
+- StyLua integration with more robust fallbacks
+- Pre-commit hook execution flow and reporting
 
 ## [0.1.0] - 2025-03-02
 
@@ -36,13 +81,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project structure based on GitHub best practices
 
 ### Planned
-- Luacheck integration for linting Lua files
-- Test runner integration for Neovim projects
-- Automatic fixes for common issues:
-  - Trailing whitespace
-  - Line endings
-  - Unused variables
-  - Missing module imports
+- Support for additional hook types:
+  - pre-push hooks for deployment validation
+  - post-checkout hooks for environment setup
+  - post-merge hooks for dependency management
+- Module import detection and auto-correction
+- Advanced test result reporting and formatting
+- Integration with LSP servers for better diagnostics
 
-[Unreleased]: https://github.com/greggh/hooks-util/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/greggh/hooks-util/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/greggh/hooks-util/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/greggh/hooks-util/releases/tag/v0.1.0

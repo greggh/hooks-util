@@ -13,20 +13,26 @@ This library provides standardized Git hook functionality for Neovim Lua project
 The primary tools supported are:
 - **StyLua** - Lua code formatter designed for Neovim configurations
 - **Luacheck** - Lua static analyzer and linter
+- **ShellCheck** - Shell script static analysis tool
 - **Neovim Test Framework** - For running plugin and configuration tests
+- **Code Quality Tools** - Fix common code issues automatically
 
 ## Features
 
-- **Configurable Tool Paths** - Set custom paths for StyLua, Luacheck, etc.
+- **Configurable Tool Paths** - Set custom paths for StyLua, Luacheck, ShellCheck, etc.
 - **Cross-platform Support** - Works consistently on Linux, macOS, and Windows
 - **Fallback Mechanisms** - Graceful degradation when tools are missing
 - **Standardized Output Format** - Consistent, colorized messages across all hooks
 - **Verbose Debug Mode** - Detailed output for troubleshooting
 - **Test Integration** - Standardized test execution and reporting
+- **Automatic Code Quality Fixes** - Fix common issues like trailing whitespace and line endings
+- **Layered Configuration** - Machine and user-specific configuration options
+- **Framework Auto-detection** - Automatically detects project structure and testing frameworks
+- **GitHub Integration** - Workflows for CI/CD, documentation, and releases
 
 ## Installation
 
-### Option 1: Clone as a submodule
+### Option 1: Git Submodule (Recommended)
 
 ```bash
 git submodule add https://github.com/greggh/hooks-util.git .hooks-util
@@ -53,11 +59,13 @@ Create a `.hooksrc` file in your project root to customize hook behavior:
 
 ```bash
 # .hooksrc - Hook configuration
-STYLUA_ENABLED=true
-LUACHECK_ENABLED=true
-TESTS_ENABLED=true
-TEST_TIMEOUT=60000  # 60 seconds
-VERBOSITY=1         # 0=quiet, 1=normal, 2=verbose
+STYLUA_ENABLED=true           # Enable StyLua formatting
+LUACHECK_ENABLED=true         # Enable Luacheck linting
+TESTS_ENABLED=true            # Enable test runner
+QUALITY_ENABLED=true          # Enable code quality fixes
+TEST_TIMEOUT=60000            # 60 seconds test timeout
+VERBOSITY=1                   # 0=quiet, 1=normal, 2=verbose
+SHELLCHECK_SEVERITY="error"   # ShellCheck severity level
 ```
 
 #### Advanced Configuration
@@ -89,9 +97,12 @@ Configuration files are loaded in order (main → local → user), with later fi
 
 - **Bash** - Shell environment for hook execution
 - **Git** - Version control system
-- **StyLua** - For Lua code formatting
-- **Luacheck** - For Lua static analysis
+- **StyLua** - For Lua code formatting (optional but recommended)
+- **Luacheck** - For Lua static analysis (optional but recommended)
+- **ShellCheck** - For shell script validation (required for shell scripts)
 - **Neovim 0.8+** - For running tests (if enabled)
+
+The hooks system will gracefully handle missing tools with appropriate warnings.
 
 ## Contributing
 
@@ -105,8 +116,11 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 - [StyLua](https://github.com/JohnnyMorganz/StyLua) - Lua code formatter designed for Neovim
 - [Luacheck](https://github.com/lunarmodules/luacheck) - Lua static analyzer and linter
+- [ShellCheck](https://github.com/koalaman/shellcheck) - Shell script static analysis tool
 - [Neovim](https://neovim.io/) - The core editor these hooks support
+- [Plenary.nvim](https://github.com/nvim-lua/plenary.nvim) - Testing framework integration
 - [pre-commit](https://pre-commit.com/) - Hook management framework that inspired this project
+- [GitHub Actions](https://github.com/features/actions) - CI/CD workflow integration
 - [Semantic Versioning](https://semver.org/) - Versioning standard used in this project
 - [Contributor Covenant](https://www.contributor-covenant.org/) - Code of Conduct standard
 - [Keep a Changelog](https://keepachangelog.com/) - Changelog format
