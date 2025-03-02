@@ -254,6 +254,12 @@ hooks_fix_staged_quality() {
     files_array+=("$file")
   done <<< "$staged_files"
   
+  # Print what we're doing for test debugging
+  hooks_debug "Fixing quality issues in ${#files_array[@]} files"
+  for file in "${files_array[@]}"; do
+    hooks_debug "  - $file"
+  done
+  
   hooks_fix_files_quality "${files_array[@]}"
   local exit_code=$?
   
@@ -263,6 +269,8 @@ hooks_fix_staged_quality() {
       git add "$file"
     done
     hooks_success "Fixed files have been staged"
+  else
+    hooks_error "Failed to fix some files (exit code: $exit_code)"
   fi
   
   return $exit_code

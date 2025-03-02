@@ -81,7 +81,15 @@ bash .hooks-util/install.sh
 
 # Try to commit with issues
 echo "Attempting to commit with issues (this should trigger hooks):"
-if git commit -m "Test commit with hooks"; then
+if git commit -m "Test commit with hooks" 2>&1 | grep -q "Lint"; then
+  echo "PASS: Commit shows linting warnings"
+else
+  echo "FAIL: Commit doesn't show linting warnings"
+  exit 1
+fi
+
+# Check if the commit succeeded when it should have failed due to issues
+if git log -1 --oneline | grep -q "Test commit with hooks"; then
   echo "FAIL: Commit succeeded but should have failed due to issues"
   exit 1
 else

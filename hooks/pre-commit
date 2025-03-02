@@ -41,6 +41,7 @@ if [ "${HOOKS_STYLUA_ENABLED}" = true ]; then
   if ! hooks_command_exists stylua; then
     hooks_warning "StyLua is not installed. Please install it to format Lua code."
     hooks_warning "You can install it from: https://github.com/JohnnyMorganz/StyLua"
+    # We'll treat StyLua as optional for now, since it's just formatting
   else
     # Format all staged Lua files
     hooks_stylua_staged
@@ -56,6 +57,9 @@ if [ "${HOOKS_LUACHECK_ENABLED}" = true ]; then
   if ! hooks_command_exists luacheck; then
     hooks_warning "Luacheck is not installed. Please install it to lint Lua code."
     hooks_warning "You can install it via LuaRocks: luarocks install luacheck"
+    # Mark this as an error but continue - in test environments we need to be lenient
+    ((HOOKS_ERROR_COUNT++))
+    HOOKS_ERROR_MESSAGES+=("Missing required tool: luacheck")
   else
     # Lint all staged Lua files
     hooks_luacheck_staged
@@ -70,6 +74,8 @@ fi
 if ! hooks_command_exists shellcheck; then
   hooks_warning "ShellCheck is not installed. Please install it to validate shell scripts."
   hooks_warning "You can install it via your package manager: apt-get install shellcheck, brew install shellcheck, etc."
+  hooks_warning "Skipping ShellCheck validation for now, but this will be required in the future"
+  # Don't block the commit if ShellCheck is not available (for now)
 else
   # Lint all staged shell script files
   hooks_shellcheck_staged
@@ -102,4 +108,8 @@ fi
 
 # Print error summary and exit with appropriate code
 hooks_print_error_summary
-exit $?
+if [ ${HOOKS_ERROR_COUNT} -gt 0 ]; then
+  exit 1
+else
+  exit 0
+fi
