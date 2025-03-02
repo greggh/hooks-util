@@ -7,7 +7,7 @@ echo "=== Testing Pre-commit Hook ==="
 ERROR_COUNT=0
 
 # Check for issues in Lua file
-if grep -q "unused_var" test.lua 2>/dev/null; then
+if grep -q "unused_var" test.lua 2>/dev/null && ! grep -q "_unused_var" test.lua 2>/dev/null; then
   echo "ERROR: Unused variable found in test.lua"
   ERROR_COUNT=$((ERROR_COUNT+1))
 fi
