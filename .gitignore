@@ -103,3 +103,8 @@ temp/
 tmp/
 .tmp/
 .sass-cache/
+
+# Project specific files
+.hooksrc.local
+.hooksrc.user
+test/fixtures/.git/

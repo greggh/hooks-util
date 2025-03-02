@@ -1,0 +1,49 @@
+#!/bin/bash
+# Pre-commit hook for Neovim Lua projects
+
+# Determine the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Include library files from the parent directory (assuming hooks-util structure)
+LIB_DIR="$(cd "${SCRIPT_DIR}/../lib" && pwd)"
+source "${LIB_DIR}/common.sh"
+source "${LIB_DIR}/error.sh"
+source "${LIB_DIR}/path.sh"
+source "${LIB_DIR}/stylua.sh"
+
+# Print banner
+hooks_print_header "Neovim Hooks Utilities Pre-commit Hook v${HOOKS_UTIL_VERSION}"
+hooks_debug "Running from: ${SCRIPT_DIR}"
+
+# Get the top level of the git repository
+TOP_LEVEL=$(hooks_git_root)
+cd "$TOP_LEVEL" || exit 1
+
+# Load configuration
+hooks_load_config
+
+# Process staged Lua files with StyLua if enabled
+if [ "${HOOKS_STYLUA_ENABLED}" = true ]; then
+  # Check for stylua
+  if ! hooks_command_exists stylua; then
+    hooks_warning "StyLua is not installed. Please install it to format Lua code."
+    hooks_warning "You can install it from: https://github.com/JohnnyMorganz/StyLua"
+  else
+    # Format all staged Lua files
+    hooks_stylua_staged
+    hooks_handle_error $? "StyLua formatting failed"
+  fi
+else
+  hooks_debug "StyLua formatting is disabled in configuration"
+fi
+
+# TODO: Add the following integrations:
+# 1. Luacheck for linting
+# 2. Test runner for Neovim test suites
+# 3. Fix whitespace and newline issues
+# 4. Handle unused variables (prefixing with _)
+# 5. Add missing module imports (like Snacks)
+
+# Print error summary and exit with appropriate code
+hooks_print_error_summary
+exit $?

@@ -16,7 +16,7 @@ Use this section to tell people about which versions of your project are current
 We take the security of our project seriously. If you believe you've found a security vulnerability, please follow these steps:
 
 1. **Do not disclose the vulnerability publicly**
-2. **Email [security@example.com]** with details about the vulnerability
+2. **Email [g@0v.org]** with details about the vulnerability
    - Include steps to reproduce
    - Include potential impact
    - If possible, include suggestions for remediation

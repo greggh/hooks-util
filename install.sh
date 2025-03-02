@@ -1,0 +1,166 @@
+#!/bin/bash
+# Installation script for Neovim Hooks Utilities
+
+set -e
+
+# Determine the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Include library files 
+LIB_DIR="${SCRIPT_DIR}/lib"
+source "${LIB_DIR}/common.sh"
+source "${LIB_DIR}/error.sh"
+source "${LIB_DIR}/path.sh"
+
+# Print banner
+hooks_print_header "Neovim Hooks Utilities Installation v${HOOKS_UTIL_VERSION}"
+
+# Function to display usage information
+show_usage() {
+  echo "Usage: $0 [OPTIONS]"
+  echo
+  echo "Options:"
+  echo "  -t, --target DIR  Install hooks to target directory (default: current git repo)"
+  echo "  -c, --config      Create a default .hooksrc configuration file"
+  echo "  -f, --force       Overwrite existing hooks"
+  echo "  -v, --verbose     Enable verbose output"
+  echo "  -h, --help        Show this help message"
+  echo
+  echo "Examples:"
+  echo "  $0                    Install to current git repository"
+  echo "  $0 -t /path/to/repo   Install to specified repository"
+  echo "  $0 -c -v              Install with config file and verbose output"
+}
+
+# Parse command line arguments
+TARGET_DIR=""
+CREATE_CONFIG=false
+FORCE_OVERWRITE=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -t|--target)
+      TARGET_DIR="$2"
+      shift 2
+      ;;
+    -c|--config)
+      CREATE_CONFIG=true
+      shift
+      ;;
+    -f|--force)
+      FORCE_OVERWRITE=true
+      shift
+      ;;
+    -v|--verbose)
+      hooks_set_verbosity $HOOKS_VERBOSITY_VERBOSE
+      shift
+      ;;
+    -h|--help)
+      show_usage
+      exit 0
+      ;;
+    *)
+      hooks_error "Unknown option: $1"
+      show_usage
+      exit 1
+      ;;
+  esac
+done
+
+# Determine target directory (current git repo if not specified)
+if [ -z "$TARGET_DIR" ]; then
+  TARGET_DIR=$(hooks_git_root)
+  if [ $? -ne 0 ]; then
+    hooks_error "Not in a git repository. Please specify a target directory with -t."
+    exit 1
+  fi
+fi
+
+hooks_info "Installing to: $TARGET_DIR"
+
+# Ensure the target directory exists and is a git repository
+if [ ! -d "$TARGET_DIR/.git" ]; then
+  hooks_error "Target directory is not a git repository: $TARGET_DIR"
+  exit 1
+fi
+
+# Create .githooks directory in the target repository
+HOOKS_DIR="$TARGET_DIR/.githooks"
+mkdir -p "$HOOKS_DIR"
+hooks_info "Created hooks directory: $HOOKS_DIR"
+
+# Copy hook files
+hooks_print_header "Installing hooks"
+for hook_file in "$SCRIPT_DIR/hooks"/*; do
+  if [ -f "$hook_file" ]; then
+    hook_name=$(basename "$hook_file")
+    target_file="$HOOKS_DIR/$hook_name"
+    
+    # Check if the hook already exists
+    if [ -f "$target_file" ] && [ "$FORCE_OVERWRITE" = false ]; then
+      hooks_warning "Hook already exists: $target_file"
+      hooks_warning "Use -f to overwrite existing hooks"
+      continue
+    fi
+    
+    # Copy the hook file
+    cp "$hook_file" "$target_file"
+    chmod +x "$target_file"
+    hooks_success "Installed hook: $hook_name"
+  fi
+done
+
+# Create symbolic links to lib directory
+LIB_TARGET_DIR="$HOOKS_DIR/lib"
+if [ -d "$LIB_TARGET_DIR" ] && [ "$FORCE_OVERWRITE" = false ]; then
+  hooks_warning "Lib directory already exists: $LIB_TARGET_DIR"
+else
+  # Remove existing lib directory if it exists
+  rm -rf "$LIB_TARGET_DIR"
+  
+  # Create lib directory
+  mkdir -p "$LIB_TARGET_DIR"
+  
+  # Copy lib files
+  for lib_file in "$SCRIPT_DIR/lib"/*.sh; do
+    if [ -f "$lib_file" ]; then
+      cp "$lib_file" "$LIB_TARGET_DIR/"
+    fi
+  done
+  
+  hooks_success "Installed library files to: $LIB_TARGET_DIR"
+fi
+
+# Set up Git hooks directory
+hooks_print_header "Configuring Git"
+pushd "$TARGET_DIR" > /dev/null
+git config core.hooksPath .githooks
+hooks_success "Configured Git to use hooks from: .githooks"
+popd > /dev/null
+
+# Create a default configuration file if requested
+if [ "$CREATE_CONFIG" = true ]; then
+  CONFIG_FILE="$TARGET_DIR/.hooksrc"
+  if [ -f "$CONFIG_FILE" ] && [ "$FORCE_OVERWRITE" = false ]; then
+    hooks_warning "Configuration file already exists: $CONFIG_FILE"
+  else
+    cp "$SCRIPT_DIR/templates/hooksrc.template" "$CONFIG_FILE"
+    hooks_success "Created configuration file: $CONFIG_FILE"
+  fi
+fi
+
+hooks_print_header "Installation complete"
+hooks_success "Hooks are ready to use!"
+hooks_info "Pre-commit hook will:"
+hooks_info "- Format Lua files using StyLua"
+hooks_info "- Run Luacheck for linting (when implemented)"
+hooks_info "- Fix common issues automatically (when implemented):"
+hooks_info "  - Trailing whitespace"
+hooks_info "  - Line endings"
+hooks_info "  - Prefix unused variables with _"
+hooks_info "  - Add missing module imports"
+hooks_info "- Run tests to ensure code quality (when implemented)"
+hooks_info ""
+hooks_info "To customize, edit: $TARGET_DIR/.hooksrc"
+
+exit 0

@@ -1,32 +1,60 @@
-# Project Roadmap
+# Neovim Hooks Utilities Roadmap
 
-This document outlines the planned development path for this project. It's divided into short-term, medium-term, and long-term goals. This roadmap may evolve over time based on user feedback and project priorities.
+This document outlines the planned development path for the Neovim Hooks Utilities project. It's divided into short-term, medium-term, and long-term goals based on the priorities identified in our pre-commit improvements plan.
 
 ## Short-term Goals (Next 3 months)
 
-- [Goal 1]: Brief description of the goal
-  - [Sub-goal 1.1]
-  - [Sub-goal 1.2]
+- **Core Utility Library**: Implement the shared library for common pre-commit tasks
+  - Create standardized error handling with better messages
+  - Develop path handling utilities for cross-platform compatibility
+  - Implement configuration system with environment variables
+  - Build pluggable architecture for hooks
 
-- [Goal 2]: Brief description of the goal
-  - [Sub-goal 2.1]
-  - [Sub-goal 2.2]
+- **Ready-to-use Hook Implementations**: Create standardized hooks
+  - Implement pre-commit hook with StyLua integration
+  - Implement pre-commit hook with Luacheck integration
+  - Create test execution framework integration
+  - Provide template configurations
+
+- **Documentation and Examples**: Create comprehensive documentation
+  - Write detailed installation and configuration guides
+  - Create examples for common Neovim project types
+  - Document all utility functions and hooks
 
 ## Medium-term Goals (3-12 months)
 
-- [Goal 3]: Brief description of the goal
+- **Enhanced Testing Framework**: Improve test execution and reporting
+  - Create standardized test output format
+  - Implement test timeouts and resource limits
+  - Add support for different test frameworks
+  - Create test summary reports
 
-- [Goal 4]: Brief description of the goal
+- **IDE/Editor Integration**: Improve developer experience
+  - Create VS Code extension for hooks configuration
+  - Add Neovim plugin for hooks management
+  - Implement live feedback during editing
+
+- **Cross-project Standardization**: Ensure consistency across projects
+  - Create migration guides for existing projects
+  - Implement version checking and compatibility
+  - Build tools for analyzing project setups
 
 ## Long-term Goals (12+ months)
 
-- [Goal 5]: Brief description of the goal
+- **CI/CD Integration**: Enhanced CI workflow support
+  - Create GitHub Actions integration
+  - Implement GitLab CI support
+  - Add reporting and notifications
 
-- [Goal 6]: Brief description of the goal
+- **Plugin Ecosystem**: Support for community extensions
+  - Create plugin architecture for third-party hooks
+  - Implement registry for hook discovery
+  - Build tooling for hook development
 
 ## Completed Goals
 
-- [None yet]
+- Initial project structure and documentation
+- Basic design for the shared utility library
 
 ## Feature Requests and Contributions
 

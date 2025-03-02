@@ -4,14 +4,14 @@ Thank you for considering contributing to this project! We welcome contributions
 
 ## Code of Conduct
 
-This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to [maintainer-email].
+This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to g@0v.org.
 
 ## Getting Started
 
 1. Fork the repository
 2. Clone your fork and create a new branch:
    ```bash
-   git clone https://github.com/username/project-name.git
+   git clone https://github.com/greggh/hooks-util.git
    cd project-name
    git checkout -b my-feature-branch
    ```

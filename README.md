@@ -1,73 +1,99 @@
-# Project Template Repository
+# Neovim Hooks Utilities
 
-A comprehensive template repository with best practices for modern GitHub projects. Fork this repository to quickly set up new projects with standardized community guidelines, documentation, and GitHub configurations.
+A shared library of utilities for Git hooks across Lua-based Neovim projects.
+
+## Overview
+
+This library provides standardized Git hook functionality for Neovim Lua projects, with a focus on:
+
+1. **Enhanced Error Handling** - Better error messages and fallback mechanisms
+2. **Improved Path Handling** - Cross-platform path resolution and environment variable support
+3. **Shared Core Utilities** - Common functionality for pre-commit tasks
+
+The primary tools supported are:
+- **StyLua** - Lua code formatter designed for Neovim configurations
+- **Luacheck** - Lua static analyzer and linter
+- **Neovim Test Framework** - For running plugin and configuration tests
 
 ## Features
 
-- **Community Guidelines** – Code of conduct, contributing guide, and support information
-- **Security Policy** – Vulnerability reporting and security expectations
-- **GitHub Configurations** – Issue/PR templates, funding information, and workflow examples
-- **Documentation Templates** – Readme, changelog, development guide, and roadmap
-- **Project Structure** – Common directories and file templates
+- **Configurable Tool Paths** - Set custom paths for StyLua, Luacheck, etc.
+- **Cross-platform Support** - Works consistently on Linux, macOS, and Windows
+- **Fallback Mechanisms** - Graceful degradation when tools are missing
+- **Standardized Output Format** - Consistent, colorized messages across all hooks
+- **Verbose Debug Mode** - Detailed output for troubleshooting
+- **Test Integration** - Standardized test execution and reporting
 
-## Getting Started
+## Installation
 
-1. Click "Use this template" on GitHub to create a new repository based on this template
-2. Clone your new repository
-3. Run the setup script to customize the template for your project:
-   ```bash
-   ./scripts/setup.sh
-   ```
-4. Update the documentation files with your project-specific information
-5. Set up your development environment based on the development guide
-6. Start developing!
+### Option 1: Clone as a submodule
 
-## What's Included
+```bash
+git submodule add https://github.com/greggh/hooks-util.git .hooks-util
+cd .hooks-util
+./install.sh
+```
 
-### Documentation
+### Option 2: Direct download
 
-- `README.md` - Project introduction and main documentation
-- `CHANGELOG.md` - Keep a Changelog-formatted version history
-- `CODE_OF_CONDUCT.md` - Contributor Covenant code of conduct
-- `CONTRIBUTING.md` - Guide for contributing to the project
-- `DEVELOPMENT.md` - Development environment setup instructions
-- `LICENSE` - MIT License by default (customize as needed)
-- `ROADMAP.md` - Project goals and planned features
-- `SECURITY.md` - Security policy and vulnerability reporting
-- `SUPPORT.md` - How to get help with your project
+```bash
+mkdir -p .hooks-util
+curl -L https://github.com/greggh/hooks-util/archive/main.tar.gz | tar -xz --strip-components=1 -C .hooks-util
+cd .hooks-util
+./install.sh
+```
 
-### GitHub Configuration
+## Usage
 
-- `.github/ISSUE_TEMPLATE/` - Templates for bug reports and feature requests
-- `.github/PULL_REQUEST_TEMPLATE.md` - Pull request template
-- `.github/FUNDING.yml` - Funding links configuration
-- `.github/workflows/` - Example CI workflows for common languages
+After installation, the pre-commit hooks in your repository will automatically use the shared utilities.
 
-### Project Structure
+### Configuration
 
-- `.gitignore` - Common ignore patterns
-- `.editorconfig` - Consistent coding styles across editors
-- `docs/` - Extended documentation directory
-- `examples/` - Example code directory
-- `scripts/` - Utility scripts directory
+Create a `.hooksrc` file in your project root to customize hook behavior:
 
-## Customization
+```bash
+# .hooksrc - Hook configuration
+STYLUA_ENABLED=true
+LUACHECK_ENABLED=true
+TESTS_ENABLED=true
+TEST_TIMEOUT=60000  # 60 seconds
+VERBOSITY=1         # 0=quiet, 1=normal, 2=verbose
+```
 
-This template is designed to be customized for your specific project. You should:
+## Component Overview
 
-1. Update all documentation files with your project details
-2. Choose appropriate GitHub workflow files for your language/framework
-3. Customize ignore patterns and editor configurations
-4. Remove any unnecessary components
-5. Add language-specific files and directories
+- `/lib` - Core utility functions
+- `/hooks` - Ready-to-use hook implementations
+- `/templates` - Template configurations
+
+## Requirements
+
+- **Bash** - Shell environment for hook execution
+- **Git** - Version control system
+- **StyLua** - For Lua code formatting
+- **Luacheck** - For Lua static analysis
+- **Neovim 0.8+** - For running tests (if enabled)
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
 
 ## License
 
-This template is available under the MIT License.
+MIT License - See [LICENSE](LICENSE) for details.
 
-## Acknowledgments
+## Acknowledgements
 
-- [Keep a Changelog](https://keepachangelog.com/)
-- [Contributor Covenant](https://www.contributor-covenant.org/)
-- [Semantic Versioning](https://semver.org/)
-- [GitHub Community Standards](https://opensource.guide/)
+- [StyLua](https://github.com/JohnnyMorganz/StyLua) - Lua code formatter designed for Neovim
+- [Luacheck](https://github.com/lunarmodules/luacheck) - Lua static analyzer and linter
+- [Neovim](https://neovim.io/) - The core editor these hooks support
+- [pre-commit](https://pre-commit.com/) - Hook management framework that inspired this project
+- [Semantic Versioning](https://semver.org/) - Versioning standard used in this project
+- [Contributor Covenant](https://www.contributor-covenant.org/) - Code of Conduct standard
+- [Keep a Changelog](https://keepachangelog.com/) - Changelog format
+
+---
+
+<div align="center">
+  <p>Made with ❤️ by <a href="https://github.com/greggh">greggh</a></p>
+</div>

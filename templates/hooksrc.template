@@ -1,0 +1,22 @@
+#
+# Neovim Hooks Utilities Configuration
+#
+# This is a template configuration file for the hooks-util library.
+# Copy this file to your project root as .hooksrc and customize as needed.
+#
+
+# Enable/disable specific hook components
+HOOKS_STYLUA_ENABLED=true
+HOOKS_LUACHECK_ENABLED=true
+HOOKS_TESTS_ENABLED=true
+
+# Tool paths (uncomment and set if not in PATH)
+#HOOKS_STYLUA_PATH=/path/to/stylua
+#HOOKS_LUACHECK_PATH=/path/to/luacheck
+#HOOKS_NEOVIM_PATH=/path/to/nvim
+
+# Test settings
+HOOKS_TEST_TIMEOUT=60000  # 60 seconds timeout for tests
+
+# Verbosity level: 0=quiet, 1=normal, 2=verbose
+HOOKS_VERBOSITY=1

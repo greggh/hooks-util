@@ -4,7 +4,7 @@ This document outlines the various ways you can get help with this project.
 
 ## GitHub Discussions
 
-For general questions, ideas, or community discussions, please use [GitHub Discussions](https://github.com/username/project-name/discussions).
+For general questions, ideas, or community discussions, please use [GitHub Discussions](https://github.com/greggh/hooks-util/discussions).
 
 Categories:
 - **Q&A**: For specific questions about using the project
@@ -14,7 +14,7 @@ Categories:
 
 ## Issue Tracker
 
-For reporting bugs or requesting features, please use the [GitHub issue tracker](https://github.com/username/project-name/issues).
+For reporting bugs or requesting features, please use the [GitHub issue tracker](https://github.com/greggh/hooks-util/issues).
 
 Before creating a new issue:
 1. Search existing issues to avoid duplicates
