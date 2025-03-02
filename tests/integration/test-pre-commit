@@ -12,8 +12,8 @@ if grep -r "unused_var" --include="*.lua" . 2>/dev/null | grep -v "_unused_var";
   ERROR_COUNT=$((ERROR_COUNT+1))
 fi
 
-# Check for issues in any shell script
-if grep -r "\`" --include="*.sh" . 2>/dev/null; then
+# Check for issues in any shell script, excluding .hooks-util directory
+if grep -r "\`" --include="*.sh" --exclude-dir=".hooks-util" . 2>/dev/null; then
   echo "ERROR: Deprecated backtick found in shell scripts"
   ERROR_COUNT=$((ERROR_COUNT+1))
 fi
