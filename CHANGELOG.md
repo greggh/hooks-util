@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Pre-commit hook now correctly exits with non-zero status when errors are found
+- Missing tools are handled more gracefully during testing
+- Integration tests now run successfully with proper error handling
+- Fixed path handling issues in test environment
+- Added proper error tracking and reporting in hooks
+
+### Added
+- Comprehensive integration test suite:
+  - Basic functionality tests for core hook features
+  - Neovim configuration project integration tests
+  - Plugin project integration tests
+- Test pre-commit hook for reliable testing
+- Improved test runner with better diagnostic output
+- Release candidate tagging for pre-release testing
+
 ## [0.2.0] - 2025-03-02
 
 ### Added
