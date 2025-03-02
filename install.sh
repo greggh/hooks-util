@@ -138,15 +138,38 @@ git config core.hooksPath .githooks
 hooks_success "Configured Git to use hooks from: .githooks"
 popd > /dev/null
 
-# Create a default configuration file if requested
+# Create configuration files if requested
 if [ "$CREATE_CONFIG" = true ]; then
+  # Main configuration
   CONFIG_FILE="$TARGET_DIR/.hooksrc"
   if [ -f "$CONFIG_FILE" ] && [ "$FORCE_OVERWRITE" = false ]; then
     hooks_warning "Configuration file already exists: $CONFIG_FILE"
   else
     cp "$SCRIPT_DIR/templates/hooksrc.template" "$CONFIG_FILE"
-    hooks_success "Created configuration file: $CONFIG_FILE"
+    hooks_success "Created main configuration file: $CONFIG_FILE"
   fi
+  
+  # Example local configuration
+  LOCAL_CONFIG_EXAMPLE="$TARGET_DIR/.hooksrc.local.example"
+  if [ -f "$LOCAL_CONFIG_EXAMPLE" ] && [ "$FORCE_OVERWRITE" = false ]; then
+    hooks_warning "Local configuration example already exists: $LOCAL_CONFIG_EXAMPLE"
+  else
+    cp "$SCRIPT_DIR/.hooksrc.local.example" "$LOCAL_CONFIG_EXAMPLE"
+    hooks_success "Created local configuration example: $LOCAL_CONFIG_EXAMPLE"
+  fi
+  
+  # Example user configuration
+  USER_CONFIG_EXAMPLE="$TARGET_DIR/.hooksrc.user.example"
+  if [ -f "$USER_CONFIG_EXAMPLE" ] && [ "$FORCE_OVERWRITE" = false ]; then
+    hooks_warning "User configuration example already exists: $USER_CONFIG_EXAMPLE"
+  else
+    cp "$SCRIPT_DIR/.hooksrc.user.example" "$USER_CONFIG_EXAMPLE"
+    hooks_success "Created user configuration example: $USER_CONFIG_EXAMPLE"
+  fi
+  
+  hooks_info "To use advanced configuration:"
+  hooks_info "  cp .hooksrc.local.example .hooksrc.local"
+  hooks_info "  cp .hooksrc.user.example .hooksrc.user"
 fi
 
 hooks_print_header "Installation complete"

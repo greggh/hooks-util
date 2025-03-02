@@ -1,0 +1,21 @@
+#
+# Neovim Hooks Utilities - User Configuration Example
+#
+# This is an example of a user-specific configuration file that will not be committed to git.
+# Copy this file to .hooksrc.user and customize it for your user preferences.
+# The .hooksrc.user file is loaded after both .hooksrc and .hooksrc.local.
+#
+
+# Enable/disable components based on user preference
+HOOKS_STYLUA_ENABLED=true
+HOOKS_LUACHECK_ENABLED=false  # Disable luacheck for this user
+HOOKS_TESTS_ENABLED=true
+
+# User-specific options
+HOOKS_AUTO_STAGE=true         # Automatically stage fixed files
+HOOKS_NOTIFY_DESKTOP=true     # Enable desktop notifications for hooks
+HOOKS_ALLOW_NO_VERIFY=false   # Prevent --no-verify from skipping hooks
+
+# Custom hook behavior
+HOOKS_PRE_HOOK_COMMAND="echo Starting hooks for $(whoami)..."
+HOOKS_POST_HOOK_COMMAND="echo Hooks completed successfully!"

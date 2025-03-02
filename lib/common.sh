@@ -83,11 +83,14 @@ hooks_set_verbosity() {
   export HOOKS_VERBOSITY
 }
 
-# Function to load configuration from .hooksrc file
+# Function to load configuration from .hooksrc file and its variants
 # Usage: hooks_load_config [path/to/.hooksrc]
 hooks_load_config() {
   local config_file="${1:-"${PWD}/.hooksrc"}"
   local default_config_file="${SCRIPT_DIR}/../templates/hooksrc.template"
+  local config_dir=$(dirname "$config_file")
+  local local_config_file="${config_dir}/.hooksrc.local"
+  local user_config_file="${config_dir}/.hooksrc.user"
   
   # Initialize with default values
   HOOKS_STYLUA_ENABLED=${HOOKS_DEFAULT_STYLUA_ENABLED}
@@ -105,11 +108,29 @@ hooks_load_config() {
   
   # Load project-specific configuration file if exists
   if [ -f "${config_file}" ]; then
-    hooks_debug "Loading configuration from ${config_file}"
+    hooks_debug "Loading main configuration from ${config_file}"
     # shellcheck disable=SC1090
     source "${config_file}"
   else
-    hooks_debug "Configuration file ${config_file} not found, using defaults"
+    hooks_debug "Main configuration file ${config_file} not found, using defaults"
+  fi
+  
+  # Load local machine configuration if exists
+  if [ -f "${local_config_file}" ]; then
+    hooks_debug "Loading local configuration from ${local_config_file}"
+    # shellcheck disable=SC1090
+    source "${local_config_file}"
+  else
+    hooks_debug "Local configuration file ${local_config_file} not found, skipping"
+  fi
+  
+  # Load user-specific configuration if exists
+  if [ -f "${user_config_file}" ]; then
+    hooks_debug "Loading user configuration from ${user_config_file}"
+    # shellcheck disable=SC1090
+    source "${user_config_file}"
+  else
+    hooks_debug "User configuration file ${user_config_file} not found, skipping"
   fi
   
   # Export all configuration variables

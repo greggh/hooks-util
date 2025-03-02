@@ -60,6 +60,25 @@ TEST_TIMEOUT=60000  # 60 seconds
 VERBOSITY=1         # 0=quiet, 1=normal, 2=verbose
 ```
 
+#### Advanced Configuration
+
+The hooks utility supports additional configuration files for different environments:
+
+1. **`.hooksrc`** - Main project configuration, committed to git
+2. **`.hooksrc.local`** - Machine-specific configuration, not committed to git
+3. **`.hooksrc.user`** - User-specific configuration, not committed to git
+
+Example files are provided (`.hooksrc.local.example` and `.hooksrc.user.example`) that you can copy and customize:
+
+```bash
+# Create your local configuration
+cp .hooksrc.local.example .hooksrc.local
+# Create your user configuration
+cp .hooksrc.user.example .hooksrc.user
+```
+
+Configuration files are loaded in order (main → local → user), with later files overriding earlier ones.
+
 ## Component Overview
 
 - `/lib` - Core utility functions
