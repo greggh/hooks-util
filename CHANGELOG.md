@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Pre-commit hook now correctly exits with non-zero status when errors are found
-- Missing tools are handled more gracefully during testing
 - Integration tests now run successfully with proper error handling
 - Fixed path handling issues in test environment
 - Added proper error tracking and reporting in hooks
 - Improved code quality checks for whitespace and unused variables
 - Fixed test reliability issues with consistent cleanup
+- Made ShellCheck a strict requirement for shell script validation
+- Made StyLua a strict requirement for Lua formatting
+- Removed lenient handling of missing tools - all required tools now cause commit failure
 
 ### Added
 - Comprehensive integration test suite:

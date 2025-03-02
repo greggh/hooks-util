@@ -39,9 +39,11 @@ fi
 if [ "${HOOKS_STYLUA_ENABLED}" = true ]; then
   # Check for stylua
   if ! hooks_command_exists stylua; then
-    hooks_warning "StyLua is not installed. Please install it to format Lua code."
-    hooks_warning "You can install it from: https://github.com/JohnnyMorganz/StyLua"
-    # We'll treat StyLua as optional for now, since it's just formatting
+    hooks_error "StyLua is not installed. Please install it to format Lua code."
+    hooks_error "You can install it from: https://github.com/JohnnyMorganz/StyLua"
+    # Mark this as an error and block the commit
+    ((HOOKS_ERROR_COUNT++))
+    HOOKS_ERROR_MESSAGES+=("Missing required tool: stylua")
   else
     # Format all staged Lua files
     hooks_stylua_staged
@@ -72,10 +74,11 @@ fi
 # Run ShellCheck on staged shell script files
 # Always run ShellCheck on shell scripts as they are essential to the project
 if ! hooks_command_exists shellcheck; then
-  hooks_warning "ShellCheck is not installed. Please install it to validate shell scripts."
-  hooks_warning "You can install it via your package manager: apt-get install shellcheck, brew install shellcheck, etc."
-  hooks_warning "Skipping ShellCheck validation for now, but this will be required in the future"
-  # Don't block the commit if ShellCheck is not available (for now)
+  hooks_error "ShellCheck is not installed. Please install it to validate shell scripts."
+  hooks_error "You can install it via your package manager: apt-get install shellcheck, brew install shellcheck, etc."
+  # Mark this as an error and block the commit
+  ((HOOKS_ERROR_COUNT++))
+  HOOKS_ERROR_MESSAGES+=("Missing required tool: shellcheck")
 else
   # Lint all staged shell script files
   hooks_shellcheck_staged
