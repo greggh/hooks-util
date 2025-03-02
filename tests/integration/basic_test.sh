@@ -116,15 +116,19 @@ fi
 
 # Try to commit with issues
 echo "Attempting to commit with issues (this should trigger hooks):"
-OUTPUT=$(git commit -m "Test commit with hooks" 2>&1)
-echo "$OUTPUT"
+git commit -m "Test commit with hooks" 2>&1 || COMMIT_FAILED=true
 
-# Check if the commit succeeded when it should have failed due to issues
-if git log -1 --oneline | grep -q "Test commit with hooks"; then
-  echo "FAIL: Commit succeeded but should have failed due to issues"
-  exit 1
-else
+# Check if the commit failed as expected
+if [ "$COMMIT_FAILED" = "true" ]; then
   echo "PASS: Commit correctly failed due to hooks"
+else 
+  # Double-check if the commit actually went through
+  if git log -1 --oneline | grep -q "Test commit with hooks"; then
+    echo "FAIL: Commit succeeded but should have failed due to issues"
+    exit 1
+  else
+    echo "PASS: No commit was created (as expected)"
+  fi
 fi
 
 # Fix the issues manually for testing
