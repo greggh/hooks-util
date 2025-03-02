@@ -76,8 +76,12 @@ HOOKS_QUALITY_ENABLED=true
 HOOKS_VERBOSITY=2
 EOF
 
-# Install the hooks
-bash .hooks-util/install.sh -v -c
+# Copy configuration example files
+cp .hooks-util/templates/hooksrc.template .hooksrc.local.example
+cp .hooks-util/templates/hooksrc.template .hooksrc.user.example
+
+# Install the hooks (use -f to force overwrite)
+bash .hooks-util/install.sh -v -c -f
 
 # Verify hook installation
 echo "Verifying hooks installation..."

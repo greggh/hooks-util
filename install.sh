@@ -154,8 +154,14 @@ if [ "$CREATE_CONFIG" = true ]; then
   if [ -f "$LOCAL_CONFIG_EXAMPLE" ] && [ "$FORCE_OVERWRITE" = false ]; then
     hooks_warning "Local configuration example already exists: $LOCAL_CONFIG_EXAMPLE"
   else
-    cp "$SCRIPT_DIR/.hooksrc.local.example" "$LOCAL_CONFIG_EXAMPLE"
-    hooks_success "Created local configuration example: $LOCAL_CONFIG_EXAMPLE"
+    if [ -f "$SCRIPT_DIR/.hooksrc.local.example" ]; then
+      cp "$SCRIPT_DIR/.hooksrc.local.example" "$LOCAL_CONFIG_EXAMPLE"
+      hooks_success "Created local configuration example: $LOCAL_CONFIG_EXAMPLE"
+    else
+      # Fallback to template if example doesn't exist
+      cp "$SCRIPT_DIR/templates/hooksrc.template" "$LOCAL_CONFIG_EXAMPLE"
+      hooks_success "Created local configuration example (from template): $LOCAL_CONFIG_EXAMPLE"
+    fi
   fi
   
   # Example user configuration
@@ -163,8 +169,14 @@ if [ "$CREATE_CONFIG" = true ]; then
   if [ -f "$USER_CONFIG_EXAMPLE" ] && [ "$FORCE_OVERWRITE" = false ]; then
     hooks_warning "User configuration example already exists: $USER_CONFIG_EXAMPLE"
   else
-    cp "$SCRIPT_DIR/.hooksrc.user.example" "$USER_CONFIG_EXAMPLE"
-    hooks_success "Created user configuration example: $USER_CONFIG_EXAMPLE"
+    if [ -f "$SCRIPT_DIR/.hooksrc.user.example" ]; then
+      cp "$SCRIPT_DIR/.hooksrc.user.example" "$USER_CONFIG_EXAMPLE"
+      hooks_success "Created user configuration example: $USER_CONFIG_EXAMPLE"
+    else
+      # Fallback to template if example doesn't exist
+      cp "$SCRIPT_DIR/templates/hooksrc.template" "$USER_CONFIG_EXAMPLE"
+      hooks_success "Created user configuration example (from template): $USER_CONFIG_EXAMPLE"
+    fi
   fi
   
   hooks_info "To use advanced configuration:"
