@@ -24,7 +24,7 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Run markdownlint-cli
         uses: nosborn/github-action-markdown-cli@v3.3.0
@@ -37,7 +37,7 @@ jobs:
     name: Check Links
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Link Checker
         uses: lycheeverse/lychee-action@v1.8.0
@@ -50,22 +50,30 @@ jobs:
     name: Validate Examples
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Check bash code blocks in markdown
         run: |
           find . -type f -name "*.md" -exec grep -l '```bash' {} \; | while read -r file; do
             echo "Checking bash snippets in $file"
-            grep -n -A 1 '```bash' "$file" | grep -v '```bash' | grep -v '^--$' | \
-            while read -r line; do
-              line_num=$(echo "$line" | cut -d- -f1)
-              code_line=$(echo "$line" | cut -d: -f2-)
-              if [ -n "$code_line" ] && [ "$code_line" != "```" ]; then
-                # Extract the bash snippet and save to temporary file
-                temp_file=$(mktemp)
-                sed -n "/^$line_num:/,/^\`\`\`$/p" "$file" | sed '1d;$d' > "$temp_file"
-                # Check syntax
-                bash -n "$temp_file" || echo "Syntax error in $file around line $line_num"
+            
+            # Extract all bash code blocks from the markdown file
+            csplit --silent --prefix=snippet "$file" '/^```bash$/' '{*}' '/^```$/' '{*}'
+            rm snippet00 # Remove file content before the first ```bash
+            
+            # Check syntax of each bash snippet
+            for snippet in snippet*; do
+              if head -n 1 "$snippet" | grep -q '^```bash$'; then
+                # Remove the ```bash and ``` markers
+                sed -i '1d;$d' "$snippet"
+                
+                # Only check if snippet is not empty
+                if [ -s "$snippet" ]; then
+                  echo "  Checking snippet in $file (${snippet})"
+                  bash -n "$snippet" || echo "Syntax error in $file - $snippet"
+                fi
               fi
+              # Clean up snippet file
+              rm "$snippet"
             done
           done

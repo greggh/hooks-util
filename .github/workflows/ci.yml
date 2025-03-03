@@ -12,7 +12,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
@@ -30,7 +30,7 @@ jobs:
     name: Test Hooks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Install StyLua
         run: |
@@ -64,7 +64,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Test installation script
         run: |
