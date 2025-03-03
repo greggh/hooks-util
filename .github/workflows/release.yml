@@ -36,11 +36,23 @@ jobs:
             hooks/ lib/ templates/ examples/ \
             install.sh LICENSE README.md CHANGELOG.md .hooksrc.local.example .hooksrc.user.example
             
-      - name: Generate changelog
+      - name: Extract changelog for version
         id: changelog
-        uses: metcalfc/changelog-generator@v4.0.1
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          VERSION_WITHOUT_V="${VERSION#v}"
+          CHANGELOG_CONTENT=$(awk -v ver="## [${VERSION_WITHOUT_V}]" '
+            BEGIN { printing = 0; content = ""; }
+            $0 ~ ver { printing = 1; next; }
+            /^## \[/ { if (printing == 1) { printing = 0; } }
+            { if (printing == 1) content = content $0 "\n"; }
+            END { print content; }
+          ' CHANGELOG.md)
+          
+          # Properly format for GitHub Actions output
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
             
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
