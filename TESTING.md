@@ -9,10 +9,10 @@ This document describes how to thoroughly test the hooks-util project before imp
 To run all integration tests at once, use the test runner script:
 
 ```bash
-./scripts/run_integration_tests.sh
+./scripts/test_all.sh
 ```
 
-This will execute all integration tests and provide a summary of the results.
+This will execute all integration tests and provide a summary of the results. The test runner will continue to run all tests even if some of them fail, giving you a complete overview of test status.
 
 ### Running Individual Tests
 
@@ -25,8 +25,11 @@ You can also run individual test scripts directly:
 # Neovim config integration test
 ./tests/integration/neovim_config_test.sh
 
-# Neovim plugin integration test
+# Neovim plugin integration tests (fixable issues)
 ./tests/integration/plugin_test.sh
+
+# Neovim plugin integration tests (unfixable issues)
+./tests/integration/plugin_test_unfixable.sh
 ```
 
 ### Running Unit Tests
@@ -71,9 +74,11 @@ This script:
 - Verifies that the pre-commit hook catches these issues
 - Fixes the issues and verifies that the commit succeeds
 
-### 3. Neovim Plugin Integration Test
+### 3. Neovim Plugin Integration Tests
 
-Tests hooks-util with a repository that resembles a Neovim plugin:
+#### 3.1 Fixable Issues Test
+
+Tests hooks-util with a repository that resembles a Neovim plugin, focusing on issues that can be automatically fixed:
 
 ```bash
 ./tests/integration/plugin_test.sh
@@ -82,9 +87,39 @@ Tests hooks-util with a repository that resembles a Neovim plugin:
 This script:
 - Creates a test repository with a Neovim plugin structure (lua/plugin-name, tests/spec, etc.)
 - Sets up StyLua, Luacheck, and test configurations
-- Creates Lua files with formatting and linting issues
+- Creates Lua files with formatting and linting issues that can be fixed
 - Verifies that the pre-commit hook catches these issues
 - Fixes the issues and verifies that the commit succeeds
+
+#### 3.2 Unfixable Issues Test
+
+Tests hooks-util with a repository that contains issues that cannot be automatically fixed:
+
+```bash
+./tests/integration/plugin_test_unfixable.sh
+```
+
+This script:
+- Creates a test repository with a Neovim plugin structure
+- Creates Lua files with syntax errors and other unfixable issues
+- Creates shell scripts with complex issues that cannot be auto-fixed
+- Verifies that the pre-commit hook correctly blocks commits with these issues
+- Attempts multiple fix strategies and confirms they all fail appropriately
+
+### 4. Tool Validation Test
+
+Tests hooks-util behavior with and without external tools (StyLua, Luacheck, ShellCheck):
+
+```bash
+./tests/integration/tool_validation_test.sh
+```
+
+This script:
+- Creates a test repository with minimal structure
+- Tests behavior when required tools are missing
+- Tests behavior when real tools are available
+- Verifies that the pre-commit hook correctly handles both scenarios
+- Confirms that hooks properly fail when tools can't fix issues
 
 ## Shell Script Unit Tests
 
@@ -154,6 +189,20 @@ To implement hooks-util in your actual projects:
 6. Start working with your project as normal - the hooks will run automatically on commit.
 
 ## Troubleshooting
+
+### Test Debugging
+
+If you need to debug test failures or isolate specific test behavior:
+
+```bash
+# Debug a specific test's exit code behavior
+./scripts/debug_test.sh ./tests/integration/plugin_test.sh
+
+# Run tests individually with more verbose output
+./scripts/run-tests-separately.sh
+```
+
+### Hook Troubleshooting
 
 If you encounter issues with the hooks:
 

@@ -25,6 +25,7 @@ The primary tools supported are:
 - **Standardized Output Format** - Consistent, colorized messages across all hooks
 - **Verbose Debug Mode** - Detailed output for troubleshooting
 - **Test Integration** - Standardized test execution and reporting
+- **Robust Test Framework** - Comprehensive tests for various scenarios (fixable issues, unfixable issues, tool validation)
 - **Automatic Code Quality Fixes** - Fix common issues like trailing whitespace and line endings
 - **Layered Configuration** - Machine and user-specific configuration options
 - **Framework Auto-detection** - Automatically detects project structure and testing frameworks
