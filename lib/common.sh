@@ -89,7 +89,9 @@ hooks_set_verbosity() {
 hooks_load_config() {
   local config_file="${1:-"${PWD}/.hooksrc"}"
   local default_config_file="${SCRIPT_DIR}/../templates/hooksrc.template"
-  local config_dir=$(dirname "$config_file")
+  # Declare and assign separately to avoid masking return values
+  local config_dir
+  config_dir=$(dirname "$config_file")
   local local_config_file="${config_dir}/.hooksrc.local"
   local user_config_file="${config_dir}/.hooksrc.user"
   

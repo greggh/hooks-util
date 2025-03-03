@@ -97,16 +97,16 @@ EOF
 git add lua doc
 git commit -m "Initial plugin setup"
 
-# Create a file with issues
+# Create a file with formatting and linting issues
 cat > lua/test-plugin/commands.lua << 'EOF'
--- Plugin commands
+-- Plugin commands with formatting and linting issues
 local M = {}    
 
 function M.register_commands()
-    local namespace = "test-plugin"
+    local namespace = "test-plugin"  -- unused variable
     local commands = {
         TestCommand = function()
-            local result = "test"
+            local result = "test"  -- unused variable
             print("Running test command")    
         end,
     }
@@ -116,11 +116,32 @@ function M.register_commands()
     end
 end
 
+-- Invalid Lua syntax below - will fail Luacheck
+if (true) {
+   print("This is not valid Lua")
+}
+
 return M
 EOF
 
-# Add the file to Git
-git add lua/test-plugin/commands.lua
+# Create scripts directory
+mkdir -p scripts
+
+# Create a shell script with issues
+cat > scripts/test-script.sh << 'EOF'
+#!/bin/bash
+# This script has ShellCheck issues
+
+echo $UNDEFINED_VAR
+ls *.txt
+if [ $? == 0 ]; then
+  echo "Files found"
+fi
+EOF
+chmod +x scripts/test-script.sh
+
+# Add the files to Git
+git add lua/test-plugin/commands.lua scripts/test-script.sh
 
 # Set up hooks-util
 echo "Setting up hooks-util"
@@ -180,10 +201,10 @@ vim.opt.runtimepath:append("./deps/plenary.nvim")
 vim.cmd("runtime plugin/plenary.vim")
 EOF
 
-# Create the minimal test directory structure needed
-echo "Setting up simplified test environment..."
+# Set up the hooks directory structure
+echo "Setting up hooks environment..."
 mkdir -p .githooks/lib/
-cp .hooks-util/tests/integration/test-pre-commit .githooks/pre-commit
+cp .hooks-util/hooks/pre-commit .githooks/pre-commit
 chmod +x .githooks/pre-commit
 cp -r .hooks-util/lib/* .githooks/lib/
 
@@ -226,10 +247,10 @@ cat > lua/test-plugin/commands.lua << 'EOF'
 local M = {}
 
 function M.register_commands()
-  local namespace = "test-plugin"
+  local _namespace = "test-plugin" -- prefix unused variable with _
   local commands = {
     TestCommand = function()
-      local _result = "test"
+      local _result = "test" -- prefix unused variable with _
       print("Running test command")
     end,
   }
@@ -239,7 +260,26 @@ function M.register_commands()
   end
 end
 
+-- Removed invalid Lua syntax
+
 return M
+EOF
+
+# Fix the shell script
+cat > scripts/test-script.sh << 'EOF'
+#!/bin/bash
+# This script is fixed for ShellCheck
+
+# Use default value for undefined variable
+echo "${UNDEFINED_VAR:-No value}"
+
+# Use find instead of glob
+FILES=$(find . -name "*.txt")
+
+# Check if files were found using better pattern
+if [ -n "$FILES" ]; then
+  echo "Files found: $FILES"
+fi
 EOF
 
 # Fix the init.lua file to remove trailing whitespace
@@ -266,7 +306,7 @@ end
 return M
 EOF
 
-git add lua/test-plugin/commands.lua lua/test-plugin/init.lua
+git add lua/test-plugin/commands.lua lua/test-plugin/init.lua scripts/test-script.sh
 
 # Create a test file
 mkdir -p tests/spec

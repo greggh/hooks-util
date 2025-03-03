@@ -1,27 +1,115 @@
 #!/bin/bash
-# Ultra simple test pre-commit hook for integration tests
+# Test pre-commit hook that uses real tools (StyLua, Luacheck, ShellCheck)
 set -e
 
-# Simple checks that don't rely on library functions
-echo "=== Testing Pre-commit Hook ==="
+echo "=== Testing Pre-commit Hook with Real Tools ==="
 ERROR_COUNT=0
 
-# Check for issues in any Lua file
-if grep -r "unused_var\|local result" --include="*.lua" . 2>/dev/null | grep -v "_unused_var"; then
-  echo "ERROR: Unused variable found in Lua files"
-  ERROR_COUNT=$((ERROR_COUNT+1))
+# Get list of all Lua files
+LUA_FILES=$(find . -name "*.lua" -not -path "./.hooks-util/*" -not -path "./tests/*" -not -path "./.git/*")
+SHELL_FILES=$(find . -name "*.sh" -not -path "./.hooks-util/*" -not -path "./tests/*" -not -path "./.git/*")
+
+# Check if the real tools are installed
+STYLUA_INSTALLED=false
+LUACHECK_INSTALLED=false
+SHELLCHECK_INSTALLED=false
+
+if command -v stylua &> /dev/null; then
+  STYLUA_INSTALLED=true
+  echo "StyLua is installed, will use for formatting checks"
 fi
 
-# Check for trailing whitespace in Lua files
-if grep -r "\s$" --include="*.lua" . 2>/dev/null; then
-  echo "ERROR: Trailing whitespace found in Lua files"
-  ERROR_COUNT=$((ERROR_COUNT+1))
+if command -v luacheck &> /dev/null; then
+  LUACHECK_INSTALLED=true
+  echo "Luacheck is installed, will use for linting checks"
 fi
 
-# Check for issues in any shell script, excluding .hooks-util directory
-if grep -r "\`" --include="*.sh" --exclude-dir=".hooks-util" . 2>/dev/null; then
-  echo "ERROR: Deprecated backtick found in shell scripts"
-  ERROR_COUNT=$((ERROR_COUNT+1))
+if command -v shellcheck &> /dev/null; then
+  SHELLCHECK_INSTALLED=true
+  echo "ShellCheck is installed, will use for shell script checks"
+fi
+
+# First use real tools if available
+if [ "$STYLUA_INSTALLED" = true ] && [ -n "$LUA_FILES" ]; then
+  echo "Checking Lua formatting with StyLua..."
+  
+  # Find StyLua config
+  STYLUA_CONFIG=""
+  if [ -f ".stylua.toml" ]; then
+    STYLUA_CONFIG="--config-path .stylua.toml"
+  elif [ -f "stylua.toml" ]; then
+    STYLUA_CONFIG="--config-path stylua.toml"
+  fi
+  
+  # Use check mode to validate formatting without changing files
+  for file in $LUA_FILES; do
+    if ! stylua --check $STYLUA_CONFIG "$file"; then
+      echo "ERROR: StyLua formatting issues in $file"
+      ERROR_COUNT=$((ERROR_COUNT+1))
+    fi
+  done
+else
+  # Fallback to grep if StyLua isn't available
+  echo "StyLua not available, checking for basic formatting issues..."
+  if grep -r "\s$" --include="*.lua" . 2>/dev/null | grep -v -E '\.git/|\.hooks-util/|tests/'; then
+    echo "ERROR: Trailing whitespace found in Lua files"
+    ERROR_COUNT=$((ERROR_COUNT+1))
+  fi
+fi
+
+if [ "$LUACHECK_INSTALLED" = true ] && [ -n "$LUA_FILES" ]; then
+  echo "Checking Lua code with Luacheck..."
+  
+  # Find Luacheck config
+  LUACHECK_ARGS=""
+  if [ -f ".luacheckrc" ]; then
+    # Luacheck will automatically use the config file
+    LUACHECK_ARGS=""
+  fi
+  
+  # Run Luacheck on each file
+  for file in $LUA_FILES; do
+    if ! luacheck $LUACHECK_ARGS "$file"; then
+      echo "ERROR: Luacheck issues in $file"
+      ERROR_COUNT=$((ERROR_COUNT+1))
+    fi
+  done
+else
+  # Fallback to grep if Luacheck isn't available
+  echo "Luacheck not available, checking for basic linting issues..."
+  if grep -r "local \w\+ = .*" --include="*.lua" . 2>/dev/null | grep -v -E '\.git/|\.hooks-util/|tests/' | grep -v "local _ = "; then
+    local_vars=$(grep -r "local \w\+ = .*" --include="*.lua" . 2>/dev/null | grep -v -E '\.git/|\.hooks-util/|tests/' | grep -v "local _ = " | sed 's/^.*local \([a-zA-Z0-9_]\+\) =.*/\1/')
+    for var in $local_vars; do
+      # Count references to the variable (excluding the declaration)
+      if [ "$(grep -r "\b$var\b" --include="*.lua" . | wc -l)" -le 1 ]; then
+        echo "ERROR: Unused variable likely found: $var"
+        ERROR_COUNT=$((ERROR_COUNT+1))
+      fi
+    done
+  fi
+fi
+
+if [ "$SHELLCHECK_INSTALLED" = true ] && [ -n "$SHELL_FILES" ]; then
+  echo "Checking shell scripts with ShellCheck..."
+  
+  for file in $SHELL_FILES; do
+    if ! shellcheck "$file"; then
+      echo "ERROR: ShellCheck issues in $file"
+      ERROR_COUNT=$((ERROR_COUNT+1))
+    fi
+  done
+else
+  # Fallback to grep if ShellCheck isn't available
+  echo "ShellCheck not available, checking for basic shell issues..."
+  if grep -r "\`" --include="*.sh" . 2>/dev/null | grep -v -E '\.git/|\.hooks-util/|tests/'; then
+    echo "ERROR: Deprecated backtick found in shell scripts"
+    ERROR_COUNT=$((ERROR_COUNT+1))
+  fi
+  
+  if grep -r "\$[A-Za-z0-9_]*" --include="*.sh" . 2>/dev/null | grep -v -E '\.git/|\.hooks-util/|tests/' | grep -v '"'; then
+    echo "ERROR: Unquoted variables found in shell scripts"
+    ERROR_COUNT=$((ERROR_COUNT+1))
+  fi
 fi
 
 # Exit with proper code

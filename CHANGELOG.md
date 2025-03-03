@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Enhanced
+- Integration tests now use real tools (StyLua, Luacheck, ShellCheck) instead of simulations:
+  - Added support for detecting and using real tools when available
+  - Created fallbacks to pattern matching when tools aren't installed
+  - Improved test reliability with actual tool validation
+  - Added proper test configuration files (.stylua.toml, .luacheckrc)
+  - Enhanced test files with real formatting and linting issues
+  - Made tests adaptable to different environments (with/without tools)
+
 ### Fixed
 - Pre-commit hook now correctly exits with non-zero status when errors are found
 - Integration tests now run successfully with proper error handling
@@ -32,6 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Simplified runner for better debugging
   - Individual test execution support
 - Release candidate tagging for pre-release testing
+- Tool validation testing:
+  - Tests for missing tool scenarios 
+  - Tests for actual tool behavior with real validation
+  - Detection of environment capabilities for better testing
 
 ## [0.2.0] - 2025-03-02
 

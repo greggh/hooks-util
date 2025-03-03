@@ -32,10 +32,10 @@ hooks_handle_error() {
     hooks_error "$message (Exit code: $exit_code)"
     ((HOOKS_ERROR_COUNT++))
     HOOKS_ERROR_MESSAGES+=("$message")
-    return $error_code
+    return "$error_code"
   fi
   
-  return $HOOKS_ERROR_SUCCESS
+  return "$HOOKS_ERROR_SUCCESS"
 }
 
 # Function to check if a command exists, with fallback options
@@ -47,7 +47,7 @@ hooks_require_command() {
   if hooks_command_exists "$primary_command"; then
     hooks_debug "Command '$primary_command' found"
     echo "$primary_command"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   # Try alternative commands if provided
@@ -55,13 +55,13 @@ hooks_require_command() {
     if hooks_command_exists "$cmd"; then
       hooks_warning "Primary command '$primary_command' not found, using '$cmd' instead"
       echo "$cmd"
-      return $HOOKS_ERROR_SUCCESS
+      return "$HOOKS_ERROR_SUCCESS"
     fi
   done
   
   # No command found
   hooks_error "Required command '$primary_command' not found"
-  return $HOOKS_ERROR_COMMAND_NOT_FOUND
+  return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
 }
 
 # Function to try running a command with fallback options
@@ -71,13 +71,13 @@ hooks_try_command() {
   command_to_run=$(hooks_require_command "$@")
   local exit_code=$?
   
-  if [ $exit_code -eq 0 ]; then
+  if [ "$exit_code" -eq 0 ]; then
     hooks_debug "Running command: $command_to_run"
     $command_to_run
     return $?
   else
     hooks_error "No suitable command found to run"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
 }
 
@@ -91,11 +91,11 @@ hooks_run_with_timeout() {
   if hooks_command_exists timeout; then
     timeout "$timeout" "$@"
     local exit_code=$?
-    if [ $exit_code -eq 124 ]; then
+    if [ "$exit_code" -eq 124 ]; then
       hooks_error "Command timed out after ${timeout} seconds: $*"
-      return $HOOKS_ERROR_TIMEOUT
+      return "$HOOKS_ERROR_TIMEOUT"
     fi
-    return $exit_code
+    return "$exit_code"
   else
     # Fallback: run without timeout
     hooks_warning "Timeout command not available, running without timeout: $*"
@@ -107,7 +107,7 @@ hooks_run_with_timeout() {
 # Function to print a summary of errors
 # Usage: hooks_print_error_summary
 hooks_print_error_summary() {
-  if [ $HOOKS_ERROR_COUNT -gt 0 ]; then
+  if [ "$HOOKS_ERROR_COUNT" -gt 0 ]; then
     hooks_print_header "Error Summary"
     hooks_error "Found $HOOKS_ERROR_COUNT error(s):"
     
@@ -120,10 +120,10 @@ hooks_print_error_summary() {
     echo -e "\n${HOOKS_COLOR_YELLOW}${HOOKS_COLOR_BOLD}Hint:${HOOKS_COLOR_RESET} Run with increased verbosity for more details"
     echo -e "${HOOKS_COLOR_YELLOW}${HOOKS_COLOR_BOLD}Bypass:${HOOKS_COLOR_RESET} You can bypass this check with git commit --no-verify\n"
     
-    return $HOOKS_ERROR_GENERAL
+    return "$HOOKS_ERROR_GENERAL"
   fi
   
-  return $HOOKS_ERROR_SUCCESS
+  return "$HOOKS_ERROR_SUCCESS"
 }
 
 # Function to reset error counter
