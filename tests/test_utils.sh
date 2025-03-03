@@ -52,3 +52,9 @@ skip_test() {
   echo -e "\033[0;33mTest skipped: $reason\033[0m"
   exit 2
 }
+
+# Export all functions
+export -f assert_equals
+export -f assert_exit_code
+export -f assert_output_contains
+export -f skip_test

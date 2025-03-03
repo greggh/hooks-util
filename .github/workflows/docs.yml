@@ -26,6 +26,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Fix common Markdown issues
+        run: |
+          chmod +x scripts/fix-markdown.sh
+          ./scripts/fix-markdown.sh
+          
+          # Commit the changes if running on the main branch
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add "**/*.md"
+            git commit -m "Fix Markdown linting issues [skip ci]" || echo "No changes to commit"
+            git push
+          fi
+      
       - name: Run markdownlint-cli
         uses: nosborn/github-action-markdown-cli@v3.3.0
         with:

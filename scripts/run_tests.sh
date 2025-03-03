@@ -9,6 +9,13 @@ ORIGINAL_PWD="$PWD"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 TEST_DIR="${PROJECT_DIR}/tests"
+LIB_DIR="${PROJECT_DIR}/lib"
+
+# Export directories
+export SCRIPT_DIR
+export PROJECT_DIR
+export TEST_DIR
+export LIB_DIR
 
 # Define colors for output
 RED='\033[0;31m'
@@ -38,16 +45,11 @@ run_test() {
   echo -e "${YELLOW}Running test: ${test_name}${NC}"
   ((TESTS_TOTAL++))
   
-  # Run the test in a subshell
-  (
-    # Source common test utilities
-    if [ -f "${TEST_DIR}/test_utils.sh" ]; then
-      source "${TEST_DIR}/test_utils.sh"
-    fi
-    
-    # Run the test
-    source "$test_file"
-  )
+  # Make sure the test is executable
+  chmod +x "$test_file"
+  
+  # Run the test directly
+  "$test_file"
   
   local result=$?
   if [ $result -eq 0 ]; then

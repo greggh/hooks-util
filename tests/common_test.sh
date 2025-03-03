@@ -1,7 +1,43 @@
 #!/bin/bash
 # Test for common.sh functions
 
-# Source the module to test
+# Define test functions directly in case test_utils.sh isn't properly loaded
+assert_equals() {
+  local expected="$1"
+  local actual="$2"
+  local message="${3:-Expected '$expected' but got '$actual'}"
+  
+  if [ "$expected" != "$actual" ]; then
+    echo -e "\033[0;31mAssertion failed: $message\033[0m"
+    return 1
+  fi
+  return 0
+}
+
+assert_output_contains() {
+  local needle="$1"
+  local command="$2"
+  local message="${3:-Expected output to contain '$needle'}"
+  
+  local output=$(eval "$command")
+  
+  if [[ "$output" != *"$needle"* ]]; then
+    echo -e "\033[0;31mAssertion failed: $message\033[0m"
+    echo -e "Output was: $output"
+    return 1
+  fi
+  return 0
+}
+
+# Source the required script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+LIB_DIR="${PROJECT_DIR}/lib"
+
+# Source version.sh first
+source "${LIB_DIR}/version.sh"
+
+# Then source common.sh
 source "${LIB_DIR}/common.sh"
 
 # Test hooks_command_exists
@@ -25,4 +61,5 @@ output=$(hooks_debug "Debug message" 2>&1)
 assert_output_contains "Debug" "echo \"$output\"" "Debug message should be printed in verbose mode"
 
 # All tests passed
+echo "All tests passed!"
 exit 0
