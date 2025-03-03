@@ -57,23 +57,31 @@ jobs:
           find . -type f -name "*.md" -exec grep -l '```bash' {} \; | while read -r file; do
             echo "Checking bash snippets in $file"
             
-            # Extract all bash code blocks from the markdown file
-            csplit --silent --prefix=snippet "$file" '/^```bash$/' '{*}' '/^```$/' '{*}'
-            rm snippet00 # Remove file content before the first ```bash
+            # Create a temporary directory for the snippets
+            TEMP_DIR=$(mktemp -d)
             
-            # Check syntax of each bash snippet
-            for snippet in snippet*; do
-              if head -n 1 "$snippet" | grep -q '^```bash$'; then
-                # Remove the ```bash and ``` markers
-                sed -i '1d;$d' "$snippet"
+            # Extract bash code blocks using sed and a simple loop
+            grep -n '^```bash$' "$file" | while read -r line_start; do
+              # Get the line number where the bash block starts
+              line_num=$(echo "$line_start" | cut -d: -f1)
+              
+              # Find the line number where the next ``` appears
+              line_end=$(tail -n +$((line_num+1)) "$file" | grep -n '^```$' | head -1 | cut -d: -f1)
+              if [ -n "$line_end" ]; then
+                line_end=$((line_num + line_end))
                 
-                # Only check if snippet is not empty
-                if [ -s "$snippet" ]; then
-                  echo "  Checking snippet in $file (${snippet})"
-                  bash -n "$snippet" || echo "Syntax error in $file - $snippet"
+                # Extract the bash snippet
+                snippet_file="${TEMP_DIR}/snippet_${line_num}.sh"
+                sed -n "$((line_num+1)),$((line_end-1))p" "$file" > "$snippet_file"
+                
+                # Check syntax if file is not empty
+                if [ -s "$snippet_file" ]; then
+                  echo "  Checking snippet starting at line $line_num in $file"
+                  bash -n "$snippet_file" || echo "Syntax error in $file at line $line_num"
                 fi
               fi
-              # Clean up snippet file
-              rm "$snippet"
             done
+            
+            # Clean up
+            rm -rf "$TEMP_DIR"
           done
