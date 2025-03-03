@@ -14,7 +14,7 @@ hooks_fix_trailing_whitespace() {
   
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   hooks_debug "Fixing trailing whitespace in $file"
@@ -28,19 +28,19 @@ hooks_fix_trailing_whitespace() {
     sed 's/[[:space:]]*$//' "$file" > "$temp_file"
     local exit_code=$?
     
-    if [ $exit_code -ne 0 ]; then
+    if [ "$exit_code" -ne 0 ]; then
       hooks_error "Failed to fix trailing whitespace in $file"
       rm -f "$temp_file"
-      return $HOOKS_ERROR_GENERAL
+      return "$HOOKS_ERROR_GENERAL"
     fi
     
     # Replace the original file with the fixed one
     mv "$temp_file" "$file"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   else
     hooks_error "sed command not found, cannot fix trailing whitespace"
     rm -f "$temp_file"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
 }
 
@@ -51,7 +51,7 @@ hooks_ensure_final_newline() {
   
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   hooks_debug "Ensuring $file ends with a single newline"
@@ -68,11 +68,11 @@ hooks_ensure_final_newline() {
     
     # Replace the original file with the fixed one
     mv "$temp_file" "$file"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   else
     hooks_error "awk command not found, cannot fix final newline"
     rm -f "$temp_file"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
 }
 
@@ -83,7 +83,7 @@ hooks_fix_line_endings() {
   
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   hooks_debug "Fixing line endings in $file"
@@ -97,19 +97,19 @@ hooks_fix_line_endings() {
     tr -d '\r' < "$file" > "$temp_file"
     local exit_code=$?
     
-    if [ $exit_code -ne 0 ]; then
+    if [ "$exit_code" -ne 0 ]; then
       hooks_error "Failed to fix line endings in $file"
       rm -f "$temp_file"
-      return $HOOKS_ERROR_GENERAL
+      return "$HOOKS_ERROR_GENERAL"
     fi
     
     # Replace the original file with the fixed one
     mv "$temp_file" "$file"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   else
     hooks_error "tr command not found, cannot fix line endings"
     rm -f "$temp_file"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
 }
 
@@ -120,13 +120,13 @@ hooks_fix_unused_variables() {
   
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   # Check if luacheck is available
   if ! hooks_command_exists luacheck; then
     hooks_warning "luacheck not found, cannot fix unused variables"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
   
   hooks_debug "Checking for unused variables in $file"
@@ -137,7 +137,7 @@ hooks_fix_unused_variables() {
   
   if [ -z "$unused_vars" ]; then
     hooks_debug "No unused variables found in $file"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   hooks_debug "Found unused variables: $unused_vars"
@@ -164,7 +164,7 @@ hooks_fix_unused_variables() {
         else
           hooks_error "sed command not found, cannot fix unused variables"
           rm -f "$temp_file"
-          return $HOOKS_ERROR_COMMAND_NOT_FOUND
+          return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
         fi
       fi
     fi
@@ -172,7 +172,7 @@ hooks_fix_unused_variables() {
   
   # Replace the original file with the fixed one
   mv "$temp_file" "$file"
-  return $HOOKS_ERROR_SUCCESS
+  return "$HOOKS_ERROR_SUCCESS"
 }
 
 # Function to apply all code quality fixes to a single file
@@ -182,7 +182,7 @@ hooks_fix_file_quality() {
   
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   hooks_debug "Applying code quality fixes to $file"
@@ -197,7 +197,7 @@ hooks_fix_file_quality() {
     hooks_fix_unused_variables "$file"
   fi
   
-  return $HOOKS_ERROR_SUCCESS
+  return "$HOOKS_ERROR_SUCCESS"
 }
 
 # Function to fix code quality issues in multiple files
@@ -210,7 +210,7 @@ hooks_fix_files_quality() {
   
   if [ ${#files[@]} -eq 0 ]; then
     hooks_debug "No files to fix"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   hooks_print_header "Fixing code quality issues in ${#files[@]} files"
@@ -219,7 +219,7 @@ hooks_fix_files_quality() {
     hooks_fix_file_quality "$file"
     local file_exit_code=$?
     
-    if [ $file_exit_code -eq 0 ]; then
+    if [ "$file_exit_code" -eq 0 ]; then
       ((fixed_count++))
     else
       ((failed_count++))
@@ -235,7 +235,7 @@ hooks_fix_files_quality() {
     hooks_error "Failed to fix code quality issues in $failed_count files"
   fi
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Function to fix code quality issues in staged files
@@ -246,7 +246,7 @@ hooks_fix_staged_quality() {
   
   if [ -z "$staged_files" ]; then
     hooks_debug "No staged files to fix"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   local files_array=()
@@ -263,7 +263,7 @@ hooks_fix_staged_quality() {
   hooks_fix_files_quality "${files_array[@]}"
   local exit_code=$?
   
-  if [ $exit_code -eq 0 ]; then
+  if [ "$exit_code" -eq 0 ]; then
     # Add the fixed files back to staging
     for file in "${files_array[@]}"; do
       git add "$file"
@@ -273,7 +273,7 @@ hooks_fix_staged_quality() {
     hooks_error "Failed to fix some files (exit code: $exit_code)"
   fi
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Export all functions

@@ -19,7 +19,7 @@ hooks_normalize_path() {
     # Example: /c/Users/username -> C:/Users/username
     path=$(echo "$path" | sed -E 's|^/([a-zA-Z])/|\1:/|')
     # Use proper escaping for backslashes in tr
-    path=$(echo "$path" | tr '/' '\')
+    path=$(echo "$path" | tr '/' '\\')
   else
     # Unix-like systems (Linux, macOS)
     # Just make sure it's a canonical path

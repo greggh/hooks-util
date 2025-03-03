@@ -47,13 +47,13 @@ hooks_stylua_format() {
   # Check if StyLua is available
   if ! hooks_stylua_available; then
     hooks_warning "StyLua not found, skipping formatting for $file"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
   
   # Check if the file exists
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   # Use configuration file if provided
@@ -77,13 +77,13 @@ hooks_stylua_format() {
   stylua "${stylua_args[@]}" "$file"
   local exit_code=$?
   
-  if [ $exit_code -ne 0 ]; then
+  if [ "$exit_code" -ne 0 ]; then
     hooks_error "StyLua failed for $file (Exit code: $exit_code)"
-    return $HOOKS_ERROR_STYLUA_FAILED
+    return "$HOOKS_ERROR_STYLUA_FAILED"
   fi
   
   hooks_debug "StyLua successfully formatted $file"
-  return $HOOKS_ERROR_SUCCESS
+  return "$HOOKS_ERROR_SUCCESS"
 }
 
 # Function to format multiple Lua files with StyLua
@@ -97,7 +97,7 @@ hooks_stylua_format_files() {
   
   if [ ${#files[@]} -eq 0 ]; then
     hooks_debug "No files to format"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   hooks_print_header "Running StyLua on ${#files[@]} files"
@@ -111,9 +111,9 @@ hooks_stylua_format_files() {
       hooks_stylua_format "$file" "$config_file"
       local file_exit_code=$?
       
-      if [ $file_exit_code -eq 0 ]; then
+      if [ "$file_exit_code" -eq 0 ]; then
         ((formatted_count++))
-      elif [ $file_exit_code -eq $HOOKS_ERROR_COMMAND_NOT_FOUND ]; then
+      elif [ "$file_exit_code" -eq "$HOOKS_ERROR_COMMAND_NOT_FOUND" ]; then
         ((skipped_count++))
         if [ $exit_code -eq 0 ]; then
           exit_code=$file_exit_code
@@ -140,7 +140,7 @@ hooks_stylua_format_files() {
     hooks_info "Skipped $skipped_count files"
   fi
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Function to run StyLua on staged Lua files
@@ -151,7 +151,7 @@ hooks_stylua_staged() {
   
   if [ -z "$staged_files" ]; then
     hooks_debug "No staged Lua files to format"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   local files_array=()
@@ -162,7 +162,7 @@ hooks_stylua_staged() {
   hooks_stylua_format_files "${files_array[@]}"
   local exit_code=$?
   
-  if [ $exit_code -eq 0 ]; then
+  if [ "$exit_code" -eq 0 ]; then
     # Add the formatted files back to staging
     for file in "${files_array[@]}"; do
       git add "$file"
@@ -170,7 +170,7 @@ hooks_stylua_staged() {
     hooks_success "Formatted files have been staged"
   fi
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Export all functions

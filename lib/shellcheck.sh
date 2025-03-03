@@ -23,13 +23,13 @@ hooks_shellcheck_run() {
   # Check if ShellCheck is available
   if ! hooks_shellcheck_available; then
     hooks_warning "ShellCheck not found, skipping shell script validation for $file"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
   
   # Check if the file exists
   if [ ! -f "$file" ]; then
     hooks_error "File not found: $file"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   # Add standard arguments
@@ -41,13 +41,13 @@ hooks_shellcheck_run() {
   shellcheck "${shellcheck_args[@]}" "$file"
   local exit_code=$?
   
-  if [ $exit_code -ne 0 ]; then
+  if [ "$exit_code" -ne 0 ]; then
     hooks_error "ShellCheck failed for $file (Exit code: $exit_code)"
-    return $HOOKS_ERROR_SHELLCHECK_FAILED
+    return "$HOOKS_ERROR_SHELLCHECK_FAILED"
   fi
   
   hooks_debug "ShellCheck successfully validated $file"
-  return $HOOKS_ERROR_SUCCESS
+  return "$HOOKS_ERROR_SUCCESS"
 }
 
 # Function to run ShellCheck on multiple shell scripts
@@ -61,7 +61,7 @@ hooks_shellcheck_run_files() {
   
   if [ ${#files[@]} -eq 0 ]; then
     hooks_debug "No files to check"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   hooks_print_header "Running ShellCheck on ${#files[@]} files"
@@ -71,9 +71,9 @@ hooks_shellcheck_run_files() {
       hooks_shellcheck_run "$file"
       local file_exit_code=$?
       
-      if [ $file_exit_code -eq 0 ]; then
+      if [ "$file_exit_code" -eq 0 ]; then
         ((checked_count++))
-      elif [ $file_exit_code -eq $HOOKS_ERROR_COMMAND_NOT_FOUND ]; then
+      elif [ "$file_exit_code" -eq "$HOOKS_ERROR_COMMAND_NOT_FOUND" ]; then
         ((skipped_count++))
         if [ $exit_code -eq 0 ]; then
           exit_code=$file_exit_code
@@ -100,7 +100,7 @@ hooks_shellcheck_run_files() {
     hooks_info "Skipped $skipped_count files"
   fi
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Function to run ShellCheck on staged shell script files
@@ -111,7 +111,7 @@ hooks_shellcheck_staged() {
   
   if [ -z "$staged_files" ]; then
     hooks_debug "No staged shell script files to check"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   local files_array=()
@@ -122,7 +122,7 @@ hooks_shellcheck_staged() {
   hooks_shellcheck_run_files "${files_array[@]}"
   local exit_code=$?
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Export all functions
