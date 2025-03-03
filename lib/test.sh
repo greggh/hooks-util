@@ -19,10 +19,8 @@ hooks_detect_test_framework() {
   fi
   
   # Check for Makefile test targets
-  local has_makefile=false
   local makefile_has_test=false
   if [ -f "${project_dir}/Makefile" ]; then
-    has_makefile=true
     if grep -q "^test:" "${project_dir}/Makefile"; then
       makefile_has_test=true
     fi
@@ -79,7 +77,7 @@ hooks_find_test_dir() {
 # Function to find all test files
 # Usage: hooks_find_test_files [test_dir]
 hooks_find_test_files() {
-  local test_dir="${1:-$(hooks_find_test_dir)}"
+  local test_dir="${1:-$(hooks_find_test_dir "$PWD")}"
   
   if [ -z "$test_dir" ]; then
     hooks_error "No test directory found"
@@ -94,18 +92,16 @@ hooks_find_test_files() {
 # Usage: hooks_run_plenary_tests [minimal_init_file] [test_pattern]
 hooks_run_plenary_tests() {
   local minimal_init_file="$1"
-  local test_pattern="${2:-lua/.*_spec"}"
+  local test_pattern="${2:-lua/.*_spec\.lua}"
   local timeout="${HOOKS_TEST_TIMEOUT:-60000}"
   
-  # Convert milliseconds to seconds
-  local timeout_seconds=$((timeout / 1000))
-  
   hooks_debug "Running Plenary tests with pattern: $test_pattern"
+  hooks_debug "Using timeout: $timeout ms"
   
   local nvim_cmd="nvim"
   if ! hooks_command_exists nvim; then
     hooks_error "Neovim not found, cannot run tests"
-    return $HOOKS_ERROR_COMMAND_NOT_FOUND
+    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
   fi
   
   # Use the minimal init file if provided, otherwise try to find it
@@ -142,19 +138,19 @@ hooks_run_plenary_tests() {
   local exit_code=$?
   
   # Check for failures
-  if [ $exit_code -ne 0 ]; then
+  if [ "$exit_code" -ne 0 ]; then
     hooks_error "Tests failed (Exit code: $exit_code)"
     if [ -f test_output.log ]; then
       grep -E "^FAILED|^Error" test_output.log | hooks_error
       rm test_output.log
     fi
-    return $HOOKS_ERROR_TESTS_FAILED
+    return "$HOOKS_ERROR_TESTS_FAILED"
   else
     hooks_success "All tests passed"
     if [ -f test_output.log ]; then
       rm test_output.log
     fi
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
 }
 
@@ -164,18 +160,17 @@ hooks_run_makefile_tests() {
   local project_dir="${1:-$PWD}"
   local timeout="${HOOKS_TEST_TIMEOUT:-60000}"
   
-  # Convert milliseconds to seconds
-  local timeout_seconds=$((timeout / 1000))
+  hooks_debug "Using timeout: $timeout ms"
   
   # Check if Makefile exists and has a test target
   if [ ! -f "${project_dir}/Makefile" ]; then
     hooks_error "Makefile not found in $project_dir"
-    return $HOOKS_ERROR_PATH_NOT_FOUND
+    return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
   if ! grep -q "^test:" "${project_dir}/Makefile"; then
     hooks_error "No test target found in Makefile"
-    return $HOOKS_ERROR_GENERAL
+    return "$HOOKS_ERROR_GENERAL"
   fi
   
   # Run the tests
@@ -183,12 +178,12 @@ hooks_run_makefile_tests() {
   (cd "$project_dir" && make test)
   local exit_code=$?
   
-  if [ $exit_code -ne 0 ]; then
+  if [ "$exit_code" -ne 0 ]; then
     hooks_error "Tests failed (Exit code: $exit_code)"
-    return $HOOKS_ERROR_TESTS_FAILED
+    return "$HOOKS_ERROR_TESTS_FAILED"
   else
     hooks_success "All tests passed"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
 }
 
@@ -200,8 +195,10 @@ hooks_run_tests() {
   # Detect the test framework
   local framework_info
   framework_info=$(hooks_detect_test_framework "$project_dir")
-  local framework=$(echo "$framework_info" | cut -d'|' -f1)
-  local minimal_init_file=$(echo "$framework_info" | cut -d'|' -f2)
+  local framework
+  framework=$(echo "$framework_info" | cut -d'|' -f1)
+  local minimal_init_file
+  minimal_init_file=$(echo "$framework_info" | cut -d'|' -f2)
   
   hooks_print_header "Running tests for project at $project_dir"
   
@@ -214,11 +211,11 @@ hooks_run_tests() {
       ;;
     "busted")
       hooks_error "Busted test framework not implemented yet"
-      return $HOOKS_ERROR_GENERAL
+      return "$HOOKS_ERROR_GENERAL"
       ;;
     *)
       hooks_error "Unknown or unsupported test framework"
-      return $HOOKS_ERROR_GENERAL
+      return "$HOOKS_ERROR_GENERAL"
       ;;
   esac
 }
@@ -231,14 +228,14 @@ hooks_run_tests_precommit() {
   # Skip tests if not enabled
   if [ "${HOOKS_TESTS_ENABLED}" != true ]; then
     hooks_debug "Tests are disabled in configuration"
-    return $HOOKS_ERROR_SUCCESS
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   # Run the tests
   hooks_run_tests "$project_dir"
   local exit_code=$?
   
-  return $exit_code
+  return "$exit_code"
 }
 
 # Export all functions

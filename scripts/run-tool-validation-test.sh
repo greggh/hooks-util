@@ -28,7 +28,7 @@ if ! command -v shellcheck &> /dev/null; then
 fi
 
 # Print summary of missing tools
-if [ $TOOLS_MISSING -gt 0 ]; then
+if [ "$TOOLS_MISSING" -gt 0 ]; then
   echo "---------------------------------------------------"
   echo "WARNING: $TOOLS_MISSING tools missing"
   echo "This test will run in limited capacity, only testing missing tool detection."
@@ -53,14 +53,14 @@ export HOOKS_VERBOSITY=2
 # Use the exit code from the test, not from grep
 TEST_RESULT=${PIPESTATUS[0]}
 
-if [ $TEST_RESULT -eq 0 ]; then
+if [ "$TEST_RESULT" -eq 0 ]; then
   echo "Tool validation test completed successfully!"
-  if [ $TOOLS_MISSING -gt 0 ]; then
+  if [ "$TOOLS_MISSING" -gt 0 ]; then
     echo "NOTE: Test ran in limited mode. Install missing tools for full validation."
   fi
 else
   echo "Tool validation test failed with exit code $TEST_RESULT"
-  exit $TEST_RESULT
+  exit "$TEST_RESULT"
 fi
 
 exit 0

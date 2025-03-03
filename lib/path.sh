@@ -18,8 +18,8 @@ hooks_normalize_path() {
     # Windows systems - convert Unix-style paths to Windows-style
     # Example: /c/Users/username -> C:/Users/username
     path=$(echo "$path" | sed -E 's|^/([a-zA-Z])/|\1:/|')
-    # Use proper escaping for backslashes in tr
-    path=$(echo "$path" | tr '/' '\\')
+    # Use parameter expansion for efficient replacement
+    path=${path//\//\\}
   else
     # Unix-like systems (Linux, macOS)
     # Just make sure it's a canonical path

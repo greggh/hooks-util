@@ -9,11 +9,11 @@ echo "===================="
 echo
 
 # Get project information
-read -p "Project name: " PROJECT_NAME
-read -p "Project description: " PROJECT_DESCRIPTION
-read -p "GitHub username: " GITHUB_USERNAME
-read -p "Full name for license: " FULL_NAME
-read -p "Email for security contacts: " EMAIL
+read -r -p "Project name: " PROJECT_NAME
+read -r -p "Project description: " PROJECT_DESCRIPTION
+read -r -p "GitHub username: " GITHUB_USERNAME
+read -r -p "Full name for license: " FULL_NAME
+read -r -p "Email for security contacts: " EMAIL
 YEAR=$(date +%Y)
 
 echo

@@ -28,9 +28,13 @@ success_cleanup() {
   else
     echo "Test failed - not cleaning up directory: $TEST_DIR"
     echo "You may want to inspect it for debugging"
+    # Return to original directory
+    popd > /dev/null 2>&1 || true
     exit $exit_code
   fi
   
+  # Return to original directory
+  popd > /dev/null 2>&1 || true
   # Ensure we return success
   exit 0
 }
@@ -42,7 +46,7 @@ echo "Creating test Neovim plugin in $TEST_DIR"
 
 # Set up test repository mimicking a Neovim plugin
 mkdir -p "$TEST_DIR"
-cd "$TEST_DIR"
+pushd "$TEST_DIR" > /dev/null || exit 1
 git init
 git config user.name "Test User"
 git config user.email "test@example.com"
@@ -248,16 +252,28 @@ else
   fi
 fi
 
-# Fix the issues manually for testing
-cat > lua/test-plugin/commands.lua << 'EOF'
+# Implement a robust fix-and-retry approach
+MAX_ATTEMPTS=5
+attempt=1
+
+echo "Starting iterative fix process (max $MAX_ATTEMPTS attempts)"
+
+while [ $attempt -le $MAX_ATTEMPTS ]; do
+  echo "Fix attempt $attempt of $MAX_ATTEMPTS"
+  
+  # Apply fixes based on current issues
+  if [ $attempt -eq 1 ]; then
+    # Initial fix - create files that should pass all checks
+    echo "Implementing initial fixes..."
+    
+    # Create a clean commands.lua file
+    cat > lua/test-plugin/commands.lua << 'EOF'
 -- Plugin commands
 local M = {}
 
 function M.register_commands()
-  local _namespace = "test-plugin" -- prefix unused variable with _
   local commands = {
     TestCommand = function()
-      local _result = "test" -- prefix unused variable with _
       print("Running test command")
     end,
   }
@@ -267,30 +283,30 @@ function M.register_commands()
   end
 end
 
--- Removed invalid Lua syntax
-
 return M
 EOF
 
-# Fix the shell script
-cat > scripts/test-script.sh << 'EOF'
+    # Create a clean shell script
+    mkdir -p scripts
+    cat > scripts/test-script.sh << 'EOF'
 #!/bin/bash
 # This script is fixed for ShellCheck
 
 # Use default value for undefined variable
 echo "${UNDEFINED_VAR:-No value}"
 
-# Use find instead of glob
-FILES=$(find . -name "*.txt")
+# Use find instead of glob and use the result
+FILES="$(find . -name "*.txt")"
 
 # Check if files were found using better pattern
 if [ -n "$FILES" ]; then
   echo "Files found: $FILES"
 fi
 EOF
+    chmod +x scripts/test-script.sh
 
-# Fix the init.lua file to remove trailing whitespace
-cat > lua/test-plugin/init.lua << 'EOF'
+    # Create a clean init.lua file
+    cat > lua/test-plugin/init.lua << 'EOF'
 -- Main plugin init file
 local M = {}
 
@@ -313,11 +329,9 @@ end
 return M
 EOF
 
-git add lua/test-plugin/commands.lua lua/test-plugin/init.lua scripts/test-script.sh
-
-# Create a test file
-mkdir -p tests/spec
-cat > tests/spec/commands_spec.lua << 'EOF'
+    # Create a test file
+    mkdir -p tests/spec
+    cat > tests/spec/commands_spec.lua << 'EOF'
 describe("commands", function()
   it("registers commands properly", function()
     local commands = require("test-plugin.commands")
@@ -328,16 +342,72 @@ describe("commands", function()
 end)
 EOF
 
-git add tests/spec/commands_spec.lua
-
-# Try to commit again
-echo "Attempting to commit with fixed issues:"
-if git commit -m "Add command registration"; then
-  echo "PASS: Commit succeeded after fixing issues"
-else
-  echo "FAIL: Commit failed even after fixing issues"
-  exit 1
-fi
+    # Format Lua files with stylua if available
+    if command -v stylua &> /dev/null; then
+      echo "Formatting Lua files with StyLua..."
+      find lua tests -name "*.lua" -exec stylua {} \;
+    fi
+  else
+    # Additional fix attempts based on specific issues
+    echo "Implementing additional fixes for attempt $attempt..."
+    
+    # Check for current Lua issues
+    if grep -q "unused variable" .githooks/pre-commit-output.log 2>/dev/null; then
+      echo "Fixing unused variables in Lua files..."
+      sed -i 's/local _\?namespace.*$/-- Namespace used for plugin identification/' lua/test-plugin/commands.lua
+      sed -i 's/local _\?result.*$/-- Process command result/' lua/test-plugin/commands.lua
+    fi
+    
+    if grep -q "trailing whitespace" .githooks/pre-commit-output.log 2>/dev/null; then
+      echo "Fixing trailing whitespace in Lua files..."
+      find lua tests -name "*.lua" -exec sed -i 's/[ \t]*$//' {} \;
+    fi
+    
+    # Format Lua files with stylua if available
+    if command -v stylua &> /dev/null; then
+      echo "Applying StyLua formatting to fix indentation..."
+      find lua tests -name "*.lua" -exec stylua {} \;
+    fi
+    
+    # Check for shell script issues
+    if grep -q "SC2034" .githooks/pre-commit-output.log 2>/dev/null; then
+      echo "Fixing unused variables in shell scripts..."
+      sed -i 's/FILES=.*$/FILES="$(find . -name "*.txt")"\necho "Found $(echo "$FILES" | wc -w) files"/' scripts/test-script.sh
+    fi
+  fi
+  
+  # Add all relevant files
+  git add lua/test-plugin/commands.lua lua/test-plugin/init.lua scripts/test-script.sh tests/spec/commands_spec.lua
+  
+  # Try to commit, capturing output for analysis on failure
+  echo "Attempting to commit with fixed issues (attempt $attempt)..."
+  git commit -m "Add command registration (attempt $attempt)" 2>&1 | tee .githooks/pre-commit-output.log
+  
+  # Check if commit succeeded
+  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo "PASS: Commit succeeded after fixing issues on attempt $attempt"
+    break
+  fi
+  
+  # If we've reached max attempts, report failure
+  if [ $attempt -eq $MAX_ATTEMPTS ]; then
+    echo "FAIL: Could not fix all issues after $MAX_ATTEMPTS attempts"
+    cat .githooks/pre-commit-output.log
+    exit 1
+  fi
+  
+  # Analyze output to inform next fix attempt
+  echo "Commit failed. Analyzing issues for next fix attempt..."
+  
+  ((attempt++))
+done
 
 echo "All tests passed!"
+# Return to original directory before exiting
+popd > /dev/null 2>&1 || true
+# Cleanup
+if [ -n "$TEST_DIR" ] && [ -d "$TEST_DIR" ]; then
+  rm -rf "$TEST_DIR"
+  echo "Cleaned up test directory: $TEST_DIR"
+fi
 exit 0

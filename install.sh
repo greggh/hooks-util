@@ -52,7 +52,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -v|--verbose)
-      hooks_set_verbosity $HOOKS_VERBOSITY_VERBOSE
+      hooks_set_verbosity "$HOOKS_VERBOSITY_VERBOSE"
       shift
       ;;
     -h|--help)
@@ -69,8 +69,7 @@ done
 
 # Determine target directory (current git repo if not specified)
 if [ -z "$TARGET_DIR" ]; then
-  TARGET_DIR=$(hooks_git_root)
-  if [ $? -ne 0 ]; then
+  if ! TARGET_DIR=$(hooks_git_root); then
     hooks_error "Not in a git repository. Please specify a target directory with -t."
     exit 1
   fi

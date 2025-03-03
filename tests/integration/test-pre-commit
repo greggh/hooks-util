@@ -93,7 +93,9 @@ if [ "$SHELLCHECK_INSTALLED" = true ] && [ -n "$SHELL_FILES" ]; then
   echo "Checking shell scripts with ShellCheck..."
   
   for file in $SHELL_FILES; do
-    if ! shellcheck "$file"; then
+    # Exclude only informational messages about source files not being checked
+    # We should still catch all actual issues, including style issues
+    if ! shellcheck --exclude=SC1090,SC1091 "$file"; then
       echo "ERROR: ShellCheck issues in $file"
       ERROR_COUNT=$((ERROR_COUNT+1))
     fi

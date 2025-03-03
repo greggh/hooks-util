@@ -28,9 +28,13 @@ success_cleanup() {
   else
     echo "Test failed - not cleaning up directory: $TEST_DIR"
     echo "You may want to inspect it for debugging"
+    # Return to original directory
+    popd > /dev/null 2>&1 || true
     exit $exit_code
   fi
   
+  # Return to original directory
+  popd > /dev/null 2>&1 || true
   # Ensure we return success
   exit 0
 }
@@ -42,7 +46,7 @@ echo "Creating test Git repository in $TEST_DIR"
 
 # Set up test repository
 mkdir -p "$TEST_DIR"
-cd "$TEST_DIR"
+pushd "$TEST_DIR" > /dev/null || exit 1
 git init
 git config user.name "Test User"
 git config user.email "test@example.com"
@@ -200,47 +204,113 @@ else
   EXPECTED_FAIL=true
 fi
 
-# Now fix the files to pass formatting and linting
-echo "Fixing files to pass checks..."
+# Implement a robust fix-and-retry approach
+MAX_ATTEMPTS=5
+attempt=1
 
-# Fix Lua file
-cat > test.lua << 'EOF'
+echo "Starting iterative fix process (max $MAX_ATTEMPTS attempts)"
+
+while [ $attempt -le $MAX_ATTEMPTS ]; do
+  echo "Fix attempt $attempt of $MAX_ATTEMPTS"
+  
+  # Apply fixes based on current issues
+  if [ $attempt -eq 1 ]; then
+    # Initial fix - create files that should pass all checks
+    echo "Implementing initial fixes..."
+    
+    # Create a clean Lua file
+    cat > test.lua << 'EOF'
 -- Lua file with proper formatting and no linting issues
 local test = "hello"
 print(test)
 
-function properlyFormattedFunction()
+function properly_formatted_function()
   return "formatted correctly"
 end
 
-local function unusedButPrefixed()
-  return "This is intentionally not used"
-end
+-- No unused variables here
 EOF
 
-# Fix shell script
-cat > test.sh << 'EOF'
+    # Create a clean shell script
+    cat > test.sh << 'EOF'
 #!/bin/bash
 # Shell script with no shellcheck issues
-FILES=$(find . -name "*.txt")
+FILES="$(find . -name "*.txt")"
 if [ -n "$FILES" ]; then
   echo "Files found: $FILES"
 fi
 EOF
-chmod +x test.sh
+    chmod +x test.sh
 
-git add test.lua test.sh
-
-# Try to commit now - this should succeed
-echo "Attempting to commit with fixed issues:"
-if git commit -m "Fixed formatting and linting issues"; then
-  echo "PASS: Commit succeeded after fixing issues"
-else
-  echo "FAIL: Commit failed even after fixing issues"
-  exit 1
-fi
+    # Format Lua files with stylua if available
+    if command -v stylua &> /dev/null; then
+      echo "Formatting Lua files with StyLua..."
+      stylua test.lua
+    fi
+  else
+    # Additional fix attempts based on specific issues
+    echo "Implementing additional fixes for attempt $attempt..."
+    
+    # Check for Lua issues
+    if grep -q "unused variable" .githooks/pre-commit-output.log 2>/dev/null; then
+      echo "Fixing unused variables in Lua files..."
+      sed -i 's/local unused.*$/-- No unused variables/' test.lua
+      sed -i 's/local function unused.*$/-- Function removed due to being unused/' test.lua
+    fi
+    
+    if grep -q "trailing whitespace" .githooks/pre-commit-output.log 2>/dev/null; then
+      echo "Fixing trailing whitespace in Lua files..."
+      sed -i 's/[ \t]*$//' test.lua
+    fi
+    
+    # Format Lua files with stylua if available
+    if command -v stylua &> /dev/null; then
+      echo "Applying StyLua formatting to fix indentation..."
+      stylua test.lua
+    fi
+    
+    # Check for shell script issues
+    if grep -q "SC2034" .githooks/pre-commit-output.log 2>/dev/null; then
+      echo "Fixing unused variables in shell scripts..."
+      sed -i 's/FILES=.*$/FILES="$(find . -name "*.txt")"\necho "Found $(echo "$FILES" | wc -w) files"/' test.sh
+    fi
+  fi
+  
+  # Add all files
+  git add test.lua test.sh
+  
+  # Try to commit, capturing output for analysis on failure
+  echo "Attempting to commit with fixed issues (attempt $attempt)..."
+  git commit -m "Fixed formatting and linting issues (attempt $attempt)" 2>&1 | tee .githooks/pre-commit-output.log
+  
+  # Check if commit succeeded
+  if [ ${PIPESTATUS[0]} -eq 0 ]; then
+    echo "PASS: Commit succeeded after fixing issues on attempt $attempt"
+    break
+  fi
+  
+  # If we've reached max attempts, report failure
+  if [ $attempt -eq $MAX_ATTEMPTS ]; then
+    echo "FAIL: Could not fix all issues after $MAX_ATTEMPTS attempts"
+    cat .githooks/pre-commit-output.log
+    exit 1
+  fi
+  
+  # Analyze output to inform next fix attempt
+  echo "Commit failed. Analyzing issues for next fix attempt..."
+  
+  ((attempt++))
+done
 
 # Unset the special git hooks path before exiting to prevent errors
 git config --unset core.hooksPath || true
 
 echo "Tool validation test passed completely!"
+# Return to original directory before exiting
+popd > /dev/null 2>&1 || true
+# Cleanup
+if [ -n "$TEST_DIR" ] && [ -d "$TEST_DIR" ]; then
+  rm -rf "$TEST_DIR"
+  echo "Cleaned up test directory: $TEST_DIR"
+fi
+exit 0

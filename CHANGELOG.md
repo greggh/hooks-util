@@ -15,17 +15,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added proper test configuration files (.stylua.toml, .luacheckrc)
   - Enhanced test files with real formatting and linting issues
   - Made tests adaptable to different environments (with/without tools)
+- Implemented iterative fix-and-retry approach for tests:
+  - Added ability to detect issues and fix them incrementally
+  - Limited retry attempts to prevent infinite loops
+  - Added better error output analysis for targeted fixes
+  - Improved test reliability with smarter issue detection
 
 ### Fixed
 - Pre-commit hook now correctly exits with non-zero status when errors are found
 - Integration tests now run successfully with proper error handling
-- Fixed path handling issues in test environment
+- Fixed path handling issues in test environment:
+  - Replaced tr command with parameter expansion for backslash escaping
+  - Used pushd/popd instead of cd for more reliable directory handling
+  - Improved cleanup to ensure consistent test environment
 - Added proper error tracking and reporting in hooks
 - Improved code quality checks for whitespace and unused variables
 - Fixed test reliability issues with consistent cleanup
 - Made ShellCheck a strict requirement for shell script validation
 - Made StyLua a strict requirement for Lua formatting
 - Removed lenient handling of missing tools - all required tools now cause commit failure
+- Fixed ShellCheck warnings in all shell script files:
+  - Added proper quoting for all variable references
+  - Fixed variable declaration and assignment patterns
+  - Improved path handling and string manipulation
+  - Updated numeric comparisons to use proper syntax
 
 ### Added
 - Comprehensive integration test suite:
@@ -40,11 +53,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Standard test runner for CI environments
   - Simplified runner for better debugging
   - Individual test execution support
+  - Robust exit code handling for more accurate test results
 - Release candidate tagging for pre-release testing
 - Tool validation testing:
   - Tests for missing tool scenarios 
   - Tests for actual tool behavior with real validation
   - Detection of environment capabilities for better testing
+- New utility scripts:
+  - test_all.sh for running all integration tests
+  - debug_test.sh for diagnosing test issues
 
 ## [0.2.0] - 2025-03-02
 

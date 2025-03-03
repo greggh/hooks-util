@@ -2,11 +2,13 @@
 # Unit test runner for hooks-util shell scripts
 set -eo pipefail
 
+# Store the original pwd before running any commands
+ORIGINAL_PWD="$PWD"
+
 # Determine script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 TEST_DIR="${PROJECT_DIR}/tests"
-LIB_DIR="${PROJECT_DIR}/lib"
 
 # Define colors for output
 RED='\033[0;31m'
@@ -30,7 +32,8 @@ TESTS_SKIPPED=0
 # Function to run a test
 run_test() {
   local test_file="$1"
-  local test_name=$(basename "$test_file" .sh)
+  local test_name
+  test_name=$(basename "$test_file" .sh)
   
   echo -e "${YELLOW}Running test: ${test_name}${NC}"
   ((TESTS_TOTAL++))
