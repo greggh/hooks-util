@@ -30,15 +30,8 @@ jobs:
         run: |
           chmod +x scripts/fix-markdown.sh
           ./scripts/fix-markdown.sh
-          
-          # Commit the changes if running on the main branch
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.ref }}" == "refs/heads/main" ]]; then
-            git config --local user.email "github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"
-            git add "**/*.md"
-            git commit -m "Fix Markdown linting issues [skip ci]" || echo "No changes to commit"
-            git push
-          fi
+          # Note: We're not committing and pushing because the GitHub Actions bot lacks write permissions
+          # This step will fix the markdown files for validation purposes in the workflow
       
       - name: Run markdownlint-cli
         uses: nosborn/github-action-markdown-cli@v3.3.0
