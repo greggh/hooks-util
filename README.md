@@ -1,6 +1,25 @@
+<div align="center">
+
 # Neovim Hooks Utilities
 
-A shared library of utilities for Git hooks across Lua-based Neovim projects.
+[![GitHub License](https://img.shields.io/github/license/greggh/hooks-util?style=flat-square)](https://github.com/greggh/hooks-util/blob/main/LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/greggh/hooks-util?style=flat-square)](https://github.com/greggh/hooks-util/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/greggh/hooks-util?style=flat-square)](https://github.com/greggh/hooks-util/issues)
+[![CI](https://img.shields.io/github/actions/workflow/status/greggh/hooks-util/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/greggh/hooks-util/actions/workflows/ci.yml)
+[![Bash](https://img.shields.io/badge/Language-Bash-4EAA25?style=flat-square&logo=gnu-bash)](https://www.gnu.org/software/bash/)
+[![Version](https://img.shields.io/badge/Version-0.2.1-blue?style=flat-square)](https://github.com/greggh/hooks-util/releases/tag/v0.2.1)
+[![Docs](https://img.shields.io/badge/docs-passing-success?style=flat-square)](https://github.com/greggh/hooks-util/actions/workflows/docs.yml)
+
+*A standardized Git hook framework for Lua-based Neovim projects with powerful error handling and code quality tools*
+
+[Features](#features) • 
+[Installation](#installation) • 
+[Usage](#usage) • 
+[Configuration](#configuration) • 
+[Contributing](#contributing) • 
+[License](#license)
+
+</div>
 
 ## Overview
 
@@ -25,7 +44,7 @@ The primary tools supported are:
 - **Standardized Output Format** - Consistent, colorized messages across all hooks
 - **Verbose Debug Mode** - Detailed output for troubleshooting
 - **Test Integration** - Standardized test execution and reporting
-- **Robust Test Framework** - Comprehensive tests for various scenarios (fixable issues, unfixable issues, tool validation)
+- **Robust Test Framework** - Comprehensive tests for various scenarios
 - **Automatic Code Quality Fixes** - Fix common issues like trailing whitespace and line endings
 - **Layered Configuration** - Machine and user-specific configuration options
 - **Framework Auto-detection** - Automatically detects project structure and testing frameworks
@@ -45,7 +64,8 @@ cd .hooks-util
 
 ```bash
 mkdir -p .hooks-util
-curl -L https://github.com/greggh/hooks-util/archive/main.tar.gz | tar -xz --strip-components=1 -C .hooks-util
+curl -L https://github.com/greggh/hooks-util/releases/download/v0.2.1/hooks-util-0.2.1.zip -o hooks-util.zip
+unzip hooks-util.zip -d .hooks-util
 cd .hooks-util
 ./install.sh
 ```
@@ -69,7 +89,7 @@ VERBOSITY=1                   # 0=quiet, 1=normal, 2=verbose
 SHELLCHECK_SEVERITY="error"   # ShellCheck severity level
 ```
 
-#### Advanced Configuration
+### Advanced Configuration
 
 The hooks utility supports additional configuration files for different environments:
 
@@ -105,13 +125,62 @@ Configuration files are loaded in order (main → local → user), with later fi
 
 The hooks system will gracefully handle missing tools with appropriate warnings.
 
+## Tool Integration
+
+### StyLua Integration
+
+Automatically formats Lua files according to Neovim coding conventions:
+
+```bash
+# Custom StyLua path can be specified in .hooksrc
+STYLUA_PATH="/custom/path/to/stylua"
+STYLUA_ARGS="--config-path=/path/to/.stylua.toml"
+```
+
+### Luacheck Integration
+
+Static analysis for your Lua code to catch errors before they occur:
+
+```bash
+# Custom Luacheck path can be specified in .hooksrc
+LUACHECK_PATH="/custom/path/to/luacheck"
+LUACHECK_ARGS="--config /path/to/.luacheckrc"
+```
+
+### ShellCheck Integration
+
+Validates shell scripts for common errors and best practices:
+
+```bash
+# Custom ShellCheck path can be specified in .hooksrc
+SHELLCHECK_PATH="/custom/path/to/shellcheck"
+SHELLCHECK_SEVERITY="warning" # error, warning, info, style
+```
+
+### Neovim Test Integration
+
+Runs your project's test suite before committing:
+
+```bash
+# Test configuration in .hooksrc
+TEST_TIMEOUT=60000            # 60 seconds test timeout
+TEST_FRAMEWORK="plenary"      # plenary, busted, or make
+TEST_COMMAND="make test"      # Custom test command
+```
+
+## Community
+
+- [GitHub Discussions](https://github.com/greggh/hooks-util/discussions) - Get help, share ideas, and connect with other users
+- [GitHub Issues](https://github.com/greggh/hooks-util/issues) - Report bugs or suggest features
+- [GitHub Pull Requests](https://github.com/greggh/hooks-util/pulls) - Contribute to the project
+
 ## Contributing
 
 Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) for details.
+[MIT License](LICENSE) - See the LICENSE file for details.
 
 ## Acknowledgements
 
