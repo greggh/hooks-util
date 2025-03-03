@@ -204,9 +204,16 @@ EOF
 # Set up the hooks directory structure
 echo "Setting up hooks environment..."
 mkdir -p .githooks/lib/
+
+# Copy the pre-commit hook (this time not from a test mock)
 cp .hooks-util/hooks/pre-commit .githooks/pre-commit
 chmod +x .githooks/pre-commit
+
+# Copy the actual library files
 cp -r .hooks-util/lib/* .githooks/lib/
+
+# Add a symbolic link for better path resolution
+ln -sf "${PWD}/.hooks-util/lib" "${PWD}/.githooks/../lib"
 
 # Configure git to use our hooks directory
 git config core.hooksPath .githooks
