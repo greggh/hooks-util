@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Limited retry attempts to prevent infinite loops
   - Added better error output analysis for targeted fixes
   - Improved test reliability with smarter issue detection
+- Split plugin test into separate test cases:
+  - One for fixable issues (plugin_test.sh)
+  - One for unfixable issues (plugin_test_unfixable.sh)
+  - Improved test robustness to handle environment variations
+  - Added better error reporting and diagnostics
+  - Enhanced validation of pre-commit hook functionality
 
 ### Fixed
 - Pre-commit hook now correctly exits with non-zero status when errors are found
@@ -28,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Replaced tr command with parameter expansion for backslash escaping
   - Used pushd/popd instead of cd for more reliable directory handling
   - Improved cleanup to ensure consistent test environment
+- Fixed test_all.sh to continue running all tests even when some fail:
+  - Removed `set -e` to prevent premature exit on test failures
+  - Enhanced error reporting and summary statistics
+  - Improved overall test suite reliability
 - Added proper error tracking and reporting in hooks
 - Improved code quality checks for whitespace and unused variables
 - Fixed test reliability issues with consistent cleanup

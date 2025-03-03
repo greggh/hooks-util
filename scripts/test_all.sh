@@ -1,7 +1,8 @@
 #!/bin/bash
 # Custom test runner to run all tests - avoids using cd commands
 
-set -e
+# We don't want set -e here because we want to run all tests even if some fail
+# set -e
 
 # Get the absolute paths
 PROJECT_DIR="/home/gregg/Projects/hooks-util"
