@@ -7,7 +7,7 @@
 [![GitHub Issues](https://img.shields.io/github/issues/greggh/hooks-util?style=flat-square)](https://github.com/greggh/hooks-util/issues)
 [![CI](https://img.shields.io/github/actions/workflow/status/greggh/hooks-util/ci.yml?branch=main&style=flat-square&logo=github)](https://github.com/greggh/hooks-util/actions/workflows/ci.yml)
 [![Bash](https://img.shields.io/badge/Language-Bash-4EAA25?style=flat-square&logo=gnu-bash)](https://www.gnu.org/software/bash/)
-[![Version](https://img.shields.io/badge/Version-0.2.1-blue?style=flat-square)](https://github.com/greggh/hooks-util/releases/tag/v0.2.1)
+[![Version](https://img.shields.io/badge/Version-0.2.2-blue?style=flat-square)](https://github.com/greggh/hooks-util/releases/tag/v0.2.2)
 [![Docs](https://img.shields.io/badge/docs-passing-success?style=flat-square)](https://github.com/greggh/hooks-util/actions/workflows/docs.yml)
 
 *A standardized Git hook framework for Lua-based Neovim projects with powerful error handling and code quality tools*
