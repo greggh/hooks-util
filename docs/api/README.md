@@ -4,6 +4,8 @@ This directory contains documentation for the Neovim Hooks Utilities API.
 
 ## Module Overview
 
+### Shell Modules
+
 | Module | Description |
 |--------|-------------|
 | [common.sh](common.md) | Core utility functions and configuration handling |
@@ -14,6 +16,16 @@ This directory contains documentation for the Neovim Hooks Utilities API.
 | [test.sh](test.md) | Test runner integration for Neovim plugins |
 | [quality.sh](quality.md) | Code quality improvement utilities |
 | [version.sh](version.md) | Version information and management |
+
+### Lua Modules
+
+| Module | Description |
+|--------|-------------|
+| [lua-integration](lua-integration.md) | Lua integration, adapter system, and lust-next integration |
+| [adapter](lua-integration.md#adapter-module) | Project type detection and adapter system |
+| [config](lua-integration.md#config-module) | Configuration management in Lua |
+| [registry](lua-integration.md#registry-module) | Adapter registry and management |
+| [lust-next](lua-integration.md#lust-next-integration) | Testing framework integration |
 
 ## Hook Types
 

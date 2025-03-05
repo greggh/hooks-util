@@ -76,6 +76,10 @@ After installation, the pre-commit hooks in your repository will automatically u
 
 ### Configuration
 
+Hooks-util supports two configuration methods: the traditional shell-based config and a new Lua-based config.
+
+#### Shell-Based Configuration
+
 Create a `.hooksrc` file in your project root to customize hook behavior:
 
 ```bash
@@ -89,21 +93,82 @@ VERBOSITY=1                   # 0=quiet, 1=normal, 2=verbose
 SHELLCHECK_SEVERITY="error"   # ShellCheck severity level
 ```
 
+#### Lua-Based Configuration (Recommended)
+
+Create a `.hooks-util.lua` file in your project root for more advanced configuration:
+
+```lua
+-- hooks-util.lua configuration file
+return {
+  -- Project type configuration
+  -- Valid values:
+  --   "auto"           - Automatically detect project type (default)
+  --   "neovim-plugin"  - Neovim plugin project
+  --   "neovim-config"  - Neovim configuration directory
+  --   "lua-lib"        - Lua library
+  --   "lua-project"    - Generic Lua project
+  project_type = "auto", -- Will auto-detect, change only if detection is incorrect
+  
+  -- Configure which hooks should be run on pre-commit
+  hooks = {
+    pre_commit = {
+      lint = true,       -- Run linting (luacheck, etc.)
+      format = true,     -- Run formatting (stylua, etc.)
+      test = true,       -- Run tests
+    }
+  },
+  
+  -- Testing configuration
+  test = {
+    framework = "lust-next",             -- Test framework to use
+    runner = "spec/runner.lua",          -- Path to test runner
+    timeout = 60000,                     -- Test timeout in milliseconds
+  },
+  
+  -- Linting configuration
+  lint = {
+    luacheck = {
+      enabled = true,
+      config_file = ".luacheckrc",
+    },
+    stylua = {
+      enabled = true,
+      config_file = "stylua.toml",
+    }
+  }
+}
+```
+
+### Project Type Detection
+
+Hooks-util can automatically detect your project type based on file structure:
+
+- **neovim-config**: Neovim configuration with init.lua + plugin/ftplugin/after directories
+- **neovim-plugin**: Neovim plugin with plugin/init.vim or lua/*/init.lua structure
+- **lua-lib**: Lua library with .rockspec files or certain directory structures
+- **lua-project**: Generic Lua project not fitting other categories
+
+You can override this detection by setting `project_type` in your configuration file.
+
 ### Advanced Configuration
 
 The hooks utility supports additional configuration files for different environments:
 
-1. **`.hooksrc`** - Main project configuration, committed to git
-2. **`.hooksrc.local`** - Machine-specific configuration, not committed to git
-3. **`.hooksrc.user`** - User-specific configuration, not committed to git
+1. **`.hooksrc`** / **`.hooks-util.lua`** - Main project configuration, committed to git
+2. **`.hooksrc.local`** - Machine-specific configuration, not committed to git (shell format)
+3. **`.hooksrc.user`** - User-specific configuration, not committed to git (shell format)
+4. **`.hooks-util.local.lua`** - Machine-specific Lua configuration, not committed to git
+5. **`.hooks-util.user.lua`** - User-specific Lua configuration, not committed to git
 
-Example files are provided (`.hooksrc.local.example` and `.hooksrc.user.example`) that you can copy and customize:
+Example files are provided that you can copy and customize:
 
 ```bash
-# Create your local configuration
-cp .hooksrc.local.example .hooksrc.local
-# Create your user configuration
-cp .hooksrc.user.example .hooksrc.user
+# Create your local shell configuration
+cp templates/hooksrc.local.example .hooksrc.local
+# Create your user shell configuration
+cp templates/hooksrc.user.example .hooksrc.user
+# Create your Lua configuration
+cp templates/hooks-util.lua.template .hooks-util.lua
 ```
 
 Configuration files are loaded in order (main → local → user), with later files overriding earlier ones.
@@ -164,9 +229,78 @@ Runs your project's test suite before committing:
 ```bash
 # Test configuration in .hooksrc
 TEST_TIMEOUT=60000            # 60 seconds test timeout
-TEST_FRAMEWORK="plenary"      # plenary, busted, or make
+TEST_FRAMEWORK="plenary"      # plenary, busted, lust-next, or make
 TEST_COMMAND="make test"      # Custom test command
 ```
+
+### Lust-Next Testing Integration
+
+Hooks-util now includes comprehensive integration with lust-next, a lightweight and powerful testing framework for Lua:
+
+```bash
+# Run all tests with lust-next
+./spec/runner.lua
+
+# Filter tests by pattern
+./spec/runner.lua "core"
+
+# Run tests with specific tags
+./spec/runner.lua "" "unit"
+```
+
+#### Setting Up Lust-Next Testing
+
+To configure your project for lust-next testing:
+
+```lua
+-- From your Lua code
+local lust_next = require("hooks-util.lust-next")
+lust_next.setup_project("/path/to/your/project")
+```
+
+This will:
+- Create a `spec/` directory structure for your tests
+- Set up a test runner script
+- Create a base spec helper
+- Prepare a minimal test example
+- Add necessary configuration for GitHub or GitLab CI
+
+#### Test File Structure
+
+Lust-next tests use a BDD-style syntax:
+
+```lua
+-- spec/core/my_module_spec.lua
+describe("my_module", function()
+  local my_module
+  
+  before_each(function()
+    -- Setup code runs before each test
+    my_module = require("my_module")
+  end)
+  
+  it("performs the expected action", function()
+    local result = my_module.some_function()
+    assert(result == "expected value")
+  end)
+  
+  it("handles errors gracefully", function()
+    local success = pcall(my_module.risky_function)
+    assert(not success, "Should have failed")
+  end)
+end)
+```
+
+#### Generating CI Workflow
+
+You can generate a CI workflow configuration for your tests:
+
+```lua
+local lust_next = require("hooks-util.lust-next")
+lust_next.generate_workflow("/path/to/project", "github")  -- github, gitlab, or azure
+```
+
+This creates the appropriate workflow files for your CI platform, configured to run your lust-next tests.
 
 ## Community
 
@@ -188,6 +322,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for det
 - [Luacheck](https://github.com/lunarmodules/luacheck) - Lua static analyzer and linter
 - [ShellCheck](https://github.com/koalaman/shellcheck) - Shell script static analysis tool
 - [Neovim](https://neovim.io/) - The core editor these hooks support
+- [lust-next](https://github.com/greggh/lust-next) - Lightweight, powerful Lua testing framework
 - [Plenary.nvim](https://github.com/nvim-lua/plenary.nvim) - Testing framework integration
 - [pre-commit](https://pre-commit.com/) - Hook management framework that inspired this project
 - [GitHub Actions](https://github.com/features/actions) - CI/CD workflow integration

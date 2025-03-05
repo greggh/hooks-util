@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Lust-Next integration for standardized testing across projects:
+  - Comprehensive BDD-style testing framework
+  - Automatic test discovery and setup
+  - Test filtering and tagging
+  - Mocking and assertion utilities
+  - CI workflow generation for GitHub/GitLab/Azure
+- Project type detection system with intelligent adapter architecture:
+  - Automatic detection of Neovim plugins, configs, and Lua libraries
+  - Project-specific hook configuration based on detected type
+  - Custom adapter system for specialized project types
+- Lua-based configuration using `.hooks-util.lua`:
+  - Project type configuration with "auto" detection or explicit type
+  - Fine-grained control over hooks, linting, and testing
+  - Multi-environment configuration support (local/user overrides)
+  - Comprehensive configuration templating
+
 ## [0.2.2] - 2025-03-03
 
 ### Enhanced

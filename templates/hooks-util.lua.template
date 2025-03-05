@@ -1,0 +1,58 @@
+-- hooks-util configuration file
+-- Place this in the root of your project as .hooks-util.lua
+
+return {
+  -- Project type configuration
+  -- Valid values:
+  --   "auto"           - Automatically detect project type (default)
+  --   "neovim-plugin"  - Neovim plugin project
+  --   "neovim-config"  - Neovim configuration directory
+  --   "lua-lib"        - Lua library
+  --   "lua-project"    - Generic Lua project
+  project_type = "auto", -- Will auto-detect, change only if detection is incorrect
+  
+  -- Configure which hooks should be run on pre-commit
+  hooks = {
+    pre_commit = {
+      lint = true,       -- Run linting (luacheck, etc.)
+      format = true,     -- Run formatting (stylua, etc.)
+      test = true,       -- Run tests
+      version = true,    -- Verify version consistency
+    }
+  },
+  
+  -- Configure linting options
+  lint = {
+    -- Specific linter configuration
+    luacheck = {
+      enabled = true,
+      config_file = ".luacheckrc",        -- Path to luacheckrc file
+      args = "--no-color",                -- Additional luacheck arguments
+    },
+    
+    stylua = {
+      enabled = true,
+      config_file = "stylua.toml",        -- Path to stylua config
+      check_only = false,                 -- Only check formatting without modifying files
+    }
+  },
+  
+  -- Configure testing options
+  test = {
+    -- Test configuration
+    framework = "lust-next",             -- Test framework to use
+    runner = "spec/runner.lua",          -- Path to test runner
+    pattern = "**/*_spec.lua",           -- Pattern to discover test files
+    args = "",                           -- Additional arguments for the test runner
+  },
+  
+  -- Configure CI workflow options
+  ci = {
+    platform = "github",                 -- github, gitlab, or azure
+    workflow_dir = ".github/workflows",  -- Directory for workflow files
+    matrix = {
+      lua = {"5.1", "luajit"},           -- Lua versions to test against
+      os = {"ubuntu-latest"},            -- OS platforms to test on
+    }
+  }
+}
