@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  stylua:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1.5"
+      
+      - name: Setup StyLua
+        uses: JohnnyMorganz/stylua-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: 0.15.2
+      
+      - name: Check formatting
+        run: stylua --check lua/
+
+  luacheck:
+    name: Check code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1.5"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install Luacheck
+        run: luarocks install luacheck
+      
+      - name: Run Luacheck
+        run: luacheck lua/
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        neovim_version: ['stable', 'nightly']
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim_version }}
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1.5"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      # Detect test framework
+      - name: Set TEST_FRAMEWORK
+        id: detect_test_framework
+        run: |
+          if [ -d "test" ]; then
+            echo "::set-output name=framework::plenary"
+          elif [ -d "spec" ]; then
+            echo "::set-output name=framework::lust-next"
+          else
+            echo "::set-output name=framework::unknown"
+          fi
+      
+      # Install test dependencies
+      - name: Install Plenary (for Plenary tests)
+        if: steps.detect_test_framework.outputs.framework == 'plenary'
+        run: |
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+      
+      - name: Install Lust-Next (for Lust-Next tests)
+        if: steps.detect_test_framework.outputs.framework == 'lust-next'
+        run: |
+          git clone --depth 1 https://github.com/greggh/lust-next ~/.local/share/nvim/site/pack/vendor/start/lust-next
+      
+      # Run tests
+      - name: Run tests (Plenary)
+        if: steps.detect_test_framework.outputs.framework == 'plenary'
+        run: |
+          nvim --headless -c "lua require('plenary.test_harness').test_directory('test', {minimal_init = 'test/minimal_init.lua'})"
+      
+      - name: Run tests (Lust-Next)
+        if: steps.detect_test_framework.outputs.framework == 'lust-next'
+        run: |
+          cd spec && lua runner.lua
+      
+      - name: Report test framework
+        if: steps.detect_test_framework.outputs.framework == 'unknown'
+        run: |
+          echo "No recognized test framework found. Please add tests!"
+          # Don't fail the build, but inform that tests are missing
+          exit 0

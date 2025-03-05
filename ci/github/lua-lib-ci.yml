@@ -1,0 +1,209 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  stylua:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1.5"
+      
+      - name: Setup StyLua
+        uses: JohnnyMorganz/stylua-action@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: 0.15.2
+      
+      - name: Check formatting
+        run: |
+          if [ -d "lua" ]; then
+            stylua --check lua/
+          elif [ -d "src" ]; then
+            stylua --check src/
+          else
+            echo "No Lua source directories found to check formatting"
+            exit 0
+          fi
+
+  luacheck:
+    name: Check code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1.5"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Install Luacheck
+        run: luarocks install luacheck
+      
+      - name: Run Luacheck
+        run: |
+          if [ -d "lua" ]; then
+            luacheck lua/
+          elif [ -d "src" ]; then
+            luacheck src/
+          else
+            echo "No Lua source directories found to lint"
+            exit 0
+          fi
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        lua_version: ['5.1', '5.2', '5.3', '5.4', 'luajit']
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: ${{ matrix.lua_version }}
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      # Try to detect and install dependencies
+      - name: Install dependencies
+        run: |
+          if [ -f "*.rockspec" ]; then
+            # Extract dependencies from rockspec
+            ROCKSPEC=$(ls -1 *.rockspec | head -1)
+            echo "Using rockspec: $ROCKSPEC"
+            
+            # Install dependencies
+            luarocks install --only-deps $ROCKSPEC
+          else
+            echo "No rockspec found, skipping dependency installation"
+          fi
+          
+          # Check for common test dependencies and install them
+          if [ -d "spec" ]; then
+            if grep -q "lust-next" spec/*.lua 2>/dev/null; then
+              echo "Installing lust-next for testing"
+              luarocks install --server=https://luarocks.org/dev lust-next
+            elif grep -q "busted" spec/*.lua 2>/dev/null; then
+              echo "Installing busted for testing"
+              luarocks install busted
+            fi
+          elif [ -d "test" ]; then
+            if grep -q "luaunit" test/*.lua 2>/dev/null; then
+              echo "Installing luaunit for testing"
+              luarocks install luaunit
+            fi
+          fi
+      
+      # Detect test framework
+      - name: Set TEST_FRAMEWORK
+        id: detect_test_framework
+        run: |
+          if [ -f "Makefile" ] && grep -q "test:" Makefile; then
+            echo "framework=make" >> $GITHUB_OUTPUT
+          elif [ -d "spec" ] && [ -f "spec/runner.lua" ]; then
+            echo "framework=lust-next" >> $GITHUB_OUTPUT
+          elif [ -d "spec" ]; then
+            echo "framework=busted" >> $GITHUB_OUTPUT
+          elif [ -d "test" ] && grep -q "luaunit" test/*.lua 2>/dev/null; then
+            echo "framework=luaunit" >> $GITHUB_OUTPUT
+          elif [ -d "test" ]; then
+            echo "framework=generic" >> $GITHUB_OUTPUT
+          else
+            echo "framework=unknown" >> $GITHUB_OUTPUT
+          fi
+      
+      # Run tests based on detected framework
+      - name: Run tests (Make)
+        if: steps.detect_test_framework.outputs.framework == 'make'
+        run: make test
+      
+      - name: Run tests (Lust-Next)
+        if: steps.detect_test_framework.outputs.framework == 'lust-next'
+        run: lua spec/runner.lua
+      
+      - name: Run tests (Busted)
+        if: steps.detect_test_framework.outputs.framework == 'busted'
+        run: busted .
+      
+      - name: Run tests (LuaUnit)
+        if: steps.detect_test_framework.outputs.framework == 'luaunit'
+        run: |
+          # Find the main test runner
+          if [ -f "test/run_tests.lua" ]; then
+            lua test/run_tests.lua
+          elif [ -f "test/run.lua" ]; then
+            lua test/run.lua
+          else
+            # If no runner is found, run all test files
+            for f in test/*.lua; do
+              lua "$f"
+            done
+          fi
+      
+      - name: Run tests (Generic)
+        if: steps.detect_test_framework.outputs.framework == 'generic'
+        run: |
+          if [ -d "test" ]; then
+            for f in test/*.lua; do
+              lua "$f"
+            done
+          elif [ -d "spec" ]; then
+            for f in spec/*.lua; do
+              lua "$f"
+            done
+          fi
+      
+      - name: Report test framework
+        if: steps.detect_test_framework.outputs.framework == 'unknown'
+        run: |
+          echo "No recognized test framework found. Please add tests!"
+          # Don't fail the build, but inform that tests are missing
+          exit 0
+
+  luarocks-validation:
+    name: Validate rockspec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1.5"
+      
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+      
+      - name: Validate rockspec
+        run: |
+          # Find all rockspec files
+          ROCKSPECS=$(find . -name "*.rockspec")
+          if [ -z "$ROCKSPECS" ]; then
+            echo "No rockspec files found"
+            exit 0
+          fi
+          
+          # Validate each rockspec
+          for spec in $ROCKSPECS; do
+            echo "Validating $spec..."
+            luarocks lint "$spec"
+          done

@@ -7,10 +7,10 @@
 - `cd /path/to/project && .githooks/hooks-util/install.sh` - Install hooks in a project
 
 ### Git Commands
-- `git -C /home/gregg/Projects/neovim/hooks-util status` - Check current status
-- `git -C /home/gregg/Projects/neovim/hooks-util add .` - Stage all changes
-- `git -C /home/gregg/Projects/neovim/hooks-util commit -m "message"` - Commit changes
-- `git -C /home/gregg/Projects/neovim/hooks-util push` - Push changes
+- `git -C /home/gregg/Projects/hooks-util status` - Check current status
+- `git -C /home/gregg/Projects/hooks-util add .` - Stage all changes
+- `git -C /home/gregg/Projects/hooks-util commit -m "message"` - Commit changes
+- `git -C /home/gregg/Projects/hooks-util push` - Push changes
 
 ### Development Commands
 - `stylua lua/ -c` - Check Lua formatting
