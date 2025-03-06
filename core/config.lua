@@ -56,6 +56,22 @@ M.default_config = {
     version_file = "lua/version.lua",
   },
   
+  -- Test quality validation (planned feature)
+  test_quality = {
+    enabled = false, -- Disabled by default until implemented
+    coverage = {
+      enabled = false,
+      threshold = 80, -- Minimum % coverage required
+      include = {"lua/**/*.lua"}, -- Files to check coverage for
+      exclude = {"lua/vendor/**"} -- Files to exclude
+    },
+    quality = {
+      level = 1, -- Start with level 1 (Basic) by default
+      strict = false, -- Don't fail commit on quality warnings by default
+      custom_rules = {},
+    }
+  },
+  
   -- Hooks
   hooks = {
     pre_commit = {
@@ -63,10 +79,12 @@ M.default_config = {
       run_linters = true,
       run_tests = true,
       check_version = true,
+      check_test_quality = false, -- Disabled by default until implemented
     },
     pre_push = {
       enabled = false,
       run_tests = true,
+      check_test_quality = false, -- Disabled by default until implemented
     },
   },
 }

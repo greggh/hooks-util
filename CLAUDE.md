@@ -144,6 +144,10 @@ hooks-util/
 - Pre-commit hooks for version validation
 - Multi-platform CI workflow templates
 - Project type adapters for specific configurations
+- Test quality validation (planned):
+  - Test coverage threshold enforcement
+  - Quality level verification (5 levels)
+  - Configurable strictness per project type
 
 ### Project Structure
 - `core/` - Core functionality shared across all project types
