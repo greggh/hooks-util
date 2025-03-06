@@ -248,6 +248,68 @@ Hooks-util now includes comprehensive integration with lust-next, a lightweight 
 ./spec/runner.lua "" "unit"
 ```
 
+### Test Quality Validation
+
+Hooks-util provides integrated test quality validation through lust-next:
+
+```lua
+-- From your .hooks-util.lua configuration
+test_quality = {
+  enabled = true,      -- Enable test quality validation in pre-commit hooks
+  
+  -- Test coverage configuration
+  coverage = {
+    enabled = false,   -- Enable code coverage validation
+    threshold = 80,    -- Minimum coverage percentage required (0-100)
+    include = {"lua/**/*.lua"}, -- Files to check coverage for
+    exclude = {"test_*", "*_spec.lua"} -- Files to exclude from coverage
+  },
+  
+  -- Test quality level configuration
+  quality = {
+    enabled = false,   -- Enable quality level validation
+    level = 1,         -- Quality level to enforce (1-5)
+    strict = false,    -- Strict mode (fail on first issue)
+  }
+}
+```
+
+#### Quality Levels
+
+The test quality validation system has five progressive levels:
+
+1. **Basic (Level 1)** - Minimal testing with proper structure
+   - At least one assertion per test
+   - Basic test organization with describe/it blocks
+   - No empty test blocks
+
+2. **Standard (Level 2)** - More comprehensive testing
+   - Multiple assertions per test
+   - Multiple assertion types (equality, truth, type checking)
+   - Better test naming with "should" descriptions
+   - Proper error case handling
+
+3. **Comprehensive (Level 3)** - Edge case testing and better isolation
+   - Edge case testing
+   - Type checking assertions
+   - Proper mock/stub usage
+   - Isolated test setup and teardown with before/after hooks
+
+4. **Advanced (Level 4)** - Boundary testing and complete verification
+   - Boundary condition testing
+   - Complete mock verification
+   - Proper test organization with nested contexts
+   - Detailed error assertions and validation
+
+5. **Complete (Level 5)** - Security, performance, and thorough coverage
+   - 100% branch coverage
+   - Security vulnerability testing
+   - Performance validation
+   - Comprehensive API contract testing
+   - Full dependency isolation
+
+You can gradually increase the quality level as your test suite matures.
+
 #### Setting Up Lust-Next Testing
 
 To configure your project for lust-next testing:

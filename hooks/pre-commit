@@ -15,6 +15,7 @@ source "${LIB_DIR}/luacheck.sh"
 source "${LIB_DIR}/shellcheck.sh"
 source "${LIB_DIR}/test.sh"
 source "${LIB_DIR}/quality.sh"
+source "${LIB_DIR}/test_quality.sh"
 
 # Print banner
 hooks_print_header "Neovim Hooks Utilities Pre-commit Hook v${HOOKS_UTIL_VERSION}"
@@ -99,15 +100,19 @@ else
   hooks_debug "Tests are disabled in configuration"
 fi
 
+# Run test quality validation if enabled
+if [ "${HOOKS_TEST_QUALITY_ENABLED}" = true ]; then
+  # Run test quality checks
+  hooks_run_test_quality_checks "$TOP_LEVEL"
+  hooks_handle_error $? "Test quality validation failed"
+else
+  hooks_debug "Test quality validation is disabled in configuration"
+fi
+
 # Success message if no errors
 if [ "${HOOKS_ERROR_COUNT}" -eq 0 ]; then
   hooks_success "All checks passed successfully!"
 fi
-
-# Future integrations:
-# 1. Add missing module imports (like Snacks)
-# 2. Pre-push hook implementation 
-# 3. Post-checkout hook implementation
 
 # Print error summary and exit with appropriate code
 hooks_print_error_summary

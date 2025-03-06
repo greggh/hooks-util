@@ -4,6 +4,10 @@
 # This is a template configuration file for the hooks-util library.
 # Copy this file to your project root as .hooksrc and customize as needed.
 #
+# Note: For more advanced configuration options, consider using .hooks-util.lua
+# which provides additional features like project type detection and
+# test quality validation configuration.
+#
 
 # Enable/disable specific hook components
 HOOKS_STYLUA_ENABLED=true
@@ -19,6 +23,15 @@ HOOKS_QUALITY_ENABLED=true
 
 # Test settings
 HOOKS_TEST_TIMEOUT=60000  # 60 seconds timeout for tests
+
+# Test quality validation settings
+# These can also be configured in .hooks-util.lua for more advanced options
+HOOKS_TEST_QUALITY_ENABLED=true       # Enable test quality validation
+HOOKS_TEST_COVERAGE_ENABLED=false     # Enable coverage validation
+HOOKS_TEST_COVERAGE_THRESHOLD=80      # Require 80% code coverage
+HOOKS_TEST_QUALITY_ENABLED=false      # Enable quality level validation
+HOOKS_TEST_QUALITY_LEVEL=1            # Level 1-5 (higher = more strict)
+HOOKS_TEST_QUALITY_STRICT=false       # Strict mode (fail immediately on issues)
 
 # Verbosity level: 0=quiet, 1=normal, 2=verbose
 HOOKS_VERBOSITY=1

@@ -1,0 +1,78 @@
+-- hooks-util configuration file
+return {
+  -- Project type configuration
+  -- Valid values:
+  --   "auto"           - Automatically detect project type (default)
+  --   "neovim-plugin"  - Neovim plugin project
+  --   "neovim-config"  - Neovim configuration directory
+  --   "lua-lib"        - Lua library
+  --   "lua-project"    - Generic Lua project
+  project_type = "auto", -- Automatic detection
+  
+  -- Hook execution configuration
+  hooks = {
+    pre_commit = {
+      lint = true,       -- Run linting
+      format = true,     -- Run formatting
+      test = true,       -- Run tests
+      quality = true,    -- Run test quality validation
+    }
+  },
+  
+  -- Test quality validation configuration
+  test_quality = {
+    enabled = true,      -- Enable test quality validation in hooks
+    
+    -- Test coverage configuration
+    coverage = {
+      enabled = false,   -- Enable code coverage validation
+      threshold = 80,    -- Minimum coverage percentage required (0-100)
+      include = {        -- Files to include in coverage analysis
+        "*.lua",
+        "lua/**/*.lua"
+      },
+      exclude = {        -- Files to exclude from coverage analysis
+        "*_test.lua",
+        "*_spec.lua",
+        "test_*.lua",
+        "spec_*.lua",
+        "tests/**/*.lua",
+        "test/**/*.lua",
+        "spec/**/*.lua"
+      }
+    },
+    
+    -- Test quality level configuration
+    quality = {
+      enabled = false,   -- Enable quality level validation
+      level = 1,         -- Quality level to enforce (1-5)
+      -- Level descriptions:
+      -- 1 (Basic)        - Minimal testing, at least one assertion per test
+      -- 2 (Standard)     - Multiple assertion types, proper naming
+      -- 3 (Comprehensive)- Edge cases, type checking, isolated setup/teardown
+      -- 4 (Advanced)     - Boundary testing, complete mock verification
+      -- 5 (Complete)     - Security tests, 100% branch coverage, thorough api testing
+      strict = false,    -- Strict mode (fail on first issue)
+      
+      -- Custom rules (optional)
+      custom_rules = {
+        -- Add project-specific quality requirements
+        -- Example: require_describe_block = true
+      }
+    }
+  },
+  
+  -- Tool paths configuration (optional)
+  tools = {
+    -- stylua = "/path/to/stylua",
+    -- luacheck = "/path/to/luacheck",
+    -- shellcheck = "/path/to/shellcheck",
+    -- neovim = "/path/to/nvim",
+  },
+  
+  -- General settings
+  settings = {
+    verbosity = 1,      -- Verbosity level (0=quiet, 1=normal, 2=verbose)
+    test_timeout = 60000, -- Test timeout in milliseconds (60 seconds)
+  }
+}

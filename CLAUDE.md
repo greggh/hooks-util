@@ -29,6 +29,27 @@ return {
       lint = true,       -- Run linting
       format = true,     -- Run formatting
       test = true,       -- Run tests
+      quality = true,    -- Run test quality validation
+    }
+  },
+  
+  -- Test quality validation configuration
+  test_quality = {
+    enabled = true,      -- Enable test quality validation
+    
+    -- Test coverage configuration
+    coverage = {
+      enabled = false,   -- Enable code coverage validation
+      threshold = 80,    -- Minimum coverage percentage required (0-100)
+      include = {"*.lua", "lua/**/*.lua"}, -- Files to include
+      exclude = {"*_test.lua", "*_spec.lua"} -- Files to exclude
+    },
+    
+    -- Test quality level configuration
+    quality = {
+      enabled = false,   -- Enable quality level validation
+      level = 1,         -- Quality level (1-5, higher = more strict)
+      strict = false,    -- Strict mode (fail on first issue)
     }
   }
 }
@@ -78,6 +99,11 @@ The hooks-util framework uses lust-next as its testing framework. The integratio
 - `/home/gregg/Projects/hooks-util/spec/runner.lua` - Run all tests with lust-next
 - `/home/gregg/Projects/hooks-util/spec/runner.lua "core"` - Run core tests only
 - `/home/gregg/Projects/hooks-util/spec/runner.lua "" "unit"` - Run tests with "unit" tag
+
+### Test Quality Commands
+- `lua /home/gregg/Projects/hooks-util/deps/lust-next/lust-next.lua --coverage /path/to/tests` - Run tests with coverage analysis
+- `lua /home/gregg/Projects/hooks-util/deps/lust-next/lust-next.lua --quality --quality-level=3 /path/to/tests` - Run quality validation at level 3
+- `lua /home/gregg/Projects/hooks-util/deps/lust-next/lust-next.lua --coverage --coverage-threshold=80 --quality --quality-level=2 /path/to/tests` - Run both coverage and quality validation
 
 ### Test Implementation
 Tests use the lust-next BDD-style syntax:
@@ -144,10 +170,12 @@ hooks-util/
 - Pre-commit hooks for version validation
 - Multi-platform CI workflow templates
 - Project type adapters for specific configurations
-- Test quality validation (planned):
-  - Test coverage threshold enforcement
-  - Quality level verification (5 levels)
+- Test quality validation:
+  - Test coverage analysis with threshold enforcement
+  - Quality level verification (5 progressive levels)
   - Configurable strictness per project type
+  - Comprehensive assertion analysis
+  - Test structure and organization validation
 
 ### Project Structure
 - `core/` - Core functionality shared across all project types
