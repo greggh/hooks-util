@@ -35,9 +35,17 @@ CURRENT_DIR=$(pwd)
 
 # Find the root of the project (assumed to be parent directory of hooks-util)
 cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
-HOOKS_UTIL_DIR=$(pwd)
-cd ..
-PROJECT_ROOT=$(pwd)
+# Handle both cases: direct hooks-util repository and submodule inside .githooks
+if [[ "$(basename "$(pwd)")" == ".githooks" ]]; then
+    HOOKS_DIR=$(pwd)
+    HOOKS_UTIL_DIR="${HOOKS_DIR}/hooks-util"
+    cd ..
+    PROJECT_ROOT=$(pwd)
+else
+    HOOKS_UTIL_DIR=$(pwd)
+    cd ..
+    PROJECT_ROOT=$(pwd)
+fi
 
 # Go back to original directory
 cd "$CURRENT_DIR"
@@ -83,6 +91,49 @@ fi
 # Reinstall hooks if needed
 if [ "$SHOULD_REINSTALL" = true ]; then
     log "Running hooks-util installer in $PROJECT_ROOT"
+    
+    # Check if template files exist in hooks-util and create if missing
+    if [ ! -f "$HOOKS_UTIL_DIR/templates/jsonlint.json" ]; then
+        mkdir -p "$HOOKS_UTIL_DIR/templates"
+        echo '{
+  "validateComments": false,
+  "validateTrailingCommas": false,
+  "allowDuplicateKeys": false,
+  "allowEmptyStrings": true
+}' > "$HOOKS_UTIL_DIR/templates/jsonlint.json"
+        echo "Created missing jsonlint.json template"
+    fi
+
+    if [ ! -f "$HOOKS_UTIL_DIR/templates/markdownlint.json" ]; then
+        echo '{
+  "default": true,
+  "MD013": false,
+  "MD024": false,
+  "MD033": false
+}' > "$HOOKS_UTIL_DIR/templates/markdownlint.json"
+        echo "Created missing markdownlint.json template"
+    fi
+
+    if [ ! -f "$HOOKS_UTIL_DIR/templates/tomllint.toml" ]; then
+        echo '# TOML linting configuration
+title = "TOML Lint Configuration"
+
+[lint]
+missing_endline = "error"
+incorrect_type = "error"
+integer_bad_format = "error"' > "$HOOKS_UTIL_DIR/templates/tomllint.toml"
+        echo "Created missing tomllint.toml template"
+    fi
+
+    if [ ! -f "$HOOKS_UTIL_DIR/templates/yamllint.yml" ]; then
+        echo '---
+extends: default
+
+rules:
+  line-length: disable
+  truthy: disable' > "$HOOKS_UTIL_DIR/templates/yamllint.yml"
+        echo "Created missing yamllint.yml template"
+    fi
     
     # Run the installer script with the collected arguments
     "$HOOKS_UTIL_DIR/install.sh" $INSTALL_ARGS --target "$PROJECT_ROOT"
