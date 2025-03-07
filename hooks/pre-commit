@@ -13,6 +13,10 @@ source "${LIB_DIR}/path.sh"
 source "${LIB_DIR}/stylua.sh"
 source "${LIB_DIR}/luacheck.sh"
 source "${LIB_DIR}/shellcheck.sh"
+source "${LIB_DIR}/markdown.sh"
+source "${LIB_DIR}/yaml.sh"
+source "${LIB_DIR}/json.sh"
+source "${LIB_DIR}/toml.sh"
 source "${LIB_DIR}/test.sh"
 source "${LIB_DIR}/quality.sh"
 source "${LIB_DIR}/test_quality.sh"
@@ -85,6 +89,22 @@ else
   hooks_shellcheck_staged
   hooks_handle_error $? "ShellCheck validation failed"
 fi
+
+# Process Markdown files if there are any
+hooks_markdown_staged
+hooks_handle_error $? "Markdown processing failed"
+
+# Process YAML files if there are any
+hooks_yaml_staged
+hooks_handle_error $? "YAML validation failed"
+
+# Process JSON files if there are any
+hooks_json_staged
+hooks_handle_error $? "JSON validation failed"
+
+# Process TOML files if there are any
+hooks_toml_staged
+hooks_handle_error $? "TOML validation failed"
 
 # Run tests if enabled
 if [ "${HOOKS_TESTS_ENABLED}" = true ]; then
