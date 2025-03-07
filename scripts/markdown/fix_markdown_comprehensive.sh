@@ -28,7 +28,7 @@ fi
 # Determine files to process
 if [ $# -eq 0 ]; then
     # No arguments, use default pattern
-    files=$(find . -name "*.md" -type f)
+    mapfile -t files < <(find . -name "*.md" -type f)
 else
     # Use provided arguments
     files=("$@")
@@ -37,7 +37,7 @@ fi
 # Process each file
 if [ $# -eq 0 ]; then
     # Process files found by find command
-    for file in $files; do
+    for file in "${files[@]}"; do
     # Check if file exists and is readable
     if [ ! -f "$file" ] || [ ! -r "$file" ]; then
         echo "Warning: Cannot read file $file, skipping."
