@@ -10,6 +10,10 @@
 
 set -e
 
+# Directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.." || exit 1
+
 # Create output directory
 OUTPUT_DIR="./test-results"
 mkdir -p "$OUTPUT_DIR"
@@ -50,8 +54,9 @@ test_adapter() {
   
   # Install hooks-util
   print_subheader "Installing hooks-util..."
-  env -C "$testbed_path" $(pwd)/install.sh --force > "$OUTPUT_DIR/$adapter_name-install.log" 2>&1
-  if [ $? -eq 0 ]; then
+  env -C "$testbed_path" "$(pwd)/install.sh" --force > "$OUTPUT_DIR/$adapter_name-install.log" 2>&1
+  install_exit_code=$?
+  if [ $install_exit_code -eq 0 ]; then
     print_success "Hooks-util installed successfully"
   else
     print_error "Hooks-util installation failed! See $OUTPUT_DIR/$adapter_name-install.log for details"
@@ -60,7 +65,7 @@ test_adapter() {
   # Check template files
   print_subheader "Checking template files..."
   find "$testbed_path/.githooks/hooks-util/templates" -type f > "$OUTPUT_DIR/$adapter_name-templates.log" 2>&1
-  template_count=$(cat "$OUTPUT_DIR/$adapter_name-templates.log" | wc -l)
+  template_count=$(wc -l < "$OUTPUT_DIR/$adapter_name-templates.log")
   if [ "$template_count" -ge 4 ]; then
     print_success "Found $template_count template files"
   else
@@ -69,12 +74,53 @@ test_adapter() {
   
   # Create test files for all formats if they don't exist
   print_subheader "Creating test files..."
-  echo "function  badlyFormattedFunction()  " > "$testbed_path/test-formatting.lua"
-  echo "#!/bin/bash\necho 'Test script'" > "$testbed_path/test-shell.sh"
-  echo "# Test markdown\n## Heading" > "$testbed_path/test-markdown.md"
-  echo "---\nkey: value" > "$testbed_path/test-yaml.yml"
-  echo '{"test": "value"}' > "$testbed_path/test-json.json"
-  echo 'title = "Test TOML"' > "$testbed_path/test-toml.toml"
+  
+  # Create Lua test file
+  cat > "$testbed_path/test-formatting.lua" << 'EOF'
+function  badlyFormattedFunction()  
+  local x = 10
+  return x
+end
+EOF
+
+  # Create shell test file
+  cat > "$testbed_path/test-shell.sh" << 'EOF'
+#!/bin/bash
+echo 'Test script'
+EOF
+
+  # Create markdown test file
+  cat > "$testbed_path/test-markdown.md" << 'EOF'
+# Test markdown
+
+## Heading
+
+This is a test file for markdown linting.
+EOF
+
+  # Create YAML test file
+  cat > "$testbed_path/test-yaml.yml" << 'EOF'
+---
+key: value
+nested:
+  - item1
+  - item2
+EOF
+
+  # Create JSON test file
+  cat > "$testbed_path/test-json.json" << 'EOF'
+{
+  "test": "value",
+  "array": [1, 2, 3]
+}
+EOF
+
+  # Create TOML test file
+  cat > "$testbed_path/test-toml.toml" << 'EOF'
+title = "Test TOML"
+[owner]
+name = "Test User"
+EOF
   
   # Add all files to git
   print_subheader "Adding test files to git..."
@@ -135,48 +181,61 @@ print_header "All tests completed"
 echo "Detailed logs available in $OUTPUT_DIR"
 
 # Create a summary report
-cat > "$OUTPUT_DIR/summary.md" << EOF
-# Hooks-Util Test Summary
-
-## Test Environment
-- Date: $(date)
-- Hooks-Util Version: $(git -C $(pwd) rev-parse --short HEAD)
-
-## Test Results
-
-### Lua Library Adapter
-- Installation: $(if grep -q "success" "$OUTPUT_DIR/lua-lib-install.log"; then echo "✅ Success"; else echo "❌ Failure"; fi)
-- Templates: $(cat "$OUTPUT_DIR/lua-lib-templates.log" | wc -l) files found
-- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/lua-lib-precommit.log"; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)
-- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/lua-lib-shellcheck.log"; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)
-
-### Neovim Plugin Adapter
-- Installation: $(if grep -q "success" "$OUTPUT_DIR/nvim-plugin-install.log"; then echo "✅ Success"; else echo "❌ Failure"; fi)
-- Templates: $(cat "$OUTPUT_DIR/nvim-plugin-templates.log" | wc -l) files found
-- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/nvim-plugin-precommit.log"; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)
-- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/nvim-plugin-shellcheck.log"; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)
-
-### Neovim Config Adapter
-- Installation: $(if grep -q "success" "$OUTPUT_DIR/nvim-config-install.log"; then echo "✅ Success"; else echo "❌ Failure"; fi)
-- Templates: $(cat "$OUTPUT_DIR/nvim-config-templates.log" | wc -l) files found
-- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/nvim-config-precommit.log"; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)
-- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/nvim-config-shellcheck.log"; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)
-
-### Documentation Adapter
-- Installation: $(if grep -q "success" "$OUTPUT_DIR/docs-install.log"; then echo "✅ Success"; else echo "❌ Failure"; fi)
-- Templates: $(cat "$OUTPUT_DIR/docs-templates.log" | wc -l) files found
-- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/docs-precommit.log"; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)
-- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/docs-shellcheck.log"; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)
-
-## Issues Found
-
-$(grep -l "error" "$OUTPUT_DIR"/*.log | while read file; do echo "- Issue in $(basename "$file"): $(grep "error" "$file" | head -1)"; done)
-
-## Recommendations
-
-1. Verify any failed tests manually using commands in TESTING.md
-2. Address any shellcheck detection issues across environments 
-3. Ensure template files are generated with correct strictness levels
-EOF
+{
+  echo "# Hooks-Util Test Summary"
+  echo ""
+  echo "## Test Environment"
+  echo "- Date: $(date)"
+  echo "- Hooks-Util Version: $(git rev-parse --short HEAD)"
+  echo ""
+  echo "## Test Results"
+  echo ""
+  echo "### Lua Library Adapter"
+  echo "- Installation: $(if grep -q "success" "$OUTPUT_DIR/lua-lib-install.log" 2>/dev/null; then echo "✅ Success"; else echo "❌ Failure"; fi)"
+  echo "- Templates: $(wc -l < "$OUTPUT_DIR/lua-lib-templates.log" 2>/dev/null || echo "0") files found"
+  echo "- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/lua-lib-precommit.log" 2>/dev/null; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)"
+  echo "- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/lua-lib-shellcheck.log" 2>/dev/null; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)"
+  echo ""
+  echo "### Neovim Plugin Adapter"
+  echo "- Installation: $(if grep -q "success" "$OUTPUT_DIR/nvim-plugin-install.log" 2>/dev/null; then echo "✅ Success"; else echo "❌ Failure"; fi)"
+  echo "- Templates: $(wc -l < "$OUTPUT_DIR/nvim-plugin-templates.log" 2>/dev/null || echo "0") files found"
+  echo "- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/nvim-plugin-precommit.log" 2>/dev/null; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)"
+  echo "- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/nvim-plugin-shellcheck.log" 2>/dev/null; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)"
+  echo ""
+  echo "### Neovim Config Adapter"
+  echo "- Installation: $(if grep -q "success" "$OUTPUT_DIR/nvim-config-install.log" 2>/dev/null; then echo "✅ Success"; else echo "❌ Failure"; fi)"
+  echo "- Templates: $(wc -l < "$OUTPUT_DIR/nvim-config-templates.log" 2>/dev/null || echo "0") files found"
+  echo "- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/nvim-config-precommit.log" 2>/dev/null; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)"
+  echo "- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/nvim-config-shellcheck.log" 2>/dev/null; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)"
+  echo ""
+  echo "### Documentation Adapter"
+  echo "- Installation: $(if grep -q "success" "$OUTPUT_DIR/docs-install.log" 2>/dev/null; then echo "✅ Success"; else echo "❌ Failure"; fi)"
+  echo "- Templates: $(wc -l < "$OUTPUT_DIR/docs-templates.log" 2>/dev/null || echo "0") files found"
+  echo "- Recursion Protection: $(if grep -q "HOOKS_PROCESSING_QUALITY" "$OUTPUT_DIR/docs-precommit.log" 2>/dev/null; then echo "✅ Working"; else echo "⚠️ Not detected"; fi)"
+  echo "- ShellCheck Detection: $(if grep -q "shellcheck" "$OUTPUT_DIR/docs-shellcheck.log" 2>/dev/null; then echo "✅ Detected"; else echo "⚠️ Not found"; fi)"
+  echo ""
+  echo "## Issues Found"
+  echo ""
+  
+  # Handle the case where no error logs are found
+  error_logs=$(grep -l "error" "$OUTPUT_DIR"/*.log 2>/dev/null || echo "")
+  if [ -n "$error_logs" ]; then
+    while IFS= read -r file; do
+      error_line=$(grep "error" "$file" 2>/dev/null | head -1)
+      if [ -n "$error_line" ]; then
+        echo "- Issue in $(basename "$file"): $error_line"
+      fi
+    done <<< "$error_logs"
+  else
+    echo "No errors found in logs."
+  fi
+  
+  echo ""
+  echo "## Recommendations"
+  echo ""
+  echo "1. Verify any failed tests manually using commands in TESTING.md"
+  echo "2. Address any shellcheck detection issues across environments" 
+  echo "3. Ensure template files are generated with correct strictness levels"
+} > "$OUTPUT_DIR/summary.md"
 
 print_success "Summary report created at $OUTPUT_DIR/summary.md"

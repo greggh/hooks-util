@@ -7,6 +7,10 @@
 
 set -e
 
+# Directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.." || exit 1
+
 # Check if act is installed
 if ! command -v act &> /dev/null; then
     echo "Error: act is not installed. Please install it to test GitHub workflows locally."
@@ -41,26 +45,28 @@ print_error() {
 }
 
 # Get all workflow files
-workflow_files=$(find "$WORKFLOW_DIR" -name "*.yml" -type f)
+mapfile -t workflow_files < <(find "$WORKFLOW_DIR" -name "*.yml" -type f)
 
-if [ -z "$workflow_files" ]; then
+if [ ${#workflow_files[@]} -eq 0 ]; then
     print_error "No workflow files found in $WORKFLOW_DIR"
     exit 1
 fi
 
-print_header "Found $(echo "$workflow_files" | wc -l) workflow files to test"
+print_header "Found ${#workflow_files[@]} workflow files to test"
 
 # Function to validate a single workflow file using act
 validate_workflow() {
     local workflow_file="$1"
-    local workflow_name=$(basename "$workflow_file" .yml)
+    local workflow_name
+    workflow_name=$(basename "$workflow_file" .yml)
     
     print_subheader "Validating workflow: $workflow_name"
     
     # Run act with --dryrun to check for syntax errors
     act --dryrun -W "$workflow_file" > "$OUTPUT_DIR/$workflow_name-dryrun.log" 2>&1
+    local act_exit_code=$?
     
-    if [ $? -eq 0 ]; then
+    if [ $act_exit_code -eq 0 ]; then
         print_success "Workflow file $workflow_name passed basic validation"
         
         # Look for specific hooks-util related issues
@@ -88,47 +94,52 @@ validate_workflow() {
 }
 
 # Validate each workflow file
-for workflow in $workflow_files; do
+for workflow in "${workflow_files[@]}"; do
     validate_workflow "$workflow"
 done
 
 # Generate a summary report
 print_header "Generating summary report"
 
-cat > "$OUTPUT_DIR/workflows-summary.md" << EOF
-# GitHub Workflows Validation Summary
-
-## Test Environment
-- Date: $(date)
-- Hooks-Util Version: $(git rev-parse --short HEAD)
-
-## Workflow Files Tested
-
-$(for workflow in $workflow_files; do
-    workflow_name=$(basename "$workflow" .yml)
-    if grep -q "error" "$OUTPUT_DIR/$workflow_name-dryrun.log"; then
-        echo "- $workflow_name: ❌ Failed validation"
-    else
-        echo "- $workflow_name: ✅ Passed validation"
-    fi
-done)
-
-## Issues Found
-
-$(grep -l "error" "$OUTPUT_DIR"/*.log | while read file; do 
-    workflow_name=$(basename "$file" -dryrun.log)
-    echo "### $workflow_name"
-    echo "$(grep -A 3 "error" "$file" | head -4 | sed 's/^/    /')"
+{
+    echo "# GitHub Workflows Validation Summary"
     echo ""
-done)
+    echo "## Test Environment"
+    echo "- Date: $(date)"
+    echo "- Hooks-Util Version: $(git rev-parse --short HEAD)"
+    echo ""
+    echo "## Workflow Files Tested"
+    echo ""
 
-## Recommendations
-
-1. Fix any syntax errors in workflow files
-2. Remove any disabled checks (if: false)
-3. Remove any continue-on-error settings unless absolutely necessary
-4. Test workflows on GitHub with a test branch after local validation passes
-EOF
+    for workflow in "${workflow_files[@]}"; do
+        workflow_name=$(basename "$workflow" .yml)
+        if grep -q "error" "$OUTPUT_DIR/$workflow_name-dryrun.log"; then
+            echo "- $workflow_name: ❌ Failed validation"
+        else
+            echo "- $workflow_name: ✅ Passed validation"
+        fi
+    done
+    
+    echo ""
+    echo "## Issues Found"
+    echo ""
+    
+    while IFS= read -r file; do
+        if [ -n "$file" ]; then
+            workflow_name=$(basename "$file" -dryrun.log)
+            echo "### $workflow_name"
+            grep -A 3 "error" "$file" | head -4 | sed 's/^/    /'
+            echo ""
+        fi
+    done < <(grep -l "error" "$OUTPUT_DIR"/*.log 2>/dev/null || echo "")
+    
+    echo "## Recommendations"
+    echo ""
+    echo "1. Fix any syntax errors in workflow files"
+    echo "2. Remove any disabled checks (if: false)"
+    echo "3. Remove any continue-on-error settings unless absolutely necessary"
+    echo "4. Test workflows on GitHub with a test branch after local validation passes"
+} > "$OUTPUT_DIR/workflows-summary.md"
 
 print_success "Summary report created at $OUTPUT_DIR/workflows-summary.md"
 print_header "Workflow validation completed"
