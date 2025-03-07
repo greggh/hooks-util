@@ -1,3 +1,4 @@
+
 # Common Module API Reference
 
 The common.sh module provides core utility functions and configuration handling for hooks-util.
@@ -21,9 +22,11 @@ Prints an error message.
 
 ```bash
 hooks_error "Error message"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The error message to print
 
 **Returns**: Nothing, writes to stderr
@@ -34,9 +37,11 @@ Prints a warning message.
 
 ```bash
 hooks_warning "Warning message"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The warning message to print
 
 **Returns**: Nothing, writes to stderr
@@ -47,9 +52,11 @@ Prints an info message.
 
 ```bash
 hooks_info "Info message"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The info message to print
 
 **Returns**: Nothing, writes to stdout
@@ -60,9 +67,11 @@ Prints a success message.
 
 ```bash
 hooks_success "Success message"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The success message to print
 
 **Returns**: Nothing, writes to stdout
@@ -73,9 +82,11 @@ Prints a debug message if verbosity is set to verbose.
 
 ```bash
 hooks_debug "Debug message"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The debug message to print
 
 **Returns**: Nothing, writes to stderr if `HOOKS_VERBOSITY` >= 2
@@ -86,9 +97,11 @@ Prints a message if verbosity is not set to quiet.
 
 ```bash
 hooks_message "Message"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The message to print
 
 **Returns**: Nothing, writes to stdout if `HOOKS_VERBOSITY` >= 1
@@ -99,9 +112,11 @@ Prints a section header with formatting.
 
 ```bash
 hooks_print_header "Section Title"
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The header text to print
 
 **Returns**: Nothing, writes to stdout if `HOOKS_VERBOSITY` >= 1
@@ -116,9 +131,11 @@ Checks if a command exists in the PATH.
 if hooks_command_exists "command-name"; then
   # Command exists
 fi
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The command name to check
 
 **Returns**: 0 if the command exists, 1 otherwise
@@ -129,9 +146,11 @@ Sets the verbosity level for output functions.
 
 ```bash
 hooks_set_verbosity 2  # Set to verbose
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The verbosity level (0=quiet, 1=normal, 2=verbose)
 
 **Returns**: Nothing, sets the `HOOKS_VERBOSITY` variable
@@ -142,9 +161,11 @@ Loads configuration from .hooksrc files.
 
 ```bash
 hooks_load_config ["/path/to/.hooksrc"]
-```
+
+```text
 
 **Parameters**:
+
 - `$1` (optional): Path to the main configuration file. If not provided, defaults to ".hooksrc" in the current directory.
 
 **Returns**: Nothing, sets configuration variables
@@ -155,7 +176,8 @@ Gets the top level directory of the Git repository.
 
 ```bash
 repo_root=$(hooks_git_root)
-```
+
+```text
 
 **Parameters**: None
 
@@ -169,9 +191,11 @@ Checks if a file is a Lua file (based on file extension).
 if hooks_is_lua_file "path/to/file.lua"; then
   # File is a Lua file
 fi
-```
+
+```text
 
 **Parameters**:
+
 - `$1`: The file path to check
 
 **Returns**: 0 if the file is a Lua file, 1 otherwise
@@ -182,7 +206,8 @@ Gets a list of all staged Lua files in the Git repository.
 
 ```bash
 staged_files=$(hooks_get_staged_lua_files)
-```
+
+```text
 
 **Parameters**: None
 
@@ -192,6 +217,7 @@ staged_files=$(hooks_get_staged_lua_files)
 
 ```bash
 #!/bin/bash
+
 # Example script using common.sh
 
 # Include the library
@@ -224,4 +250,6 @@ while IFS= read -r file; do
     fi
   fi
 done <<< "$staged_files"
-```
+
+```text
+

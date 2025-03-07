@@ -1,12 +1,13 @@
 -- hooks-util/adapters/nvim-plugin/init.lua
 -- Adapter for Neovim plugins
 local adapter = require("hooks-util.core.adapter")
+local lfs = require("lfs")
 
 -- Create the Neovim plugin adapter
 local nvim_plugin_adapter = adapter.create({
   name = "nvim-plugin",
   description = "Adapter for Neovim plugins",
-  version = "0.1.0",
+  version = "0.2.0", -- Version updated to reflect new functionality
   
   -- Check if this adapter is compatible with the project
   is_compatible = function(self, project_root)
@@ -324,6 +325,203 @@ end)
           pattern = "v(%d+%.%d+%.%d+)"
         }
       }
+    }
+  end,
+  
+  -- NEW FUNCTIONS BELOW
+  
+  -- Validate health check module
+  validate_health_check = function(self, project_root)
+    local errors = {}
+    local warnings = {}
+    
+    -- Check for health.lua file
+    local health_paths = {
+      project_root .. "/lua/health.lua",
+      project_root .. "/lua/" .. self:get_plugin_name(project_root) .. "/health.lua"
+    }
+    
+    local health_file_found = false
+    for _, path in ipairs(health_paths) do
+      local file = io.open(path, "r")
+      if file then
+        file:close()
+        health_file_found = true
+        break
+      end
+    end
+    
+    if not health_file_found then
+      table.insert(warnings, "No health check module found. Consider adding one for better user experience.")
+    else
+      -- Verify health check functions
+      -- Open the health file and check for required functions
+      local health_file = io.open(health_paths[1], "r") or io.open(health_paths[2], "r")
+      if health_file then
+        local content = health_file:read("*all")
+        health_file:close()
+        
+        if not content:match("check%s*%(%s*%)") then
+          table.insert(errors, "Health check module missing 'check()' function")
+        end
+        
+        -- Check for report_* functions
+        if not content:match("report_ok") and not content:match("report_info") and not content:match("report_warn") and not content:match("report_error") then
+          table.insert(errors, "Health check module should use health reporting functions")
+        end
+      end
+    end
+    
+    return #errors == 0, errors, warnings
+  end,
+  
+  -- Validate plugin runtime paths
+  validate_runtime_paths = function(self, project_root)
+    local errors = {}
+    local warnings = {}
+    
+    -- Essential plugin directories
+    local plugin_dir = project_root .. "/plugin"
+    local lua_dir = project_root .. "/lua"
+    local doc_dir = project_root .. "/doc"
+    
+    -- Validate plugin directory
+    if lfs.attributes(plugin_dir, "mode") ~= "directory" then
+      table.insert(warnings, "Missing 'plugin' directory. This may be intentional for lazy-loaded plugins.")
+    end
+    
+    -- Validate lua directory
+    if lfs.attributes(lua_dir, "mode") ~= "directory" then
+      table.insert(errors, "Missing 'lua' directory. Neovim plugins should use lua for implementation.")
+    else
+      -- Check for proper plugin namespace structure
+      local has_namespace = false
+      for entry in lfs.dir(lua_dir) do
+        if entry ~= "." and entry ~= ".." and lfs.attributes(lua_dir .. "/" .. entry, "mode") == "directory" then
+          has_namespace = true
+          break
+        end
+      end
+      
+      if not has_namespace then
+        table.insert(warnings, "No namespace directory found under 'lua/'. Consider using a proper namespace structure.")
+      end
+    end
+    
+    -- Validate doc directory and files
+    if lfs.attributes(doc_dir, "mode") ~= "directory" then
+      table.insert(warnings, "Missing 'doc' directory. Documentation is recommended for Neovim plugins.")
+    else
+      local has_help_file = false
+      for entry in lfs.dir(doc_dir) do
+        if entry:match("%.txt$") then
+          has_help_file = true
+          break
+        end
+      end
+      
+      if not has_help_file then
+        table.insert(warnings, "No help text file found in 'doc/' directory.")
+      end
+    end
+    
+    return #errors == 0, errors, warnings
+  end,
+  
+  -- Validate plugin structure
+  validate_plugin_structure = function(self, project_root)
+    local errors = {}
+    local warnings = {}
+    
+    -- Plugin structure requirements
+    local plugin_name = self:get_plugin_name(project_root)
+    
+    -- Check for proper init file
+    local init_file = project_root .. "/lua/" .. plugin_name .. "/init.lua"
+    local file = io.open(init_file, "r")
+    if not file then
+      table.insert(warnings, "Missing init.lua file in plugin namespace. Consider adding proper entry point.")
+    else
+      file:close()
+    end
+    
+    -- Check README exists
+    local readme_file = project_root .. "/README.md"
+    file = io.open(readme_file, "r")
+    if not file then
+      table.insert(warnings, "Missing README.md file. Documentation is important.")
+    else
+      file:close()
+    end
+    
+    -- Check for tests directory
+    local tests_dir = project_root .. "/tests"
+    local spec_dir = project_root .. "/spec"
+    if lfs.attributes(tests_dir, "mode") ~= "directory" and lfs.attributes(spec_dir, "mode") ~= "directory" then
+      table.insert(warnings, "No tests directory found. Consider adding tests for your plugin.")
+    end
+    
+    -- Check for .luacheckrc
+    local luacheckrc = project_root .. "/.luacheckrc"
+    file = io.open(luacheckrc, "r")
+    if not file then
+      table.insert(warnings, "Missing .luacheckrc file. Linting configuration is recommended.")
+    else
+      file:close()
+    end
+    
+    -- Check for minimal_init.lua for tests
+    local minimal_init = project_root .. "/tests/minimal_init.lua"
+    file = io.open(minimal_init, "r")
+    if not file then
+      table.insert(warnings, "Missing minimal_init.lua for tests. This helps with test isolation.")
+    else
+      file:close()
+    end
+    
+    return #errors == 0, errors, warnings
+  end,
+  
+  -- Helper: Get plugin name from directory structure
+  get_plugin_name = function(self, project_root)
+    -- Try to determine the plugin name from the lua directory structure
+    local lua_dir = project_root .. "/lua"
+    if lfs.attributes(lua_dir, "mode") == "directory" then
+      for entry in lfs.dir(lua_dir) do
+        if entry ~= "." and entry ~= ".." and lfs.attributes(lua_dir .. "/" .. entry, "mode") == "directory" then
+          return entry
+        end
+      end
+    end
+    
+    -- Fallback: use the directory name
+    local dir_name = project_root:match("([^/]+)$")
+    if dir_name:match("%.nvim$") or dir_name:match("nvim%-(.+)") then
+      return dir_name:gsub("%.nvim$", ""):gsub("nvim%-", "")
+    end
+    
+    return dir_name
+  end,
+  
+  -- Get workflow configurations for this adapter
+  get_workflow_configs = function(self)
+    return {
+      "ci.config.yml",
+      "release.config.yml",
+      "docs.config.yml"
+    }
+  end,
+  
+  -- Get base workflows that apply to this adapter
+  get_applicable_workflows = function(self)
+    return {
+      "ci.yml",
+      "markdown-lint.yml",
+      "yaml-lint.yml",
+      "scripts-lint.yml",
+      "docs.yml",
+      "release.yml",
+      "dependency-updates.yml"
     }
   end
 })

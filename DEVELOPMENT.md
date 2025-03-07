@@ -1,3 +1,4 @@
+
 # Development Guide for Neovim Hooks Utilities
 
 This document provides instructions for setting up your development environment and outlines the development workflow for the Neovim Hooks Utilities project.
@@ -18,7 +19,8 @@ This document provides instructions for setting up your development environment 
 ```bash
 git clone https://github.com/greggh/hooks-util.git
 cd hooks-util
-```
+
+```text
 
 ### Install Dependencies
 
@@ -27,6 +29,7 @@ cd hooks-util
 ##### Ubuntu/Debian
 
 ```bash
+
 # Install basic tools
 sudo apt-get update
 sudo apt-get install git make luarocks shellcheck
@@ -39,11 +42,13 @@ curl -L -o stylua.zip $(curl -s https://api.github.com/repos/JohnnyMorganz/StyLu
 unzip stylua.zip
 chmod +x stylua
 sudo mv stylua /usr/local/bin/
-```
+
+```text
 
 ##### Arch Linux
 
 ```bash
+
 # Install basic tools
 sudo pacman -S git make luarocks shellcheck
 
@@ -54,12 +59,15 @@ sudo luarocks install luacheck
 yay -S stylua
 
 # Or install StyLua using paru
+
 # paru -S stylua
-```
+
+```text
 
 ##### Fedora
 
 ```bash
+
 # Install basic tools
 sudo dnf install git make luarocks ShellCheck
 
@@ -71,11 +79,13 @@ curl -L -o stylua.zip $(curl -s https://api.github.com/repos/JohnnyMorganz/StyLu
 unzip stylua.zip
 chmod +x stylua
 sudo mv stylua /usr/local/bin/
-```
+
+```text
 
 #### macOS
 
 ```bash
+
 # Install Homebrew if not already installed
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -87,13 +97,15 @@ luarocks install luacheck
 
 # Install StyLua
 brew install stylua
-```
+
+```text
 
 #### Windows
 
 ##### Using Scoop
 
 ```powershell
+
 # Install scoop if not already installed
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
@@ -110,11 +122,13 @@ luarocks install luacheck
 
 # Install stylua
 scoop install stylua
-```
+
+```text
 
 ##### Using Chocolatey
 
 ```powershell
+
 # Install chocolatey if not already installed
 Set-ExecutionPolicy Bypass -Scope Process -Force
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
@@ -130,32 +144,39 @@ choco install luarocks
 luarocks install luacheck
 
 # Install stylua (download from GitHub)
+
 # Visit https://github.com/JohnnyMorganz/StyLua/releases and download the Windows version
+
 # Add the stylua executable to your PATH
-```
+
+```text
 
 ##### Using WSL (recommended)
 
 For the best development experience on Windows, we recommend using Windows Subsystem for Linux (WSL):
 
 ```bash
+
 # Install WSL with Ubuntu
 wsl --install
 
 # Then follow the Ubuntu/Debian instructions above
-```
+
+```text
 
 ### Configure Development Environment
 
 Set up Git hooks for your local development:
 
 ```bash
+
 # Install hooks in the project repository itself
 ./install.sh --config
 
 # Create local configuration
 cp .hooksrc.local.example .hooksrc.local
-```
+
+```text
 
 ## Development Workflow
 
@@ -171,13 +192,16 @@ cp .hooksrc.local.example .hooksrc.local
 You can test your changes by installing the hooks in a test repository:
 
 ```bash
+
 # From your test repository:
 /path/to/hooks-util/install.sh --config --verbose
-```
+
+```text
 
 ### Testing Scripts
 
 ```bash
+
 # Test common utilities
 bash -x lib/common.sh
 
@@ -186,7 +210,8 @@ bash -x hooks/pre-commit
 
 # Lint shell scripts with ShellCheck
 shellcheck lib/*.sh hooks/* install.sh
-```
+
+```text
 
 ### Adding New Functionality
 
@@ -208,7 +233,7 @@ When adding new functionality:
 
 ## Directory Structure
 
-```
+```text
 hooks-util/
 ├── hooks/              # Ready-to-use Git hooks
 │   └── pre-commit      # Pre-commit hook implementation
@@ -223,13 +248,15 @@ hooks-util/
 ├── examples/           # Example usage
 ├── docs/               # Documentation
 └── scripts/            # Utility scripts
-```
+
+```text
 
 ## Common Issues and Solutions
 
 ### StyLua Not Found
 
 If you encounter "StyLua not found" errors:
+
 1. Check that StyLua is installed: `which stylua`
 2. Ensure it's in your PATH
 3. Set the path explicitly in `.hooksrc.local`: `HOOKS_STYLUA_PATH=/path/to/stylua`
@@ -237,6 +264,7 @@ If you encounter "StyLua not found" errors:
 ### Hooks Not Running
 
 If hooks aren't running:
+
 1. Verify that Git is using the hooks: `git config core.hooksPath`
 2. Check hook permissions: `ls -la .githooks/`
 3. Ensure scripts have execute permission: `chmod +x .githooks/*`
@@ -244,6 +272,7 @@ If hooks aren't running:
 ### Path Issues on Windows
 
 If you encounter path-related issues on Windows:
+
 1. Use Git Bash or WSL for more consistent behavior
 2. Check path normalization by adding `set -x` to the hook script
 
@@ -257,3 +286,4 @@ If you encounter path-related issues on Windows:
 ## Getting Help
 
 If you encounter any issues during development, please check the [SUPPORT.md](SUPPORT.md) file for ways to get help from the community.
+

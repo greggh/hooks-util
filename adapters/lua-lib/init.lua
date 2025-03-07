@@ -1,12 +1,13 @@
 -- hooks-util/adapters/lua-lib/init.lua
 -- Adapter for general Lua libraries
 local adapter = require("hooks-util.core.adapter")
+local lfs = require("lfs")
 
 -- Create the Lua Library adapter
 local lua_lib_adapter = adapter.create({
   name = "lua-lib",
   description = "Adapter for general Lua libraries and modules",
-  version = "0.1.0",
+  version = "0.2.0", -- Version updated to reflect new functionality
   
   -- Check if this adapter is compatible with the project
   is_compatible = function(self, project_root)
@@ -468,6 +469,205 @@ end)
       enabled = true,
       version_file = version_file,
       patterns = patterns
+    }
+  end,
+  
+  -- NEW FUNCTIONS BELOW
+  
+  -- Enhanced coverage tracking
+  setup_coverage = function(self, project_root, options)
+    local coverage_config = {
+      enabled = true,
+      tool = "luacov",
+      threshold = 75, -- Minimum coverage percentage
+      excludes = {
+        "spec/*",
+        "tests/*",
+        ".*_spec%.lua$"
+      },
+      report_format = "default" -- Can be "default", "html", "coveralls"
+    }
+    
+    -- Merge with provided options
+    if options then
+      for k, v in pairs(options) do
+        if type(v) == "table" and type(coverage_config[k]) == "table" then
+          for k2, v2 in pairs(v) do
+            coverage_config[k][k2] = v2
+          end
+        else
+          coverage_config[k] = v
+        end
+      end
+    end
+    
+    -- Create luacov configuration file if needed
+    if coverage_config.enabled then
+      local luacov_path = project_root .. "/.luacov"
+      local luacov_file = io.open(luacov_path, "w")
+      if luacov_file then
+        -- Write luacov configuration
+        luacov_file:write("return {\n")
+        luacov_file:write("  statsfile = 'luacov.stats.out',\n")
+        luacov_file:write("  reportfile = 'luacov.report.out',\n")
+        luacov_file:write("  exclude = {\n")
+        
+        for _, pattern in ipairs(coverage_config.excludes) do
+          luacov_file:write(string.format('    "%s",\n', pattern))
+        end
+        
+        luacov_file:write("  },\n")
+        luacov_file:write("  includeuntestedfiles = true,\n")
+        
+        if coverage_config.threshold then
+          luacov_file:write(string.format("  threshold = %d,\n", coverage_config.threshold))
+        end
+        
+        luacov_file:write("}\n")
+        luacov_file:close()
+      end
+    end
+    
+    return coverage_config
+  end,
+  
+  -- LuaRocks validation
+  validate_rockspec = function(self, project_root)
+    local errors = {}
+    local warnings = {}
+    
+    -- Find rockspec file
+    local rockspec_pattern = project_root .. "/*.rockspec"
+    local rockspec_files = {}
+    for file in lfs.dir(project_root) do
+      if file:match("%.rockspec$") then
+        table.insert(rockspec_files, project_root .. "/" .. file)
+      end
+    end
+    
+    -- Check if rockspec file exists
+    if #rockspec_files == 0 then
+      table.insert(errors, "No rockspec file found. Lua libraries should have a rockspec file for LuaRocks.")
+      return false, errors, warnings
+    end
+    
+    -- If multiple rockspec files, warn about it
+    if #rockspec_files > 1 then
+      table.insert(warnings, "Multiple rockspec files found. This could cause confusion.")
+    end
+    
+    -- Validate content of the first rockspec
+    local rockspec_file = io.open(rockspec_files[1], "r")
+    if rockspec_file then
+      local content = rockspec_file:read("*all")
+      rockspec_file:close()
+      
+      -- Check for required fields
+      if not content:match("package%s*=") then
+        table.insert(errors, "Rockspec missing 'package' field")
+      end
+      
+      if not content:match("version%s*=") then
+        table.insert(errors, "Rockspec missing 'version' field")
+      end
+      
+      if not content:match("source%s*=") then
+        table.insert(errors, "Rockspec missing 'source' field")
+      end
+      
+      -- Check for description, which is recommended
+      if not content:match("description%s*=") then
+        table.insert(warnings, "Rockspec missing 'description' field")
+      end
+      
+      -- Check for dependencies
+      if not content:match("dependencies%s*=") then
+        table.insert(warnings, "Rockspec missing 'dependencies' field")
+      end
+      
+      -- Check for build section
+      if not content:match("build%s*=") then
+        table.insert(warnings, "Rockspec missing 'build' field")
+      end
+    end
+    
+    return #errors == 0, errors, warnings
+  end,
+  
+  -- Setup multi-version testing
+  setup_multi_version_testing = function(self, project_root, versions)
+    local versions_to_test = versions or {"5.1", "5.2", "5.3", "5.4", "luajit"}
+    local test_config = {
+      enabled = true,
+      versions = versions_to_test,
+      test_command = "lua spec/runner.lua" -- Default test command
+    }
+    
+    -- Create multi-version test script
+    local script_path = project_root .. "/scripts/test_all_versions.sh"
+    local script_dir = project_root .. "/scripts"
+    
+    -- Ensure scripts directory exists
+    if lfs.attributes(script_dir, "mode") ~= "directory" then
+      lfs.mkdir(script_dir)
+    end
+    
+    -- Create the script
+    local script_file = io.open(script_path, "w")
+    if script_file then
+      script_file:write("#!/bin/bash\n\n")
+      script_file:write("# Test against multiple Lua versions\n")
+      script_file:write("# Generated by hooks-util\n\n")
+      
+      script_file:write("set -e\n\n")
+      
+      for _, version in ipairs(versions_to_test) do
+        script_file:write(string.format("echo \"Testing with Lua %s...\"\n", version))
+        -- Handle LuaJIT as special case
+        if version == "luajit" then
+          script_file:write("if command -v luajit &> /dev/null; then\n")
+          script_file:write("  luajit spec/runner.lua\n")
+          script_file:write("else\n")
+          script_file:write("  echo \"LuaJIT not available, skipping\"\n")
+          script_file:write("fi\n\n")
+        else
+          script_file:write(string.format("if command -v lua%s &> /dev/null; then\n", version))
+          script_file:write(string.format("  lua%s spec/runner.lua\n", version))
+          script_file:write("else\n")
+          script_file:write(string.format("  echo \"Lua %s not available, skipping\"\n", version))
+          script_file:write("fi\n\n")
+        end
+      end
+      
+      script_file:write("echo \"All tests completed!\"\n")
+      script_file:close()
+      
+      -- Make the script executable
+      os.execute("chmod +x " .. script_path)
+    end
+    
+    return test_config
+  end,
+  
+  -- Get workflow configurations for this adapter
+  get_workflow_configs = function(self)
+    return {
+      "ci.config.yml",
+      "release.config.yml",
+      "docs.config.yml"
+    }
+  end,
+  
+  -- Get base workflows that apply to this adapter
+  get_applicable_workflows = function(self)
+    return {
+      "ci.yml",
+      "markdown-lint.yml",
+      "yaml-lint.yml",
+      "scripts-lint.yml",
+      "docs.yml",
+      "release.yml",
+      "dependency-updates.yml"
     }
   end
 })

@@ -1,28 +1,33 @@
+
 # Contributing to Neovim Hooks Utilities
 
 Thank you for considering contributing to Neovim Hooks Utilities! Your contributions help improve the pre-commit experience for Neovim Lua projects across the community.
 
 ## Code of Conduct
 
-This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to g@0v.org.
+This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to <g@0v.org>.
 
 ## Getting Started
 
 1. Fork the repository
 2. Clone your fork and create a new branch:
+
    ```bash
    git clone https://github.com/greggh/hooks-util.git
    cd hooks-util
    git checkout -b feature/my-feature-name
    ```
-3. Set up your development environment following the instructions in [DEVELOPMENT.md](DEVELOPMENT.md)
-4. Install the hooks in the project itself to ensure your changes follow our standards:
+
+1. Set up your development environment following the instructions in [DEVELOPMENT.md](DEVELOPMENT.md)
+2. Install the hooks in the project itself to ensure your changes follow our standards:
+
    ```bash
    ./install.sh --config
    ```
-5. Make your changes
-6. Test your changes (see [Testing Changes](#testing-changes) below)
-7. Push to your fork and submit a pull request to the [greggh/hooks-util](https://github.com/greggh/hooks-util) repository
+
+1. Make your changes
+2. Test your changes (see [Testing Changes](#testing-changes) below)
+3. Push to your fork and submit a pull request to the [greggh/hooks-util](https://github.com/greggh/hooks-util) repository
 
 ## Development Process
 
@@ -33,25 +38,28 @@ Please see [DEVELOPMENT.md](DEVELOPMENT.md) for detailed instructions on setting
 Before submitting a pull request, please test your changes:
 
 1. **Shell Script Linting**:
+
    ```bash
    shellcheck lib/*.sh hooks/* install.sh
    ```
 
-2. **Manual Testing**:
+1. **Manual Testing**:
+
    ```bash
    # Test individual components
    bash -x lib/your-module.sh
-   
+
    # Test the pre-commit hook
    bash -x hooks/pre-commit
    ```
 
-3. **End-to-End Testing**:
+1. **End-to-End Testing**:
    Install the hooks in a test repository:
+
    ```bash
    # From your test repository
    /path/to/hooks-util/install.sh --config --verbose
-   
+
    # Make some changes and commit to test the hooks
    touch test.lua
    echo "print('Hello')" > test.lua
@@ -88,12 +96,14 @@ Before submitting a pull request, please test your changes:
 
 - Use clear, descriptive commit messages
 - Follow the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
   ```
   feat: add support for luacheck integration
   fix: correct path handling on Windows
   docs: improve installation instructions
   test: add shellcheck validation
   ```
+
 - Reference issues and pull requests where appropriate
 
 ## Adding New Hook Types

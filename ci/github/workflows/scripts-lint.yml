@@ -1,0 +1,50 @@
+name: Scripts Linting
+
+on:
+  push:
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.lua'
+      - '.github/workflows/scripts-lint.yml'
+  pull_request:
+    paths:
+      - '**.sh'
+      - '**.bash'
+      - '**.lua'
+      - '.github/workflows/scripts-lint.yml'
+
+jobs:
+  shell-lint:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck
+        run: find . -type f -name "*.sh" -o -name "*.bash" | xargs shellcheck
+
+  lua-lint:
+    name: Lint Lua Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1"
+
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Install luacheck
+        run: luarocks install luacheck
+
+      - name: Run luacheck
+        run: luacheck lua/

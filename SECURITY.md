@@ -1,3 +1,4 @@
+
 # Security Policy
 
 ## Supported Versions
@@ -53,6 +54,7 @@ Since hooks execute as part of Git operations, they have the potential to run co
 ## Security Updates
 
 Security updates will be released as:
+
 - Patch versions for supported releases
 - Security advisories on GitHub
 - Announcements in our release notes

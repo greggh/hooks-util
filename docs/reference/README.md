@@ -1,3 +1,4 @@
+
 # Neovim Hooks Utilities Reference
 
 This directory contains technical reference documentation for the Neovim Hooks Utilities.

@@ -1,3 +1,4 @@
+
 # Error Codes Reference
 
 This document lists all error codes used in the hooks-util library, their meanings, and how to resolve them.
@@ -43,6 +44,7 @@ When an error occurs in a hook, the hook typically:
 When using hooks-util in custom scripts, you should handle errors like this:
 
 ```bash
+
 # Call a hooks-util function
 hooks_stylua_format "my_file.lua"
 exit_code=$?
@@ -51,7 +53,7 @@ exit_code=$?
 if [ $exit_code -ne 0 ]; then
   # Use hooks_handle_error to properly record the error
   hooks_handle_error $exit_code "StyLua formatting failed for my_file.lua"
-  
+
   # Decide whether to continue or exit
   if [ $exit_code -eq $HOOKS_ERROR_COMMAND_NOT_FOUND ]; then
     hooks_warning "Continuing without StyLua"
@@ -61,7 +63,8 @@ if [ $exit_code -ne 0 ]; then
     exit $exit_code
   fi
 fi
-```
+
+```text
 
 ## Bypassing Hooks on Error
 
@@ -69,7 +72,8 @@ In emergency situations, you can bypass pre-commit hooks using:
 
 ```bash
 git commit --no-verify -m "Emergency commit message"
-```
+
+```text
 
 This will skip all pre-commit hooks, but should only be used in exceptional circumstances.
 
@@ -77,41 +81,51 @@ This will skip all pre-commit hooks, but should only be used in exceptional circ
 
 ### StyLua Not Found
 
-```
+```text
 Error: StyLua is not installed. Please install it to format Lua code.
 You can install it from: https://github.com/JohnnyMorganz/StyLua
-```
+
+```text
 
 **Solution**: Install StyLua or specify its path in your configuration:
 
 ```bash
+
 # In .hooksrc.local
 HOOKS_STYLUA_PATH=/path/to/stylua
-```
+
+```text
 
 ### Luacheck Not Found
 
-```
+```text
 Error: Luacheck is not installed. Please install it to lint Lua code.
 You can install it via LuaRocks: luarocks install luacheck
-```
+
+```text
 
 **Solution**: Install Luacheck or specify its path in your configuration:
 
 ```bash
+
 # In .hooksrc.local
 HOOKS_LUACHECK_PATH=/path/to/luacheck
-```
+
+```text
 
 ### Test Framework Not Detected
 
-```
+```text
 Error: Unknown or unsupported test framework
-```
+
+```text
 
 **Solution**: Set up a proper test framework (Plenary or Makefile) or disable tests:
 
 ```bash
+
 # In .hooksrc or .hooksrc.user
 HOOKS_TESTS_ENABLED=false
-```
+
+```text
+

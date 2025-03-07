@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # If there is no previous tag, show all commits
+            git log --pretty=format:"* %s (%h)" > CHANGELOG.md
+          else
+            # Otherwise, show commits since the previous tag
+            git log --pretty=format:"* %s (%h)" ${PREVIOUS_TAG}..HEAD > CHANGELOG.md
+          fi
+          echo "CHANGELOG_PATH=CHANGELOG.md" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body_path: ${{ steps.changelog.outputs.CHANGELOG_PATH }}
+          draft: false
+          prerelease: false

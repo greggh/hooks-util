@@ -1,3 +1,4 @@
+
 # Getting Started with Neovim Hooks Utilities
 
 This guide will help you set up and start using the Neovim Hooks Utilities in your Neovim Lua project.
@@ -17,17 +18,20 @@ Before you begin, make sure you have:
 ### Option 1: Git Submodule (Recommended)
 
 ```bash
+
 # Add the hooks utilities as a git submodule
 git submodule add https://github.com/greggh/hooks-util.git .hooks-util
 
 # Run the installation script
 cd .hooks-util
 ./install.sh
-```
+
+```text
 
 ### Option 2: Direct Download
 
 ```bash
+
 # Create a directory for the hooks utilities
 mkdir -p .hooks-util
 
@@ -37,20 +41,23 @@ curl -L https://github.com/greggh/hooks-util/archive/refs/tags/v0.2.1.tar.gz | t
 # Run the installation script
 cd .hooks-util
 ./install.sh
-```
+
+```text
 
 ## Configuration
 
 After installation, you'll have a `.hooksrc` file in your project root. This file controls the behavior of the hooks.
 
 ```bash
+
 # Example .hooksrc configuration
 HOOKS_STYLUA_ENABLED=true
 HOOKS_LUACHECK_ENABLED=true
 HOOKS_TESTS_ENABLED=true
 HOOKS_QUALITY_ENABLED=true
 HOOKS_VERBOSITY=1  # 0=quiet, 1=normal, 2=verbose
-```
+
+```text
 
 You can customize this configuration to suit your project needs.
 
@@ -77,11 +84,13 @@ Once installed, the hooks will run automatically on git operations:
 If your tools are installed in non-standard locations, you can specify their paths:
 
 ```bash
+
 # Custom tool paths
 HOOKS_STYLUA_PATH=/custom/path/to/stylua
 HOOKS_LUACHECK_PATH=/custom/path/to/luacheck
 HOOKS_NEOVIM_PATH=/custom/path/to/nvim
-```
+
+```text
 
 ## Next Steps
 
@@ -97,3 +106,4 @@ If you encounter issues:
 2. Check that required tools (StyLua, Luacheck) are in your PATH
 3. Verify configuration file syntax
 4. See [Common Issues](troubleshooting.md) for known problems and solutions
+

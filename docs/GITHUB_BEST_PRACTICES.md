@@ -1,3 +1,4 @@
+
 # GitHub Repository Best Practices
 
 This document outlines comprehensive best practices for creating and maintaining high-quality GitHub repositories. These practices apply to projects of any language or framework and represent modern standards for open-source and professional software development.
@@ -156,17 +157,17 @@ Follow [Semantic Versioning 2.0.0](https://semver.org/) with MAJOR.MINOR.PATCH f
    - Multiple version testing (language/framework versions)
    - Caching dependencies for speed
 
-2. **Validation**
+1. **Validation**
    - Linting
    - Code style checking
    - Type checking (if applicable)
 
-3. **Testing**
+1. **Testing**
    - Unit tests
    - Integration tests
    - Coverage reports
 
-4. **Building**
+1. **Building**
    - Compilation/build steps
    - Artifact creation
 
@@ -177,7 +178,7 @@ Follow [Semantic Versioning 2.0.0](https://semver.org/) with MAJOR.MINOR.PATCH f
    - Changelog generation
    - GitHub release creation
 
-2. **Publishing**
+1. **Publishing**
    - Package registry deployment
    - Docker image publishing
    - Documentation site deployment

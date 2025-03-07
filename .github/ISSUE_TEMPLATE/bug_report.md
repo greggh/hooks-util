@@ -10,6 +10,7 @@ assignees: ''
 <!-- A clear and concise description of what the bug is -->
 
 ## Steps To Reproduce
+
 1. 
 2. 
 3. 
@@ -23,12 +24,15 @@ assignees: ''
 
 ## Log Output
 <!-- If applicable, add log output (set HOOKS_VERBOSITY=2 for more detailed logs) -->
-```
+
+```text
 Paste log output here
-```
+
+```text
 
 ## Environment
 <!-- Please fill in the following information -->
+
 - OS: [e.g. Ubuntu 22.04, Windows 11, macOS 13.0]
 - Bash Version: [e.g. 5.1.16]
 - Neovim Version: [e.g. 0.9.1]
@@ -38,12 +42,16 @@ Paste log output here
 
 ## Configuration
 <!-- If applicable, include your .hooksrc configuration -->
+
 ```bash
+
 # Paste your .hooksrc configuration here
-```
+
+```text
 
 ## Additional Context
 <!-- Add any other context about the problem here -->
 
 ## Possible Solution
 <!-- If you have suggestions on how to fix the issue, please describe them here -->
+

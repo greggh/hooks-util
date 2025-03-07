@@ -1,3 +1,4 @@
+
 # Issue and Pull Request Response Process
 
 This document outlines the standard process for responding to issues and pull requests in the hooks-util project. Following these guidelines ensures consistent, timely, and helpful interactions with contributors.
@@ -17,8 +18,8 @@ All new issues should receive an initial response within 72 hours:
    - `help wanted`: For issues where community help is particularly welcome
    - `question`: For general questions
 
-3. **Request more information** if needed (see saved replies)
-4. **Reproduce the issue** locally if possible, or ask for clarification if not reproducible
+1. **Request more information** if needed (see saved replies)
+2. **Reproduce the issue** locally if possible, or ask for clarification if not reproducible
 
 ### Issue Classification
 

@@ -50,17 +50,27 @@ end
 
 -- Load all adapters from the adapters directory
 function M.load_adapters()
-  local adapter_paths = {
-    "/home/gregg/Projects/hooks-util/adapters/nvim-plugin/init.lua",
-    "/home/gregg/Projects/hooks-util/adapters/nvim-config/init.lua",
-    "/home/gregg/Projects/hooks-util/adapters/lua-lib/init.lua",
-    -- Add more adapter paths as needed
+  -- Get the directory of the current script
+  local script_path = debug.getinfo(1, "S").source:sub(2)
+  local script_dir = script_path:match("(.*/)")
+  local adapters_dir = script_dir:gsub("/core/$", "/adapters/")
+  
+  -- Known adapter types
+  local adapter_types = {
+    "nvim-plugin",
+    "nvim-config",
+    "lua-lib",
+    "docs"
   }
   
-  for _, path in ipairs(adapter_paths) do
-    local ok, adapter = pcall(dofile, path)
+  -- Load each adapter
+  for _, adapter_type in ipairs(adapter_types) do
+    local adapter_path = adapters_dir .. adapter_type .. "/init.lua"
+    local ok, adapter = pcall(dofile, adapter_path)
     if ok and adapter then
       table.insert(M.adapters, adapter)
+    else
+      print("Failed to load adapter: " .. adapter_type)
     end
   end
 end

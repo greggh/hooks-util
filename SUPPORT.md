@@ -1,3 +1,4 @@
+
 # Support for Neovim Hooks Utilities
 
 This document outlines the various ways you can get help with Neovim Hooks Utilities.
@@ -7,6 +8,7 @@ This document outlines the various ways you can get help with Neovim Hooks Utili
 For general questions, ideas, or community discussions, please use [GitHub Discussions](https://github.com/greggh/hooks-util/discussions).
 
 Categories:
+
 - **Q&A**: For specific questions about using the hooks
 - **Ideas**: For suggesting new features or improvements
 - **Show and Tell**: For sharing how you've customized or extended the hooks
@@ -17,6 +19,7 @@ Categories:
 For reporting bugs or requesting features, please use the [GitHub issue tracker](https://github.com/greggh/hooks-util/issues).
 
 Before creating a new issue:
+
 1. Search existing issues to avoid duplicates
 2. Use the appropriate issue template
 3. Provide as much detail as possible, including:
@@ -28,6 +31,7 @@ Before creating a new issue:
 ## Documentation
 
 For help with using the hooks:
+
 - Read the [README.md](README.md) for basic usage and installation
 - Check the [examples/](examples/) directory for usage examples
 - Review the [templates/](templates/) directory for configuration templates
@@ -49,11 +53,11 @@ For quick solutions to common problems:
    - Check that Git is using the hooks: `git config core.hooksPath`
    - Ensure hooks have execute permission: `chmod +x .githooks/*`
 
-2. **StyLua/Luacheck not found**
+1. **StyLua/Luacheck not found**
    - Follow the installation instructions in [DEVELOPMENT.md](DEVELOPMENT.md)
    - Set custom tool paths in your `.hooksrc.local` file
 
-3. **Path issues (especially on Windows)**
+1. **Path issues (especially on Windows)**
    - Use WSL for a more consistent experience
    - Set environment variables in your `.hooksrc.local` file
 

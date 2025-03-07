@@ -1,3 +1,4 @@
+
 # Neovim Hooks Utilities Roadmap
 
 This document outlines the planned development path for the Neovim Hooks Utilities project. It's divided into short-term, medium-term, and long-term goals based on the priorities identified in our pre-commit improvements plan.

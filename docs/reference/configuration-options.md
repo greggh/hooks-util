@@ -1,3 +1,4 @@
+
 # Configuration Options Reference
 
 This document provides a comprehensive list of all configuration options available in the hooks-util library.
@@ -57,28 +58,35 @@ Multiple configuration files can be used together, with later ones overriding ea
 ### Basic Configuration
 
 ```bash
+
 # .hooksrc - Basic configuration
 HOOKS_STYLUA_ENABLED=true
 HOOKS_LUACHECK_ENABLED=true
 HOOKS_TESTS_ENABLED=true
 HOOKS_QUALITY_ENABLED=true
 HOOKS_VERBOSITY=1
-```
+
+```text
 
 ### Machine-Specific Configuration
 
 ```bash
+
 # .hooksrc.local - Machine-specific configuration
 HOOKS_STYLUA_PATH=/opt/stylua/bin/stylua
 HOOKS_LUACHECK_PATH=/usr/local/bin/luacheck
 HOOKS_NEOVIM_PATH=/opt/neovim/bin/nvim
 HOOKS_TEST_TIMEOUT=120000  # Increase timeout for slower machines
-```
+
+```text
 
 ### User-Specific Configuration
 
 ```bash
+
 # .hooksrc.user - User-specific configuration
 HOOKS_TESTS_ENABLED=false  # Disable tests for this user
 HOOKS_VERBOSITY=2          # Increase verbosity for debugging
-```
+
+```text
+

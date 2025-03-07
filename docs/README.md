@@ -1,3 +1,4 @@
+
 # Neovim Hooks Utilities Documentation
 
 This directory contains extended documentation for the Neovim Hooks Utilities project. Here you'll find detailed guides, configuration references, API documentation, and examples.
@@ -14,13 +15,14 @@ As the project expands, we plan to add:
 
 ## Documentation Structure
 
-```
+```text
 docs/
 ├── api/              # API reference for hook functions
 ├── guides/           # How-to guides for specific use cases
 ├── examples/         # Example configurations and implementations
 └── reference/        # Technical reference for configuration options
-```
+
+```text
 
 ## Best Practices for Git Hooks
 
@@ -45,6 +47,7 @@ Example of a custom hook:
 
 ```bash
 #!/bin/bash
+
 # Custom pre-push hook
 
 # Source the hooks-util libraries
@@ -62,4 +65,6 @@ fi
 
 # Success message
 hooks_success "Pre-push checks passed!"
-```
+
+```text
+

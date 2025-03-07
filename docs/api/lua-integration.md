@@ -1,3 +1,4 @@
+
 # Lua Integration and Adapter System
 
 ## Project Type Adapter System
@@ -39,10 +40,11 @@ return {
   --   "lua-lib"        - Lua library
   --   "lua-project"    - Generic Lua project
   project_type = "neovim-plugin",  -- Override auto-detection with specific type
-  
+
   -- Other configuration options...
 }
-```
+
+```text
 
 Setting `project_type = "auto"` (the default) will use the automatic detection system.
 
@@ -55,7 +57,7 @@ Hooks-util supports Lua-based configuration with the following file:
 return {
   -- Project type (auto or specific type)
   project_type = "auto",
-  
+
   -- Configure which hooks should be run on pre-commit
   hooks = {
     pre_commit = {
@@ -65,7 +67,7 @@ return {
       version = true,    -- Verify version consistency
     }
   },
-  
+
   -- Configure linting options
   lint = {
     -- Specific linter configuration
@@ -74,14 +76,14 @@ return {
       config_file = ".luacheckrc",        -- Path to luacheckrc file
       args = "--no-color",                -- Additional luacheck arguments
     },
-    
+
     stylua = {
       enabled = true,
       config_file = "stylua.toml",        -- Path to stylua config
       check_only = false,                 -- Only check formatting without modifying files
     }
   },
-  
+
   -- Configure testing options
   test = {
     -- Test configuration
@@ -91,7 +93,7 @@ return {
     args = "",                           -- Additional arguments for the test runner
     timeout = 60000,                     -- Test timeout in milliseconds
   },
-  
+
   -- Configure CI workflow options
   ci = {
     platform = "github",                 -- github, gitlab, or azure
@@ -102,7 +104,8 @@ return {
     }
   }
 }
-```
+
+```text
 
 ## Lust-Next Integration
 
@@ -137,7 +140,8 @@ lust_next.run_tests("/path/to/project", {
   filter = "module_name",  -- Only run tests containing this pattern
   tags = "unit",           -- Only run tests with this tag
 })
-```
+
+```text
 
 ### Testing Structure
 
@@ -148,22 +152,23 @@ describe("component", function()
   before_each(function()
     -- Set up test environment
   end)
-  
+
   after_each(function()
     -- Clean up after tests
   end)
-  
+
   it("does something specific", function()
     -- Test assertions
     assert(true, "This should pass")
   end)
-  
+
   -- Use tags to organize tests
   it("does something async", function()
     -- Asynchronous test
   end, "async")
 end)
-```
+
+```text
 
 ## Core Modules API
 
@@ -194,7 +199,8 @@ end
 -- Register the adapter
 local registry = require("hooks-util.core.registry")
 registry.register(my_adapter)
-```
+
+```text
 
 ### Config Module
 
@@ -213,7 +219,8 @@ config.set("test.timeout", 30000)
 
 -- Save configuration to file
 config.save_config("/path/to/.hooks-util.lua")
-```
+
+```text
 
 ### Registry Module
 
@@ -231,4 +238,6 @@ local all_adapters = registry.get_adapters()
 
 -- Detect the appropriate adapter for a project
 local detected = registry.detect_adapter("/path/to/project")
-```
+
+```text
+

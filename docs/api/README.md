@@ -1,3 +1,4 @@
+
 # Neovim Hooks Utilities API Reference
 
 This directory contains documentation for the Neovim Hooks Utilities API.
@@ -39,6 +40,7 @@ To use the hooks utility API in your own hooks:
 
 ```bash
 #!/bin/bash
+
 # Example custom hook
 
 # Include the required modules
@@ -51,6 +53,7 @@ hooks_print_header "Custom Hook"
 hooks_debug "Running custom functionality"
 
 # Define custom logic
+
 # ...
 
 # Handle errors
@@ -59,4 +62,6 @@ hooks_handle_error $? "Custom hook failed"
 # Exit with proper code
 hooks_print_error_summary
 exit $?
-```
+
+```text
+

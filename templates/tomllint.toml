@@ -1,0 +1,15 @@
+# TOML linting configuration
+
+# General settings
+[general]
+max_line_length = 100
+indent_size = 2
+
+# Allow these keys to have empty values
+[empty_values]
+allowed_keys = ['description', 'summary']
+
+# Specific table configurations (if the tool supports it)
+[tables]
+array_trailing_comma = false
+inline_tables = true

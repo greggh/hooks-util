@@ -1,0 +1,6 @@
+{
+  "validateComments": false,
+  "validateTrailingCommas": false,
+  "allowDuplicateKeys": false,
+  "allowEmptyStrings": true
+}

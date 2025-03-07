@@ -1,0 +1,59 @@
+jobs:
+  build-docs:
+    name: Build Documentation Site
+    steps:
+      - name: Install additional dependencies
+        run: |
+          pip install mkdocs-material-extensions mkdocs-awesome-pages-plugin mkdocs-git-revision-date-localized-plugin
+
+      - name: Build and deploy documentation
+        run: mkdocs gh-deploy --force
+
+  validate-cross-references:
+    name: Validate Cross References
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: pip install pyyaml markdown
+
+      - name: Check internal links
+        run: |
+          python3 -c '
+          import os
+          import re
+          import sys
+          
+          link_regex = re.compile(r"\[.*?\]\((.*?)\)")
+          errors = []
+          
+          for root, _, files in os.walk("."):
+              for file in files:
+                  if not file.endswith(".md"):
+                      continue
+                  
+                  filepath = os.path.join(root, file)
+                  with open(filepath, "r") as f:
+                      content = f.read()
+                  
+                  for match in link_regex.finditer(content):
+                      link = match.group(1)
+                      if not link.startswith(("http://", "https://", "#", "mailto:")):
+                          # Normalize path
+                          if link.startswith("/"):
+                              target = "." + link
+                          else:
+                              target = os.path.normpath(os.path.join(os.path.dirname(filepath), link))
+                          
+                          if not os.path.exists(target):
+                              errors.append(f"Broken link in {filepath}: {link} -> {target}")
+          
+          if errors:
+              for error in errors:
+                  print(error)
+              sys.exit(1)
+          else:
+              print("All internal links are valid!")
+          '

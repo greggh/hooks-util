@@ -29,15 +29,28 @@ Hooks-Util is a comprehensive Git hooks framework for pre-commit validation acro
 
 ## Current Focus
 
-- ✅ Completed comprehensive testing with all testbed projects to validate every adapter type:
-  - ✅ Tested docs adapter with hooks-util-testbed-docs
-  - ✅ Tested lua-lib adapter with hooks-util-testbed-lua-lib
-  - ✅ Tested nvim-plugin adapter with hooks-util-testbed-nvim-plugin
-  - ✅ Tested nvim-config adapter with hooks-util-testbed-nvim-config
-- ✅ Verified all adapter-specific validations and workflows
-- ✅ Tested submodule update mechanism
-- Next step: updating base-project-repo with the fully tested hooks-util v0.6.0
-- Preparing comprehensive integration plans for production environments
+- Fix critical submodule and path issues:
+  - [ ] Fix pre-commit hook's handling of submodule references
+  - [ ] Fix update_hook.sh to properly handle both normal and submodule installations
+  - [ ] Implement reliable template file distribution mechanism
+  - [ ] Create proper file tracking system for git
+  - [ ] Enhance error logging to better diagnose issues
+- Fix pre-commit hook integration:
+  - ✅ Created shell script wrappers (markdown.sh, yaml.sh, json.sh, toml.sh) for linting modules
+  - ✅ Updated pre-commit hook to call these new functions
+  - [ ] Fix remaining pre-commit hook execution issues
+  - ✅ Created comprehensive testing scripts for each linting feature
+  - [ ] Fix error handling for various edge cases
+  - [ ] Test with various file types and edge cases
+- Testing across all adapter types (after fixing critical issues):
+  - [ ] Testing with lua-lib adapter (hooks-util-testbed-lua-lib)
+  - [ ] Testing with nvim-plugin adapter (hooks-util-testbed-nvim-plugin)
+  - [ ] Testing with nvim-config adapter (hooks-util-testbed-nvim-config)
+  - [ ] Testing with docs adapter (hooks-util-testbed-docs)
+- Deployment steps after testing:
+  - Update base-project-repo with fully tested hooks-util v0.6.0
+  - Propagate changes to template repositories
+  - Deploy to end-product repositories
 
 ## Documentation Links
 

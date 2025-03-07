@@ -1,3 +1,4 @@
+
 # Basic Setup Example
 
 This example demonstrates a standard setup for hooks-util in a Neovim Lua plugin project.
@@ -6,7 +7,7 @@ This example demonstrates a standard setup for hooks-util in a Neovim Lua plugin
 
 Assume we have a typical Neovim plugin structure:
 
-```
+```text
 my-plugin/
 ├── lua/
 │   └── my-plugin/
@@ -18,7 +19,8 @@ my-plugin/
 ├── .stylua.toml
 ├── .luacheckrc
 └── Makefile
-```
+
+```text
 
 ## Step 1: Add hooks-util as a Git Submodule
 
@@ -27,26 +29,30 @@ cd my-plugin
 git submodule add https://github.com/greggh/hooks-util.git .hooks-util
 cd .hooks-util
 ./install.sh
-```
+
+```text
 
 ## Step 2: Configure the Hooks
 
 The installation script will create a `.hooksrc` file in your project root. Let's customize it:
 
 ```bash
+
 # .hooksrc - Hooks configuration
 HOOKS_STYLUA_ENABLED=true
 HOOKS_LUACHECK_ENABLED=true
 HOOKS_TESTS_ENABLED=true 
 HOOKS_QUALITY_ENABLED=true
 HOOKS_VERBOSITY=1          # 0=quiet, 1=normal, 2=verbose
-```
+
+```text
 
 ## Step 3: Add Configuration Files for Tools
 
 If you don't already have them, create configuration files for StyLua and Luacheck:
 
 **.stylua.toml**
+
 ```toml
 column_width = 120
 line_endings = "Unix"
@@ -54,9 +60,11 @@ indent_type = "Spaces"
 indent_width = 2
 quote_style = "AutoPreferDouble"
 call_parentheses = "Always"
-```
+
+```text
 
 **.luacheckrc**
+
 ```lua
 -- Global objects
 globals = {
@@ -80,11 +88,13 @@ exclude_files = {
   ".luarocks/**",
   "lua/deps/**",
 }
-```
+
+```text
 
 ## Step 4: Add a Test Setup
 
 **tests/minimal-init.lua**
+
 ```lua
 -- Minimal init file for tests
 vim.cmd("set runtimepath+=.")
@@ -94,21 +104,25 @@ vim.o.swapfile = false
 
 -- Load the plugin
 require("my-plugin")
-```
+
+```text
 
 **Makefile**
+
 ```makefile
 .PHONY: test
 
 test:
-	nvim --headless -u tests/minimal-init.lua -c "lua require('plenary.busted').run('./tests/spec')" -c "qa!"
-```
+ nvim --headless -u tests/minimal-init.lua -c "lua require('plenary.busted').run('./tests/spec')" -c "qa!"
+
+```text
 
 ## Step 5: Make a Commit
 
 Now when you make changes and commit, the hooks will run automatically:
 
 ```bash
+
 # Make some changes to your plugin
 vim lua/my-plugin/init.lua
 
@@ -117,9 +131,11 @@ git add lua/my-plugin/init.lua
 
 # Commit (this will trigger the pre-commit hook)
 git commit -m "Update plugin initialization"
-```
+
+```text
 
 The pre-commit hook will:
+
 1. Fix code quality issues (trailing whitespace, line endings, etc.)
 2. Format your Lua code with StyLua
 3. Lint your code with Luacheck
@@ -132,3 +148,4 @@ If you encounter any issues:
 1. Increase verbosity in your `.hooksrc` file: `HOOKS_VERBOSITY=2`
 2. Check the output for specific errors
 3. Ensure StyLua and Luacheck are correctly installed and in your PATH
+

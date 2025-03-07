@@ -1,0 +1,46 @@
+jobs:
+  test:
+    strategy:
+      matrix:
+        neovim-version: ["stable", "nightly"]
+    name: Test (Neovim ${{ matrix.neovim-version }})
+    steps:
+      - name: Setup Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: ${{ matrix.neovim-version }}
+
+      - name: Run Neovim plugin tests
+        run: |
+          nvim --headless -u tests/minimal_init.lua -c "lua require('plenary.test_harness').test_directory('tests/', {minimal_init = 'tests/minimal_init.lua'})" -c "lua vim.api.nvim_command('cquit')"
+
+  health-check:
+    name: Validate Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+
+      - name: Validate health check module
+        run: |
+          if [ -f "lua/health.lua" ] || [ -f "lua/*/health.lua" ]; then
+            echo "Health check module found"
+          else
+            echo "Health check module not found"
+            exit 1
+          fi
+
+      - name: Run health check
+        run: |
+          HEALTH_OUTPUT=$(nvim --headless -c "checkhealth $PLUGIN_NAME" -c "quit" 2>&1)
+          echo "$HEALTH_OUTPUT"
+          if echo "$HEALTH_OUTPUT" | grep -q "ERROR"; then
+            exit 1
+          fi

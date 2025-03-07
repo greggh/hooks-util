@@ -1,0 +1,47 @@
+jobs:
+  test:
+    strategy:
+      matrix:
+        lua-version: ["5.1", "5.2", "5.3", "5.4", "luajit"]
+    name: Test (Lua ${{ matrix.lua-version }})
+    steps:
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: ${{ matrix.lua-version }}
+
+  coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1"
+
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Install dependencies
+        run: |
+          luarocks install luacov
+          luarocks install luacov-reporter
+          luarocks install luafilesystem
+
+      - name: Run tests with coverage
+        run: lua -lluacov spec/runner.lua
+
+      - name: Generate coverage report
+        run: luacov
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: luacov.report.out

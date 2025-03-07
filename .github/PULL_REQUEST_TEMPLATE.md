@@ -1,12 +1,13 @@
-## Description
+
+# Description
 
 <!-- Provide a clear and concise description of the changes in this PR -->
 
-## Related Issues
+# Related Issues
 
 <!-- Link any related issues using the GitHub syntax: "Fixes #123" or "Relates to #456" -->
 
-## Type of Change
+# Type of Change
 
 <!-- Mark the relevant option with an "x" (fill in the square brackets with an "x") -->
 
@@ -20,14 +21,14 @@
 - [ ] Tests or linting
 - [ ] CI/CD or build process changes
 
-## Hooks Affected
+# Hooks Affected
 
 <!-- List any hooks that are affected by this change -->
 
 - [ ] pre-commit
 - [ ] Other: _________________
 
-## How Has This Been Tested?
+# How Has This Been Tested?
 
 <!-- Describe the tests you ran to verify your changes -->
 
@@ -38,7 +39,7 @@
 - [ ] Integration testing with Neovim
 - [ ] Other (please describe):
 
-## Platform Compatibility
+# Platform Compatibility
 
 <!-- Indicate which platforms you've tested on or ensured compatibility with -->
 
@@ -47,7 +48,7 @@
 - [ ] Windows (Git Bash)
 - [ ] Windows (WSL)
 
-## Checklist
+# Checklist
 
 - [ ] My code follows the Bash script style guidelines
 - [ ] I have updated the documentation accordingly
@@ -58,6 +59,7 @@
 - [ ] I have checked for and resolved any merge conflicts
 - [ ] My changes provide helpful error messages for users
 
-## Additional Information
+# Additional Information
 
 <!-- Any additional information about the PR, if needed -->
+

@@ -1,3 +1,4 @@
+
 # Neovim Hooks Utilities Examples
 
 This directory contains examples for using the Neovim Hooks Utilities in different scenarios.

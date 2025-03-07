@@ -1,0 +1,56 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Run weekly on Mondays
+  workflow_dispatch:     # Allow manual triggers
+
+jobs:
+  check-deps:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Check for outdated dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm outdated || true
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Check Python dependencies
+        run: |
+          if [ -f "requirements.txt" ]; then
+            pip install pip-outdated
+            pip-outdated requirements.txt || true
+          fi
+
+      - name: Setup Lua
+        uses: leafo/gh-actions-lua@v9
+        with:
+          luaVersion: "5.1"
+
+      - name: Setup Luarocks
+        uses: leafo/gh-actions-luarocks@v4
+
+      - name: Check Lua dependencies
+        run: |
+          if [ -f "*.rockspec" ]; then
+            # Get all dependencies from rockspec
+            DEPS=$(grep -E 'dependencies\s*=' -A 20 *.rockspec | grep -E '"\w+"' | sed 's/.*"\([^"]*\)".*/\1/')
+            for dep in $DEPS; do
+              echo "Checking $dep..."
+              luarocks show $dep | grep -E 'Version:|Latest version:' || true
+            done
+          fi

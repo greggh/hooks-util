@@ -1,3 +1,4 @@
+
 # Creating Custom Hooks
 
 This guide demonstrates how to create custom Git hooks using the hooks-util library.
@@ -21,6 +22,7 @@ Create a file at `.git/hooks/pre-push`:
 
 ```bash
 #!/bin/bash
+
 # Custom pre-push hook using hooks-util
 set -eo pipefail  # Exit on error, error on pipeline failures
 
@@ -50,11 +52,11 @@ protected_branches=("main" "develop" "release")
 
 if [[ " ${protected_branches[*]} " == *" $current_branch "* ]]; then
   hooks_info "Pushing to protected branch: $current_branch"
-  
+
   # Run comprehensive tests before pushing
   hooks_run_tests "$TOP_LEVEL"
   hooks_handle_error $? "Tests failed, cannot push to $current_branch"
-  
+
   # Additional custom checks could go here
   # ...
 else
@@ -65,13 +67,15 @@ fi
 # Print error summary and exit with appropriate code
 hooks_print_error_summary
 exit $?
-```
+
+```text
 
 ### Step 2: Make the Hook Executable
 
 ```bash
 chmod +x .git/hooks/pre-push
-```
+
+```text
 
 ### Example: Custom Post-Checkout Hook
 
@@ -83,6 +87,7 @@ Create a file at `.git/hooks/post-checkout`:
 
 ```bash
 #!/bin/bash
+
 # Custom post-checkout hook using hooks-util
 set -eo pipefail  # Exit on error, error on pipeline failures
 
@@ -107,7 +112,7 @@ if [ "$checkout_type" -eq 1 ]; then
   # Get current branch name
   current_branch=$(git symbolic-ref --short HEAD)
   hooks_info "Switched to branch: $current_branch"
-  
+
   # Check for dependency files
   if [ -f "package.json" ]; then
     hooks_info "Checking for new npm dependencies..."
@@ -116,7 +121,7 @@ if [ "$checkout_type" -eq 1 ]; then
       hooks_warning "Dependencies may have changed. Consider running: npm install"
     fi
   fi
-  
+
   # Check if we're on a feature branch
   if [[ "$current_branch" == feature/* ]]; then
     # Custom setup for feature branches
@@ -126,13 +131,15 @@ if [ "$checkout_type" -eq 1 ]; then
 fi
 
 exit 0
-```
+
+```text
 
 ### Step 2: Make the Hook Executable
 
 ```bash
 chmod +x .git/hooks/post-checkout
-```
+
+```text
 
 ## Best Practices for Custom Hooks
 
@@ -152,8 +159,11 @@ To share custom hooks with your team:
 3. Update your `.hooksrc` to include a setup step:
 
 ```bash
+
 # In .hooksrc
 HOOKS_CUSTOM_HOOKS_DIR=".githooks"
-```
+
+```text
 
 Then modify the install.sh script to copy these hooks to .git/hooks when installing.
+
