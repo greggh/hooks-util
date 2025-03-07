@@ -221,8 +221,19 @@ rules:
     fi
     
     # Run the installer script with the collected arguments
-    "$HOOKS_UTIL_DIR/install.sh" $INSTALL_ARGS --target "$PROJECT_ROOT"
-    INSTALL_RESULT=$?
+    # Check if install.sh exists in both potential locations
+    if [ -f "$HOOKS_UTIL_DIR/install.sh" ]; then
+        # Main repo case or submodule case
+        "$HOOKS_UTIL_DIR/install.sh" $INSTALL_ARGS --target "$PROJECT_ROOT"
+        INSTALL_RESULT=$?
+    elif [ -f "$HOOKS_DIR/install.sh" ]; then
+        # Installed case where install.sh is in .githooks directory
+        "$HOOKS_DIR/install.sh" $INSTALL_ARGS --target "$PROJECT_ROOT"
+        INSTALL_RESULT=$?
+    else
+        log "Error: install.sh not found in either $HOOKS_UTIL_DIR or $HOOKS_DIR"
+        INSTALL_RESULT=1
+    fi
     
     if [ $INSTALL_RESULT -eq 0 ]; then
         log "Successfully updated hooks-util"
