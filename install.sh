@@ -706,53 +706,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     hooks_info "Post-submodule-update hook is up to date"
   fi
   
-  # Also create a .gitmodules-hooks entry if it doesn't exist
-  GITMODULES_HOOKS="$TARGET_DIR/.gitmodules-hooks"
-  if [ ! -f "$GITMODULES_HOOKS" ] || [ "$FORCE_OVERWRITE" = true ]; then
-    cat > "$GITMODULES_HOOKS" << 'EOT'
-#!/bin/bash
-# This file contains custom hooks for .gitmodules
-# It should be sourced by your shell initialization script (e.g. .bashrc, .zshrc)
-
-# Define a function to wrap git commands that handle submodules
-git_with_hooks() {
-  # Capture the original command
-  local original_command="$@"
-  
-  # Execute the original git command
-  git "$@"
-  result=$?
-  
-  # Check if this was a submodule update command
-  if [[ "$1" == "submodule" && ("$2" == "update" || "$2" == "init") ]]; then
-    echo "Running post-submodule-update hooks..."
-    
-    # Find the root of the repository
-    local repo_root=$(git rev-parse --show-toplevel)
-    
-    # Run the post-submodule-update hook if it exists
-    if [ -x "$repo_root/.githooks/post-submodule-update" ]; then
-      "$repo_root/.githooks/post-submodule-update"
-    fi
-  fi
-  
-  return $result
-}
-
-# Instructions to add to your shell config:
-# echo 'source /path/to/your/repo/.gitmodules-hooks' >> ~/.bashrc
-# echo 'alias git=git_with_hooks' >> ~/.bashrc
-
-# Usage example:
-# $ git submodule update  # Will run post-submodule-update hook afterwards
-EOT
-    
-    hooks_success "Created .gitmodules-hooks script"
-    hooks_info ""
-    hooks_info "IMPORTANT: To enable automatic submodule update hooks, add these lines to your shell config:"
-    hooks_info "  source \"$GITMODULES_HOOKS\""
-    hooks_info "  alias git=git_with_hooks"
-  fi
+  # Provide instructions for using the gitmodules-hooks.sh script from hooks-util
+  hooks_info ""
+  hooks_info "IMPORTANT: To enable automatic submodule update hooks, add these lines to your shell config:"
+  hooks_info "  source \"$SCRIPT_DIR/scripts/gitmodules-hooks.sh\""
+  hooks_info "  alias git=git_with_hooks"
   
   hooks_success "Installed/updated post-update hooks"
 elif [ "$CHECK_UPDATES_ONLY" = true ]; then
@@ -832,17 +790,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     hooks_info "Post-submodule-update hook is up to date"
   fi
   
-  # Check if .gitmodules-hooks needs to be created
-  GITMODULES_HOOKS="$TARGET_DIR/.gitmodules-hooks"
-  if [ ! -f "$GITMODULES_HOOKS" ]; then
-    hooks_info "Update needed: .gitmodules-hooks script should be created"
-  fi
+  # No need to check for .gitmodules-hooks anymore as we're using the one from hooks-util
 else
   hooks_info "[DRY RUN] Would install/update:"
   hooks_info "- post-merge hook"
   hooks_info "- post-checkout hook"
   hooks_info "- post-submodule-update hook"
-  hooks_info "- .gitmodules-hooks script for git command wrapping"
 fi
 
 hooks_print_header "Installation complete"

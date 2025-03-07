@@ -18,14 +18,14 @@ The first two hooks are standard Git hooks, but the third one is custom and requ
 
 ## Setting Up Submodule Update Hook
 
-To enable the automatic submodule update hook, you need to add a wrapper around the git command. During installation, hooks-util creates a `.gitmodules-hooks` script in your repository that defines this wrapper.
+To enable the automatic submodule update hook, you need to add a wrapper around the git command. The hooks-util project includes a `gitmodules-hooks.sh` script that defines this wrapper.
 
 ### Steps to Enable
 
 1. Add these lines to your shell configuration file (e.g., `~/.bashrc` or `~/.zshrc`):
 
    ```bash
-   source "/path/to/your/repo/.gitmodules-hooks"
+   source "/path/to/your/repo/hooks-util/scripts/gitmodules-hooks.sh"
    alias git=git_with_hooks
    ```
 
