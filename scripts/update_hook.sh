@@ -76,6 +76,12 @@ else
     # Get current version from hooks-util
     CURRENT_VERSION=$(cd "$HOOKS_UTIL_DIR" && git rev-parse HEAD)
     
+    # Always ensure VERSION_FILE is defined
+    if [ -z "$VERSION_FILE" ]; then
+        VERSION_FILE="${PROJECT_ROOT}/.hooks-util-version"
+        log "Setting version file to default location: $VERSION_FILE"
+    fi
+    
     if [ -f "$VERSION_FILE" ]; then
         PREVIOUS_VERSION=$(cat "$VERSION_FILE")
         
