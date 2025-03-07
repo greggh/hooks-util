@@ -1,5 +1,5 @@
 #!/bin/bash
-# test_github_workflows.sh - Script to validate GitHub Actions workflows locally
+# test_github_workflows.sh - Script to validate GitHub Actions workflows locally and ensure proper configuration
 #
 # This script helps test GitHub workflow files locally to identify issues
 # before pushing to GitHub. It requires act (https://github.com/nektos/act)
