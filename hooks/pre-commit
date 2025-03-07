@@ -86,13 +86,31 @@ fi
 
 # Run ShellCheck on staged shell script files
 # Always run ShellCheck on shell scripts as they are essential to the project
-if ! hooks_command_exists shellcheck; then
+# First, check using direct command
+if command -v shellcheck >/dev/null 2>&1; then
+  # Shellcheck exists directly in PATH
+  SHELLCHECK_CMD="shellcheck"
+# Try some common locations as fallbacks
+elif [ -f "/usr/bin/shellcheck" ]; then
+  SHELLCHECK_CMD="/usr/bin/shellcheck"
+elif [ -f "/usr/local/bin/shellcheck" ]; then
+  SHELLCHECK_CMD="/usr/local/bin/shellcheck"
+elif [ -f "/opt/homebrew/bin/shellcheck" ]; then
+  SHELLCHECK_CMD="/opt/homebrew/bin/shellcheck"
+else
   hooks_error "ShellCheck is not installed. Please install it to validate shell scripts."
   hooks_error "You can install it via your package manager: apt-get install shellcheck, brew install shellcheck, etc."
   # Mark this as an error and block the commit
   ((HOOKS_ERROR_COUNT++))
   HOOKS_ERROR_MESSAGES+=("Missing required tool: shellcheck")
-else
+  SHELLCHECK_CMD=""
+fi
+
+if [ -n "$SHELLCHECK_CMD" ]; then
+  # Export the command for the shellcheck.sh module to use
+  export SHELLCHECK_CMD
+  hooks_debug "Using shellcheck: $SHELLCHECK_CMD"
+  
   # Lint all staged shell script files
   hooks_shellcheck_staged
   hooks_handle_error $? "ShellCheck validation failed"

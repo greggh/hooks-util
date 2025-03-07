@@ -1,230 +1,117 @@
-# Testing the hooks-util Project
+# Testing Hooks-Util
 
-This document describes how to thoroughly test the hooks-util project before implementing it in your real projects.
+This document describes the proper testing procedure for hooks-util development.
 
-## Running Tests
+## Testbed Projects
 
-### Running All Tests
+Four testbed projects have been created to validate hooks-util functionality across different adapter types:
 
-To run all integration tests at once, use the test runner script:
+1. **hooks-util-testbed-lua-lib**: Testing hooks-util with Lua library adapter
+2. **hooks-util-testbed-nvim-plugin**: Testing hooks-util with Neovim plugin adapter
+3. **hooks-util-testbed-nvim-config**: Testing hooks-util with Neovim config adapter
+4. **hooks-util-testbed-docs**: Testing hooks-util with Documentation adapter
 
-```bash
-./scripts/test_all.sh
-```
+## Proper Development Workflow
 
-This will execute all integration tests and provide a summary of the results. The test runner will continue to run all tests even if some of them fail, giving you a complete overview of test status.
+When making changes to hooks-util, follow these essential steps:
 
-### Running Individual Tests
-
-You can also run individual test scripts directly:
-
-```bash
-# Basic functionality test
-./tests/integration/basic_test.sh
-
-# Neovim config integration test
-./tests/integration/neovim_config_test.sh
-
-# Neovim plugin integration tests (fixable issues)
-./tests/integration/plugin_test.sh
-
-# Neovim plugin integration tests (unfixable issues)
-./tests/integration/plugin_test_unfixable.sh
-```
-
-### Running Unit Tests
-
-To test the shell script functions:
-
-```bash
-./scripts/run_tests.sh
-```
-
-## Test Scripts
-
-The following test scripts are included in the project:
-
-### 1. Basic Functionality Test
-
-Tests the core functionality of hooks-util with a simple Git repository:
-
-```bash
-./tests/integration/basic_test.sh
-```
-
-This script:
-- Sets up a test Git repository
-- Creates a Lua file with intentional issues (whitespace, unused variables)
-- Installs hooks-util
-- Verifies that the pre-commit hook catches these issues
-- Fixes the issues and verifies that the commit succeeds
-
-### 2. Neovim Config Integration Test
-
-Tests hooks-util with a repository that resembles a Neovim configuration:
-
-```bash
-./tests/integration/neovim_config_test.sh
-```
-
-This script:
-- Creates a test repository with a Neovim config structure (lua/config, lua/plugins, etc.)
-- Sets up StyLua and Luacheck configurations
-- Creates a Lua file with formatting and linting issues
-- Verifies that the pre-commit hook catches these issues
-- Fixes the issues and verifies that the commit succeeds
-
-### 3. Neovim Plugin Integration Tests
-
-#### 3.1 Fixable Issues Test
-
-Tests hooks-util with a repository that resembles a Neovim plugin, focusing on issues that can be automatically fixed:
-
-```bash
-./tests/integration/plugin_test.sh
-```
-
-This script:
-- Creates a test repository with a Neovim plugin structure (lua/plugin-name, tests/spec, etc.)
-- Sets up StyLua, Luacheck, and test configurations
-- Creates Lua files with formatting and linting issues that can be fixed
-- Verifies that the pre-commit hook catches these issues
-- Fixes the issues and verifies that the commit succeeds
-
-#### 3.2 Unfixable Issues Test
-
-Tests hooks-util with a repository that contains issues that cannot be automatically fixed:
-
-```bash
-./tests/integration/plugin_test_unfixable.sh
-```
-
-This script:
-- Creates a test repository with a Neovim plugin structure
-- Creates Lua files with syntax errors and other unfixable issues
-- Creates shell scripts with complex issues that cannot be auto-fixed
-- Verifies that the pre-commit hook correctly blocks commits with these issues
-- Attempts multiple fix strategies and confirms they all fail appropriately
-
-### 4. Tool Validation Test
-
-Tests hooks-util behavior with and without external tools (StyLua, Luacheck, ShellCheck):
-
-```bash
-./tests/integration/tool_validation_test.sh
-```
-
-This script:
-- Creates a test repository with minimal structure
-- Tests behavior when required tools are missing
-- Tests behavior when real tools are available
-- Verifies that the pre-commit hook correctly handles both scenarios
-- Confirms that hooks properly fail when tools can't fix issues
-
-## Shell Script Unit Tests
-
-The project also includes unit tests for the shell script functions:
-
-```bash
-/home/gregg/Projects/hooks-util/scripts/run_tests.sh
-```
-
-These tests verify the behavior of individual functions in the utility libraries.
-
-## Manual Testing Checklist
-
-Before implementing hooks-util in your real projects, perform these manual checks:
-
-1. **Installation Testing**:
-   - [ ] Install as a Git submodule
-   - [ ] Install via direct download
-   - [ ] Verify hooks are properly installed in `.git/hooks`
-
-2. **Configuration Testing**:
-   - [ ] Test with default configuration
-   - [ ] Test with custom .hooksrc settings
-   - [ ] Test with .hooksrc.local and .hooksrc.user overrides
-
-3. **Tool Integration Testing**:
-   - [ ] Verify StyLua formatting works correctly
-   - [ ] Verify Luacheck linting works correctly
-   - [ ] Verify test execution works (if applicable)
-   - [ ] Verify code quality fixes work (whitespace, line endings, etc.)
-
-4. **Edge Case Testing**:
-   - [ ] Test with non-Lua files in the repository
-   - [ ] Test with missing tools (StyLua, Luacheck)
-   - [ ] Test with syntax errors in configuration files
-   - [ ] Test with very large files
-
-## Implementation in Real Projects
-
-To implement hooks-util in your actual projects:
-
-1. Add hooks-util as a Git submodule:
+1. **Make changes in the main hooks-util repository**:
    ```bash
-   cd /path/to/your/project
-   git submodule add https://github.com/greggh/hooks-util.git .hooks-util
+   # Edit files in the main hooks-util directory
+   vim /home/gregg/Projects/lua-library/hooks-util/lib/quality.sh
+   
+   # Commit changes to hooks-util repository
+   git -C /home/gregg/Projects/lua-library/hooks-util add lib/quality.sh
+   git -C /home/gregg/Projects/lua-library/hooks-util commit -m "Fix submodule detection in hooks_fix_staged_quality"
    ```
 
-2. Install the hooks:
+2. **Update testbed projects using proper submodule commands**:
    ```bash
-   cd .hooks-util
-   ./install.sh
+   # For each testbed project, update the hooks-util submodule
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib submodule update --init --recursive
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-nvim-plugin submodule update --init --recursive
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-nvim-config submodule update --init --recursive
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-docs submodule update --init --recursive
    ```
 
-3. Create a .hooksrc configuration file in your project root:
+3. **Test the changes without using `--no-verify`**:
    ```bash
-   cp .hooks-util/templates/hooksrc.template .hooksrc
+   # Create test files with issues in each testbed project
+   env -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib ./validate-hooks.sh
+   
+   # Always let the pre-commit hook run to validate your changes
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib add test-file.txt
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib commit -m "Test hooks-util functionality"
    ```
 
-4. Customize the configuration as needed for your project.
+## Common Mistakes to Avoid
 
-5. Create StyLua and Luacheck configuration files if they don't already exist:
-   ```bash
-   cp .hooks-util/examples/.stylua.toml .
-   cp .hooks-util/examples/.luacheckrc .
-   ```
+1. **NEVER edit hooks-util files directly in testbed projects**:
+   - Changes to hooks-util should only be made in the main hooks-util repository
+   - Never commit hooks-util files as part of a testbed project commit
 
-6. Start working with your project as normal - the hooks will run automatically on commit.
+2. **NEVER use `--no-verify`**:
+   - The purpose of testing is to verify that hooks work correctly
+   - Using `--no-verify` bypasses hooks and defeats the purpose of testing
 
-## Troubleshooting
+3. **NEVER disable checks in testbed projects**:
+   - Testbed projects should use strict checking to properly validate hooks-util
+   - If checks are failing, fix the underlying issues in hooks-util instead of disabling checks
 
-### Test Debugging
+4. **NEVER commit incomplete work**:
+   - Make sure all hooks-util functionality works correctly before committing
+   - If hooks fail, fix the issues rather than bypassing them
 
-If you need to debug test failures or isolate specific test behavior:
+## Ensuring Proper Submodule Handling
+
+Each testbed project should have hooks-util as a submodule, typically located at `.githooks/hooks-util`. When you update hooks-util in a testbed project, it should be done through proper submodule commands:
 
 ```bash
-# Debug a specific test's exit code behavior
-./scripts/debug_test.sh ./tests/integration/plugin_test.sh
+# Initialize submodules if needed
+git -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib submodule update --init --recursive
 
-# Run tests individually with more verbose output
-./scripts/run-tests-separately.sh
+# Force reinstall hooks after updating
+env -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib ./.githooks/hooks-util/install.sh --force
 ```
 
-### Hook Troubleshooting
+## Testing Specific Functionality
 
-If you encounter issues with the hooks:
+1. **Test submodule detection**:
+   - Create a submodule in a testbed project
+   - Verify that hooks-util correctly identifies and skips files in the submodule
 
-1. Increase verbosity in your .hooksrc file:
-   ```
-   HOOKS_VERBOSITY=2
-   ```
+2. **Test path resolution**:
+   - Verify that hooks can correctly find tools like shellcheck
+   - Test with both relative and absolute paths
 
-2. Check if tools are properly installed and in your PATH:
+3. **Test template file distribution**:
+   - Delete template files and verify they are properly recreated
+   - Verify that testbed projects get stricter templates
+
+4. **Test quality checking for testbeds**:
+   - Verify that testbed projects enforce strict quality requirements
+   - Test that normal projects use standard quality requirements
+
+## Debugging Issues
+
+When troubleshooting hooks-util, use these approaches:
+
+1. **Enable debug mode**:
    ```bash
-   which stylua
-   which luacheck
+   env -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib DEBUG=1 ./.githooks/hooks-util/install.sh --force
    ```
 
-3. Verify that your configuration files are valid.
+2. **Check logs**:
+   - Look for debug output in the console
+   - Check for any error or warning messages
 
-4. Run the hooks manually to debug:
+3. **Test each component separately**:
    ```bash
-   .git/hooks/pre-commit
+   # Test shellcheck detection
+   env -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib DEBUG=1 bash -c "source ./.githooks/hooks-util/lib/shellcheck.sh && hooks_shellcheck_available && echo 'Shellcheck available'"
    ```
 
-5. If necessary, bypass the hooks temporarily:
+4. **Verify submodule setup**:
    ```bash
-   git commit --no-verify -m "Emergency commit message"
+   git -C /home/gregg/Projects/test-projects/hooks-util-testbed-lua-lib submodule status
    ```

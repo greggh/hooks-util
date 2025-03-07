@@ -93,46 +93,104 @@ if [ "$SHOULD_REINSTALL" = true ]; then
     log "Running hooks-util installer in $PROJECT_ROOT"
     
     # Check if template files exist in hooks-util and create if missing
-    if [ ! -f "$HOOKS_UTIL_DIR/templates/jsonlint.json" ]; then
-        mkdir -p "$HOOKS_UTIL_DIR/templates"
-        echo '{
+    TEMPLATES_DIR="$HOOKS_UTIL_DIR/templates"
+    mkdir -p "$TEMPLATES_DIR"
+    
+    # Create strict template files for testbed projects but standard templates for regular projects
+    if [[ "$PROJECT_ROOT" == *"testbed"* ]] || [[ "$PROJECT_ROOT" == *"test-projects"* ]]; then
+        log "Creating strict linting templates for testbed project"
+        
+        # For testbeds, create strict JSON template
+        if [ ! -f "$TEMPLATES_DIR/jsonlint.json" ]; then
+            echo '{
+  "validateComments": true,
+  "validateTrailingCommas": true,
+  "allowDuplicateKeys": false,
+  "allowEmptyStrings": false
+}' > "$TEMPLATES_DIR/jsonlint.json"
+            log "Created strict jsonlint.json template for testbed"
+        fi
+
+        # For testbeds, create strict markdown template
+        if [ ! -f "$TEMPLATES_DIR/markdownlint.json" ]; then
+            echo '{
+  "default": true,
+  "MD013": true,
+  "MD024": true,
+  "MD033": true
+}' > "$TEMPLATES_DIR/markdownlint.json"
+            log "Created strict markdownlint.json template for testbed"
+        fi
+
+        # For testbeds, create strict TOML template
+        if [ ! -f "$TEMPLATES_DIR/tomllint.toml" ]; then
+            echo '# TOML linting configuration
+title = "TOML Lint Configuration for Testbed"
+
+[lint]
+missing_endline = "error"
+incorrect_type = "error"
+integer_bad_format = "error"
+duplicate_key = "error"' > "$TEMPLATES_DIR/tomllint.toml"
+            log "Created strict tomllint.toml template for testbed"
+        fi
+
+        # For testbeds, create strict YAML template
+        if [ ! -f "$TEMPLATES_DIR/yamllint.yml" ]; then
+            echo '---
+extends: default
+
+rules:
+  line-length: enable
+  truthy: enable
+  document-start: enable
+  indentation:
+    spaces: 2
+    indent-sequences: true' > "$TEMPLATES_DIR/yamllint.yml"
+            log "Created strict yamllint.yml template for testbed"
+        fi
+    else
+        # For regular projects, create standard templates
+        if [ ! -f "$TEMPLATES_DIR/jsonlint.json" ]; then
+            echo '{
   "validateComments": false,
   "validateTrailingCommas": false,
   "allowDuplicateKeys": false,
   "allowEmptyStrings": true
-}' > "$HOOKS_UTIL_DIR/templates/jsonlint.json"
-        echo "Created missing jsonlint.json template"
-    fi
+}' > "$TEMPLATES_DIR/jsonlint.json"
+            log "Created standard jsonlint.json template"
+        fi
 
-    if [ ! -f "$HOOKS_UTIL_DIR/templates/markdownlint.json" ]; then
-        echo '{
+        if [ ! -f "$TEMPLATES_DIR/markdownlint.json" ]; then
+            echo '{
   "default": true,
   "MD013": false,
   "MD024": false,
   "MD033": false
-}' > "$HOOKS_UTIL_DIR/templates/markdownlint.json"
-        echo "Created missing markdownlint.json template"
-    fi
+}' > "$TEMPLATES_DIR/markdownlint.json"
+            log "Created standard markdownlint.json template"
+        fi
 
-    if [ ! -f "$HOOKS_UTIL_DIR/templates/tomllint.toml" ]; then
-        echo '# TOML linting configuration
+        if [ ! -f "$TEMPLATES_DIR/tomllint.toml" ]; then
+            echo '# TOML linting configuration
 title = "TOML Lint Configuration"
 
 [lint]
 missing_endline = "error"
 incorrect_type = "error"
-integer_bad_format = "error"' > "$HOOKS_UTIL_DIR/templates/tomllint.toml"
-        echo "Created missing tomllint.toml template"
-    fi
+integer_bad_format = "error"' > "$TEMPLATES_DIR/tomllint.toml"
+            log "Created standard tomllint.toml template"
+        fi
 
-    if [ ! -f "$HOOKS_UTIL_DIR/templates/yamllint.yml" ]; then
-        echo '---
+        if [ ! -f "$TEMPLATES_DIR/yamllint.yml" ]; then
+            echo '---
 extends: default
 
 rules:
   line-length: disable
-  truthy: disable' > "$HOOKS_UTIL_DIR/templates/yamllint.yml"
-        echo "Created missing yamllint.yml template"
+  truthy: disable' > "$TEMPLATES_DIR/yamllint.yml"
+            log "Created standard yamllint.yml template"
+        fi
     fi
     
     # Run the installer script with the collected arguments

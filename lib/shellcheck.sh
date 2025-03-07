@@ -10,7 +10,32 @@ source "${SCRIPT_DIR}/path.sh"
 # Function to check if ShellCheck is available
 # Usage: hooks_shellcheck_available
 hooks_shellcheck_available() {
-  hooks_command_exists shellcheck
+  # First check if SHELLCHECK_CMD is already set from pre-commit hook
+  if [ -n "${SHELLCHECK_CMD:-}" ]; then
+    return 0
+  fi
+  
+  # Next try direct command check
+  if command -v shellcheck >/dev/null 2>&1; then
+    SHELLCHECK_CMD="shellcheck"
+    return 0
+  fi
+  
+  # Try some common locations as fallbacks
+  if [ -f "/usr/bin/shellcheck" ]; then
+    SHELLCHECK_CMD="/usr/bin/shellcheck"
+    return 0
+  elif [ -f "/usr/local/bin/shellcheck" ]; then
+    SHELLCHECK_CMD="/usr/local/bin/shellcheck"
+    return 0
+  elif [ -f "/opt/homebrew/bin/shellcheck" ]; then
+    SHELLCHECK_CMD="/opt/homebrew/bin/shellcheck"
+    return 0
+  fi
+  
+  # Not found
+  SHELLCHECK_CMD=""
+  return 1
 }
 
 # Function to run ShellCheck on a shell script
@@ -38,7 +63,7 @@ hooks_shellcheck_run() {
   
   # Run ShellCheck
   hooks_debug "Running ShellCheck on $file"
-  shellcheck "${shellcheck_args[@]}" "$file"
+  ${SHELLCHECK_CMD:-shellcheck} "${shellcheck_args[@]}" "$file"
   local exit_code=$?
   
   if [ "$exit_code" -ne 0 ]; then

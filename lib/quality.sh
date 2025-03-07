@@ -251,13 +251,31 @@ hooks_fix_staged_quality() {
   
   local files_array=()
   while IFS= read -r file; do
-    # Skip submodules and directories
+    # Check if the file exists and is not a submodule
     if [ -f "$file" ]; then
-      files_array+=("$file")
+      # Check if file is in a submodule by comparing its git root with the main repo root
+      local file_dir="$(dirname "$file")"
+      local file_repo_root
+      file_repo_root=$(cd "$file_dir" && git rev-parse --show-toplevel 2>/dev/null || echo "")
+      local main_repo_root
+      main_repo_root=$(git rev-parse --show-toplevel)
+      
+      if [ "$file_repo_root" = "$main_repo_root" ]; then
+        # File is in the main repository, not a submodule
+        files_array+=("$file")
+      else
+        hooks_debug "Skipping file in submodule: $file"
+      fi
     else
       hooks_debug "Skipping non-file: $file (could be a submodule or directory)"
     fi
   done <<< "$staged_files"
+  
+  # Skip if no files to process
+  if [ ${#files_array[@]} -eq 0 ]; then
+    hooks_debug "No files to fix (all skipped)"
+    return "$HOOKS_ERROR_SUCCESS"
+  fi
   
   # Print what we're doing for test debugging
   hooks_debug "Fixing quality issues in ${#files_array[@]} files"
