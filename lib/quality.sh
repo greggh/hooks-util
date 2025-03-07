@@ -251,7 +251,12 @@ hooks_fix_staged_quality() {
   
   local files_array=()
   while IFS= read -r file; do
-    files_array+=("$file")
+    # Skip submodules and directories
+    if [ -f "$file" ]; then
+      files_array+=("$file")
+    else
+      hooks_debug "Skipping non-file: $file (could be a submodule or directory)"
+    fi
   done <<< "$staged_files"
   
   # Print what we're doing for test debugging
