@@ -18,3 +18,4 @@ This directory contains examples for using the Neovim Hooks Utilities in differe
 
 - [ci-integration.md](ci-integration.md) - Integrating hooks-util with CI/CD pipelines
 - [minimal-setup.md](minimal-setup.md) - Minimal configuration for simple projects
+

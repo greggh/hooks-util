@@ -66,3 +66,4 @@ If you have feature requests or would like to contribute to the roadmap, please:
 3. Explain how your idea would benefit the project
 
 We welcome community contributions to help achieve these goals! See [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to contribute.
+

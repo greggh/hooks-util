@@ -62,3 +62,4 @@ Security updates will be released as:
 ## Past Security Advisories
 
 No security advisories have been published for this project yet.
+

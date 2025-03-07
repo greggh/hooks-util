@@ -28,3 +28,4 @@ This directory contains technical reference documentation for the Neovim Hooks U
 ## Shell Compatibility
 
 - [Shell Support](shell-support.md) - Information on supported shells and compatibility issues
+
