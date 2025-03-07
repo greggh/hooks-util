@@ -26,6 +26,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Install markdownlint-cli
+        run: |
+          npm install -g markdownlint-cli
+      
       - name: Fix common Markdown issues
         run: |
           chmod +x scripts/fix-markdown.sh
@@ -33,14 +42,27 @@ jobs:
           # Note: We're not committing and pushing because the GitHub Actions bot lacks write permissions
           # This step will fix the markdown files for validation purposes in the workflow
       
-      - name: Run basic Markdown validation (continued integration)
+      - name: Perform actual Markdown validation
         run: |
-          echo "Markdown validation is disabled for CI to prevent blocking the workflow"
-          echo "The fix-markdown.sh script above helps normalize files but doesn't fix all issues"
-          echo "This allows continued integration until all Markdown can be fixed properly"
+          echo "Running markdownlint for Markdown validation..."
           
-          # This will always succeed to keep the CI pipeline green
-          exit 0
+          # Create a temporary config with slightly relaxed rules for CI
+          cat > .markdownlint.json << 'EOF'
+          {
+            "default": true,
+            "MD013": false,
+            "MD024": false,
+            "MD033": false,
+            "MD041": false
+          }
+          EOF
+          
+          # Run markdownlint on all markdown files
+          markdownlint "**/*.md" || {
+            echo "Markdown validation found issues that need to be fixed"
+            echo "Consider running ./scripts/fix-markdown.sh locally before committing"
+            exit 1
+          }
 
   check-links:
     name: Check Links
@@ -86,7 +108,10 @@ jobs:
                 # Check syntax if file is not empty
                 if [ -s "$snippet_file" ]; then
                   echo "  Checking snippet starting at line $line_num in $file"
-                  bash -n "$snippet_file" || echo "Syntax error in $file at line $line_num"
+                  bash -n "$snippet_file" || {
+                    echo "Syntax error in $file at line $line_num"
+                    exit 1
+                  }
                 fi
               fi
             done
