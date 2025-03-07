@@ -809,6 +809,56 @@ else
   hooks_info "- post-submodule-update hook"
 fi
 
+# Run ensure_submodules.sh to ensure all required submodules are initialized
+# This is especially important for lust-next which is needed for test quality validation
+hooks_print_header "Ensuring submodules are properly initialized"
+if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
+  "${SCRIPT_DIR}/scripts/ensure_submodules.sh" -t "$TARGET_DIR"
+else
+  hooks_info "[DRY RUN/CHECK ONLY] Would ensure submodules are properly initialized"
+fi
+
+# Create a file to help track installed hook files
+hooks_print_header "Creating hooks-util tracking file"
+INSTALLED_FILES_LIST="$HOOKS_DIR/.hooks-util-files.txt"
+if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
+  {
+    echo "# This file lists all files installed by hooks-util"
+    echo "# Used for tracking what was added and needs to be committed"
+    echo "# Last updated: $(date)"
+    echo ""
+    echo ".githooks/lib/"
+    echo ".githooks/hooks/"
+    echo ".githooks/scripts/"
+    echo ".githooks/.hooks-util-files.txt"
+    echo ".githooks/post-checkout"
+    echo ".githooks/post-merge"
+    echo ".githooks/post-submodule-update"
+  } > "$INSTALLED_FILES_LIST"
+  
+  # Add the linting configuration files if they were installed
+  if [ -f "$TARGET_DIR/.markdownlint.json" ]; then
+    echo ".markdownlint.json" >> "$INSTALLED_FILES_LIST"
+  fi
+  if [ -f "$TARGET_DIR/.yamllint.yml" ]; then
+    echo ".yamllint.yml" >> "$INSTALLED_FILES_LIST"
+  fi
+  if [ -f "$TARGET_DIR/.jsonlintrc" ]; then
+    echo ".jsonlintrc" >> "$INSTALLED_FILES_LIST"
+  fi
+  if [ -f "$TARGET_DIR/.tomllintrc" ]; then
+    echo ".tomllintrc" >> "$INSTALLED_FILES_LIST"
+  fi
+  if [ -d "$TARGET_DIR/.github/workflows" ]; then
+    echo ".github/workflows/" >> "$INSTALLED_FILES_LIST"
+  fi
+  
+  hooks_success "Created hooks-util tracking file: $INSTALLED_FILES_LIST"
+  hooks_info "Review this file to see which files you should add to git"
+else
+  hooks_info "[DRY RUN/CHECK ONLY] Would create hooks-util tracking file at $INSTALLED_FILES_LIST"
+fi
+
 hooks_print_header "Installation complete"
 hooks_success "Hooks are ready to use!"
 hooks_info "Pre-commit hook will:"
@@ -824,6 +874,12 @@ hooks_info "  - Prefix unused variables with _"
 hooks_info "  - Add final newlines to files"
 hooks_info "  - Fix markdown formatting issues"
 hooks_info "- Run tests to ensure code quality"
+hooks_info ""
+hooks_info "IMPORTANT NEXT STEPS:"
+hooks_info "1. Review the hooks-util tracking file at: $HOOKS_DIR/.hooks-util-files.txt"
+hooks_info "2. Add the listed files to your git repository to track them:"
+hooks_info "   git add \$(cat $HOOKS_DIR/.hooks-util-files.txt)"
+hooks_info "3. Commit the changes to save your hooks configuration"
 hooks_info ""
 hooks_info "To customize, edit: $TARGET_DIR/.hooksrc"
 hooks_info "Post-update hooks are installed to auto-update when the hooks-util submodule is updated"

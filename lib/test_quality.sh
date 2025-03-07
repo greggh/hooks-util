@@ -37,6 +37,19 @@ hooks_find_lust_next() {
     fi
   done
   
+  # Print additional debugging info to help troubleshoot
+  hooks_debug "Could not find lust-next in any of these locations:"
+  for path in "${lust_next_paths[@]}"; do
+    hooks_debug "  - $path"
+    if [ -d "$path" ]; then
+      hooks_debug "    (directory exists but missing lust-next.lua)"
+    fi
+  done
+  hooks_debug "Your project may need to initialize submodules with:"
+  hooks_debug "git submodule update --init --recursive"
+  hooks_debug "Or use our helper script:"
+  hooks_debug "${SCRIPT_DIR}/../scripts/ensure_submodules.sh"
+  
   return 1
 }
 
@@ -492,6 +505,9 @@ EOL
   
   if [ -z "$lust_next_path" ]; then
     hooks_warning "Could not find lust-next installation - skipping test quality validation"
+    hooks_error "To resolve this issue, initialize submodules with: git submodule update --init --recursive"
+    hooks_error "Or use our helper script: ${SCRIPT_DIR}/../scripts/ensure_submodules.sh"
+    hooks_error "This is especially important for testbed projects that validate hooks-util functionality"
     return "$HOOKS_ERROR_SUCCESS"
   fi
   
