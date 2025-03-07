@@ -241,11 +241,22 @@ hooks_fix_files_quality() {
 # Function to fix code quality issues in staged files
 # Usage: hooks_fix_staged_quality
 hooks_fix_staged_quality() {
+  # Skip if we're already processing quality fixes (prevent infinite recursion)
+  if [ "${HOOKS_PROCESSING_QUALITY:-}" = "true" ]; then
+    hooks_debug "Already processing quality fixes, skipping nested call"
+    return "$HOOKS_ERROR_SUCCESS"
+  fi
+  
+  # Set flag to prevent recursive calls
+  export HOOKS_PROCESSING_QUALITY="true"
+  
   local staged_files
   staged_files=$(git diff --cached --name-only --diff-filter=ACM)
   
   if [ -z "$staged_files" ]; then
     hooks_debug "No staged files to fix"
+    # Reset processing flag
+    export HOOKS_PROCESSING_QUALITY="false"
     return "$HOOKS_ERROR_SUCCESS"
   fi
   
@@ -295,6 +306,9 @@ hooks_fix_staged_quality() {
   else
     hooks_error "Failed to fix some files (exit code: $exit_code)"
   fi
+  
+  # Reset processing flag
+  export HOOKS_PROCESSING_QUALITY="false"
   
   return "$exit_code"
 }
