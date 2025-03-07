@@ -29,7 +29,8 @@ jobs:
       
       - name: Create relaxed config
         run: |
-          echo 'extends: relaxed
+          cat > .yamllint-ci.yml << 'EOF'
+          extends: relaxed
 
           rules:
             line-length: disable
@@ -42,7 +43,8 @@ jobs:
             comments: disable
             braces: disable
             brackets: disable
-            commas: disable' > .yamllint-ci.yml
+            commas: disable
+          EOF
       
       - name: Run yamllint
         run: |
