@@ -489,7 +489,10 @@ if [ -d "$GITHUB_DIR" ] || [ -f "$TARGET_DIR/.gitlab-ci.yml" ]; then
   fi
   
   hooks_info "Detected project type: $PROJECT_TYPE"
-    
+  
+  # Process workflows based on mode
+  if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
+    # Full installation/update mode
     # Copy base workflow files
     for workflow in "$SCRIPT_DIR/ci/github/workflows/"*; do
       if [ -f "$workflow" ]; then
@@ -515,41 +518,65 @@ if [ -d "$GITHUB_DIR" ] || [ -f "$TARGET_DIR/.gitlab-ci.yml" ]; then
         fi
         
         if [ "$WORKFLOW_NEEDS_UPDATE" = true ]; then
-          if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
-            # Backup existing workflow if it exists
-            if [ -f "$target_workflow" ]; then
-              backup_file="${target_workflow}.backup.$(date +%Y%m%d%H%M%S)"
-              cp "$target_workflow" "$backup_file"
-              hooks_info "Backed up existing workflow to: $backup_file"
-            fi
-            
-            # If adapter configuration exists, merge with base
-            if [ -f "$adapter_config" ]; then
-              hooks_info "Using adapter-specific configuration for $workflow_name"
-              # Placeholder for actual YAML merging (simplified here)
-              cat "$workflow" "$adapter_config" > "$target_workflow"
-            else
-              # Just copy the base workflow
-              cp "$workflow" "$target_workflow"
-            fi
-            
-            hooks_success "Installed workflow: $workflow_name"
-          elif [ "$CHECK_UPDATES_ONLY" = true ]; then
-            hooks_info "Update needed for workflow: $workflow_name"
-          else
-            hooks_info "[DRY RUN] Would install workflow: $workflow_name"
+          # Backup existing workflow if it exists
+          if [ -f "$target_workflow" ]; then
+            backup_file="${target_workflow}.backup.$(date +%Y%m%d%H%M%S)"
+            cp "$target_workflow" "$backup_file"
+            hooks_info "Backed up existing workflow to: $backup_file"
           fi
+          
+          # If adapter configuration exists, merge with base
+          if [ -f "$adapter_config" ]; then
+            hooks_info "Using adapter-specific configuration for $workflow_name"
+            # Placeholder for actual YAML merging (simplified here)
+            cat "$workflow" "$adapter_config" > "$target_workflow"
+          else
+            # Just copy the base workflow
+            cp "$workflow" "$target_workflow"
+          fi
+          
+          hooks_success "Installed workflow: $workflow_name"
+        else
+          hooks_info "Workflow $workflow_name is up to date"
+        fi
+      fi
+    done
+  elif [ "$CHECK_UPDATES_ONLY" = true ]; then
+    # Check-only mode
+    # Check base workflow files for updates
+    for workflow in "$SCRIPT_DIR/ci/github/workflows/"*; do
+      if [ -f "$workflow" ]; then
+        workflow_name=$(basename "$workflow")
+        target_workflow="$WORKFLOWS_DIR/$workflow_name"
+        
+        # Determine if there's an adapter-specific configuration
+        adapter_config="$SCRIPT_DIR/ci/github/configs/$PROJECT_TYPE/${workflow_name%.*}.config.yml"
+        
+        # Check if workflow needs updating
+        WORKFLOW_NEEDS_UPDATE=false
+        
+        if [ ! -f "$target_workflow" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ]; then
+          WORKFLOW_NEEDS_UPDATE=true
+        else
+          # For workflows with adapter configurations, always update to ensure the merge is current
+          if [ -f "$adapter_config" ]; then
+            WORKFLOW_NEEDS_UPDATE=true
+          # For base workflows, check if the source has changed
+          elif ! cmp -s "$workflow" "$target_workflow"; then
+            WORKFLOW_NEEDS_UPDATE=true
+          fi
+        fi
+        
+        if [ "$WORKFLOW_NEEDS_UPDATE" = true ]; then
+          hooks_info "Update needed for workflow: $workflow_name"
         else
           hooks_info "Workflow $workflow_name is up to date"
         fi
       fi
     done
   else
-    if [ "$CHECK_UPDATES_ONLY" = true ]; then
-      hooks_info "Checking GitHub workflows for project type: $PROJECT_TYPE"
-    else
-      hooks_info "[DRY RUN] Would set up GitHub workflows for project type: $PROJECT_TYPE"
-    fi
+    # Dry-run mode
+    hooks_info "[DRY RUN] Would set up GitHub workflows for project type: $PROJECT_TYPE"
   fi
 fi
 
