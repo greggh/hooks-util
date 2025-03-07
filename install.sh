@@ -594,6 +594,10 @@ fi
 # Install post-update hook
 hooks_print_header "Setting up post-update hook"
 if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
+  # Copy the installer script to the hooks directory for update_hook.sh to use
+  cp "$SCRIPT_DIR/install.sh" "$HOOKS_DIR/install.sh"
+  chmod +x "$HOOKS_DIR/install.sh"
+  
   # Copy the post-update hook script
   POST_UPDATE_SCRIPT="$HOOKS_DIR/scripts/update_hook.sh"
   POST_UPDATE_SCRIPT_DIR="$(dirname "$POST_UPDATE_SCRIPT")"
