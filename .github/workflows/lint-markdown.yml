@@ -2,12 +2,12 @@ name: Lint Markdown
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - '**/*.md'
       - '.github/workflows/lint-markdown.yml'
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - '**/*.md'
       - '.github/workflows/lint-markdown.yml'
@@ -23,14 +23,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: '16'
       
       - name: Install markdownlint
         run: npm install -g markdownlint-cli
       
       - name: Create relaxed config
         run: |
-          echo '{
+          cat > .markdownlint-ci.json << 'EOF'
+          {
             "default": true,
             "MD009": false,
             "MD012": false,
@@ -40,7 +41,8 @@ jobs:
             "MD036": false,
             "MD040": false,
             "MD041": false
-          }' > .markdownlint-ci.json
+          }
+          EOF
       
       - name: Run markdownlint
         run: markdownlint '**/*.md' --ignore node_modules --config .markdownlint-ci.json
