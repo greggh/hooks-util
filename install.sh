@@ -27,7 +27,9 @@ show_usage() {
   echo "  -c, --config      Create a default .hooksrc configuration file"
   echo "  -f, --force       Overwrite existing hooks"
   echo "  -v, --verbose     Enable verbose output"
+  echo "  -q, --quiet       Reduce output verbosity"
   echo "  --dry-run         Show what would be done without making changes"
+  echo "  --check-updates-only Check for updates without installing new files"
   echo "  -h, --help        Show this help message"
   echo
   echo "Examples:"
@@ -42,6 +44,7 @@ TARGET_DIR=""
 CREATE_CONFIG=false
 FORCE_OVERWRITE=false
 DRY_RUN=false
+CHECK_UPDATES_ONLY=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -61,9 +64,18 @@ while [[ $# -gt 0 ]]; do
       hooks_set_verbosity "$HOOKS_VERBOSITY_VERBOSE"
       shift
       ;;
+    -q|--quiet)
+      hooks_set_verbosity "$HOOKS_VERBOSITY_QUIET"
+      shift
+      ;;
     --dry-run)
       DRY_RUN=true
       hooks_info "Running in dry-run mode (no changes will be made)"
+      shift
+      ;;
+    --check-updates-only)
+      CHECK_UPDATES_ONLY=true
+      hooks_info "Running in check-updates-only mode (only checking for updates)"
       shift
       ;;
     -h|--help)
@@ -130,7 +142,7 @@ for hook_file in "$SCRIPT_DIR/hooks"/*; do
     
     # Install or update the hook file
     if [ "$HOOK_NEEDS_UPDATE" = true ]; then
-      if [ "$DRY_RUN" = false ]; then
+      if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
         # Backup existing hook if it exists
         if [ -f "$target_file" ]; then
           backup_file="${target_file}.backup.$(date +%Y%m%d%H%M%S)"
@@ -141,6 +153,8 @@ for hook_file in "$SCRIPT_DIR/hooks"/*; do
         cp "$hook_file" "$target_file"
         chmod +x "$target_file"
         hooks_success "Installed hook: $hook_name"
+      elif [ "$CHECK_UPDATES_ONLY" = true ]; then
+        hooks_info "Update needed for hook: $hook_name"
       else
         hooks_info "[DRY RUN] Would install hook: $hook_name"
       fi
@@ -191,7 +205,7 @@ fi
 
 # Install or update lib files
 if [ ! -d "$LIB_TARGET_DIR" ] || [ "$NEED_UPDATE" = true ]; then
-  if [ "$DRY_RUN" = false ]; then
+  if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
     # Backup existing directory if it exists
     if [ -d "$LIB_TARGET_DIR" ]; then
       BACKUP_DIR="${LIB_TARGET_DIR}.backup.$(date +%Y%m%d%H%M%S)"
@@ -210,6 +224,8 @@ if [ ! -d "$LIB_TARGET_DIR" ] || [ "$NEED_UPDATE" = true ]; then
     done
     
     hooks_success "Installed/updated library files to: $LIB_TARGET_DIR"
+  elif [ "$CHECK_UPDATES_ONLY" = true ]; then
+    hooks_info "Update needed for library files (version $HOOKS_UTIL_VERSION)"
   else
     hooks_info "[DRY RUN] Would install/update library files to: $LIB_TARGET_DIR"
   fi
@@ -292,7 +308,7 @@ hooks_print_header "Installing documentation tools"
 # Check if the target has markdown files
 MARKDOWN_FILES=$(find "$TARGET_DIR" -name "*.md" | wc -l)
 if [ "$MARKDOWN_FILES" -gt 0 ]; then
-  if [ "$DRY_RUN" = false ]; then
+  if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
     # Check if markdown config needs updating
     MARKDOWN_CONFIG_FILE="$TARGET_DIR/.markdownlint.json"
     if [ ! -f "$MARKDOWN_CONFIG_FILE" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ]; then
@@ -309,34 +325,63 @@ if [ "$MARKDOWN_FILES" -gt 0 ]; then
     else
       hooks_info "Markdown configuration is up to date"
     fi
+  elif [ "$CHECK_UPDATES_ONLY" = true ]; then
+    # Just check if markdown config needs updating
+    MARKDOWN_CONFIG_FILE="$TARGET_DIR/.markdownlint.json"
+    if [ ! -f "$MARKDOWN_CONFIG_FILE" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ]; then
+      hooks_info "Update needed for markdown configuration"
+    else
+      hooks_info "Markdown configuration is up to date"
+    fi
     
     # Copy markdown fixing scripts
     MARKDOWN_SCRIPTS_DIR="$HOOKS_DIR/scripts/markdown"
     mkdir -p "$MARKDOWN_SCRIPTS_DIR"
     
-    # Copy all markdown scripts with update checking
-    for script_file in "$SCRIPT_DIR/scripts/markdown/"*.sh; do
-      if [ -f "$script_file" ]; then
-        script_name=$(basename "$script_file")
-        target_script="$MARKDOWN_SCRIPTS_DIR/$script_name"
-        
-        # Check if script needs updating
-        if [ ! -f "$target_script" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ] || ! cmp -s "$script_file" "$target_script"; then
-          # Backup existing script if it exists
-          if [ -f "$target_script" ]; then
-            backup_file="${target_script}.backup.$(date +%Y%m%d%H%M%S)"
-            cp "$target_script" "$backup_file"
-            hooks_info "Backed up existing markdown script to: $backup_file"
-          fi
+    if [ "$CHECK_UPDATES_ONLY" = false ]; then
+      # Copy all markdown scripts with update checking
+      for script_file in "$SCRIPT_DIR/scripts/markdown/"*.sh; do
+        if [ -f "$script_file" ]; then
+          script_name=$(basename "$script_file")
+          target_script="$MARKDOWN_SCRIPTS_DIR/$script_name"
           
-          cp "$script_file" "$target_script"
-          chmod +x "$target_script"
-          hooks_info "Updated markdown script: $script_name"
+          # Check if script needs updating
+          if [ ! -f "$target_script" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ] || ! cmp -s "$script_file" "$target_script"; then
+            # Backup existing script if it exists
+            if [ -f "$target_script" ]; then
+              backup_file="${target_script}.backup.$(date +%Y%m%d%H%M%S)"
+              cp "$target_script" "$backup_file"
+              hooks_info "Backed up existing markdown script to: $backup_file"
+            fi
+            
+            cp "$script_file" "$target_script"
+            chmod +x "$target_script"
+            hooks_info "Updated markdown script: $script_name"
+          fi
         fi
+      done
+      
+      hooks_success "Installed markdown fixing scripts"
+    else
+      # Just check if any scripts need updating
+      SCRIPTS_NEED_UPDATE=false
+      for script_file in "$SCRIPT_DIR/scripts/markdown/"*.sh; do
+        if [ -f "$script_file" ]; then
+          script_name=$(basename "$script_file")
+          target_script="$MARKDOWN_SCRIPTS_DIR/$script_name"
+          
+          # Check if script needs updating
+          if [ ! -f "$target_script" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ] || ! cmp -s "$script_file" "$target_script"; then
+            hooks_info "Update needed for markdown script: $script_name"
+            SCRIPTS_NEED_UPDATE=true
+          fi
+        fi
+      done
+      
+      if [ "$SCRIPTS_NEED_UPDATE" = false ]; then
+        hooks_info "All markdown scripts are up to date"
       fi
-    done
-    
-    hooks_success "Installed markdown fixing scripts"
+    fi
   else
     hooks_info "[DRY RUN] Would install markdown linting configuration and scripts"
   fi
@@ -424,25 +469,26 @@ WORKFLOWS_DIR="$GITHUB_DIR/workflows"
 
 # Check if this is a GitHub repository
 if [ -d "$GITHUB_DIR" ] || [ -f "$TARGET_DIR/.gitlab-ci.yml" ]; then
-  if [ "$DRY_RUN" = false ]; then
-    # Create workflows directory if it doesn't exist
+  # Create workflows directory if it doesn't exist and not in check-only mode
+  if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
     mkdir -p "$WORKFLOWS_DIR"
-    
-    # Detect project type and determine appropriate adapter
-    PROJECT_TYPE="unknown"
-    
-    # Simple project type detection
-    if [ -f "$TARGET_DIR/init.vim" ] || [ -f "$TARGET_DIR/init.lua" ]; then
-      PROJECT_TYPE="nvim-config"
-    elif [ -d "$TARGET_DIR/lua" ] && [ -d "$TARGET_DIR/plugin" ]; then
-      PROJECT_TYPE="nvim-plugin"
-    elif [ -f "$TARGET_DIR/rockspec" ] || [ -f "$TARGET_DIR/"*.rockspec ]; then
-      PROJECT_TYPE="lua-lib"
-    elif [ -f "$TARGET_DIR/mkdocs.yml" ] || [ -d "$TARGET_DIR/docs" ]; then
-      PROJECT_TYPE="docs"
-    fi
-    
-    hooks_info "Detected project type: $PROJECT_TYPE"
+  fi
+  
+  # Detect project type and determine appropriate adapter
+  PROJECT_TYPE="unknown"
+  
+  # Simple project type detection
+  if [ -f "$TARGET_DIR/init.vim" ] || [ -f "$TARGET_DIR/init.lua" ]; then
+    PROJECT_TYPE="nvim-config"
+  elif [ -d "$TARGET_DIR/lua" ] && [ -d "$TARGET_DIR/plugin" ]; then
+    PROJECT_TYPE="nvim-plugin"
+  elif [ -f "$TARGET_DIR/rockspec" ] || [ -f "$TARGET_DIR/"*.rockspec ]; then
+    PROJECT_TYPE="lua-lib"
+  elif [ -f "$TARGET_DIR/mkdocs.yml" ] || [ -d "$TARGET_DIR/docs" ]; then
+    PROJECT_TYPE="docs"
+  fi
+  
+  hooks_info "Detected project type: $PROJECT_TYPE"
     
     # Copy base workflow files
     for workflow in "$SCRIPT_DIR/ci/github/workflows/"*; do
@@ -469,37 +515,47 @@ if [ -d "$GITHUB_DIR" ] || [ -f "$TARGET_DIR/.gitlab-ci.yml" ]; then
         fi
         
         if [ "$WORKFLOW_NEEDS_UPDATE" = true ]; then
-          # Backup existing workflow if it exists
-          if [ -f "$target_workflow" ]; then
-            backup_file="${target_workflow}.backup.$(date +%Y%m%d%H%M%S)"
-            cp "$target_workflow" "$backup_file"
-            hooks_info "Backed up existing workflow to: $backup_file"
-          fi
-          
-          # If adapter configuration exists, merge with base
-          if [ -f "$adapter_config" ]; then
-            hooks_info "Using adapter-specific configuration for $workflow_name"
-            # Placeholder for actual YAML merging (simplified here)
-            cat "$workflow" "$adapter_config" > "$target_workflow"
+          if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
+            # Backup existing workflow if it exists
+            if [ -f "$target_workflow" ]; then
+              backup_file="${target_workflow}.backup.$(date +%Y%m%d%H%M%S)"
+              cp "$target_workflow" "$backup_file"
+              hooks_info "Backed up existing workflow to: $backup_file"
+            fi
+            
+            # If adapter configuration exists, merge with base
+            if [ -f "$adapter_config" ]; then
+              hooks_info "Using adapter-specific configuration for $workflow_name"
+              # Placeholder for actual YAML merging (simplified here)
+              cat "$workflow" "$adapter_config" > "$target_workflow"
+            else
+              # Just copy the base workflow
+              cp "$workflow" "$target_workflow"
+            fi
+            
+            hooks_success "Installed workflow: $workflow_name"
+          elif [ "$CHECK_UPDATES_ONLY" = true ]; then
+            hooks_info "Update needed for workflow: $workflow_name"
           else
-            # Just copy the base workflow
-            cp "$workflow" "$target_workflow"
+            hooks_info "[DRY RUN] Would install workflow: $workflow_name"
           fi
-          
-          hooks_success "Installed workflow: $workflow_name"
         else
           hooks_info "Workflow $workflow_name is up to date"
         fi
       fi
     done
   else
-    hooks_info "[DRY RUN] Would set up GitHub workflows for project type: $PROJECT_TYPE"
+    if [ "$CHECK_UPDATES_ONLY" = true ]; then
+      hooks_info "Checking GitHub workflows for project type: $PROJECT_TYPE"
+    else
+      hooks_info "[DRY RUN] Would set up GitHub workflows for project type: $PROJECT_TYPE"
+    fi
   fi
 fi
 
 # Install post-update hook
 hooks_print_header "Setting up post-update hook"
-if [ "$DRY_RUN" = false ]; then
+if [ "$DRY_RUN" = false ] && [ "$CHECK_UPDATES_ONLY" = false ]; then
   # Copy the post-update hook script
   POST_UPDATE_SCRIPT="$HOOKS_DIR/scripts/update_hook.sh"
   POST_UPDATE_SCRIPT_DIR="$(dirname "$POST_UPDATE_SCRIPT")"
@@ -590,6 +646,60 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   fi
   
   hooks_success "Installed/updated post-update hooks"
+elif [ "$CHECK_UPDATES_ONLY" = true ]; then
+  # Just check if post-update hooks need updating
+  
+  # Check if update script needs updating
+  POST_UPDATE_SCRIPT="$HOOKS_DIR/scripts/update_hook.sh"
+  SCRIPT_NEEDS_UPDATE=false
+  
+  if [ ! -f "$POST_UPDATE_SCRIPT" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ]; then
+    SCRIPT_NEEDS_UPDATE=true
+    hooks_info "Update needed for post-update script"
+  elif ! cmp -s "$SCRIPT_DIR/scripts/update_hook.sh" "$POST_UPDATE_SCRIPT"; then
+    SCRIPT_NEEDS_UPDATE=true
+    hooks_info "Update needed for post-update script"
+  else
+    hooks_info "Post-update script is up to date"
+  fi
+  
+  # Check post-merge hook
+  POST_MERGE_HOOK="$HOOKS_DIR/post-merge"
+  POST_MERGE_CONTENT='#!/bin/bash
+# Auto-generated by hooks-util installer
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/scripts/update_hook.sh"
+'
+  
+  HOOK_NEEDS_UPDATE=false
+  if [ ! -f "$POST_MERGE_HOOK" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ]; then
+    HOOK_NEEDS_UPDATE=true
+    hooks_info "Update needed for post-merge hook"
+  elif [ "$(cat "$POST_MERGE_HOOK")" != "$POST_MERGE_CONTENT" ]; then
+    HOOK_NEEDS_UPDATE=true
+    hooks_info "Update needed for post-merge hook"
+  else
+    hooks_info "Post-merge hook is up to date"
+  fi
+  
+  # Check post-checkout hook
+  POST_CHECKOUT_HOOK="$HOOKS_DIR/post-checkout"
+  POST_CHECKOUT_CONTENT='#!/bin/bash
+# Auto-generated by hooks-util installer
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/scripts/update_hook.sh" --quiet
+'
+  
+  HOOK_NEEDS_UPDATE=false
+  if [ ! -f "$POST_CHECKOUT_HOOK" ] || [ "$FORCE_OVERWRITE" = true ] || [ "$NEED_UPDATE" = true ]; then
+    HOOK_NEEDS_UPDATE=true
+    hooks_info "Update needed for post-checkout hook"
+  elif [ "$(cat "$POST_CHECKOUT_HOOK")" != "$POST_CHECKOUT_CONTENT" ]; then
+    HOOK_NEEDS_UPDATE=true
+    hooks_info "Update needed for post-checkout hook"
+  else
+    hooks_info "Post-checkout hook is up to date"
+  fi
 else
   hooks_info "[DRY RUN] Would install post-update hooks"
 fi
