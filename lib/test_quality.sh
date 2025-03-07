@@ -337,9 +337,9 @@ hooks_validate_test_quality() {
 hooks_run_test_quality_checks() {
   local project_dir="${1:-$PWD}"
   
-  # For testbed projects, be more lenient
+  # For testbed projects, be extra strict to properly test hooks-util functionality
   if [[ "${project_dir}" == *"testbed"* ]]; then
-    hooks_warning "Testbed project detected - relaxing test quality requirements"
+    hooks_info "Testbed project detected - applying strict test quality validation"
   fi
   
   # Skip if test quality validation is not enabled
@@ -545,10 +545,10 @@ EOL
     hooks_debug "Test quality validation is disabled in configuration"
   fi
   
-  # For testbed projects, don't fail the commit even if quality validation fails
+  # For testbed projects, we want to ensure strict validation to test hooks-util properly
   if [[ "${project_dir}" == *"testbed"* ]] && [ "$exit_code" -ne 0 ]; then
-    hooks_warning "Test quality validation failed in testbed project, but allowing commit to proceed"
-    return "$HOOKS_ERROR_SUCCESS"
+    hooks_error "Test quality validation failed in testbed project - failing commit to ensure proper testing"
+    return "$exit_code"
   fi
   
   # Return the final status

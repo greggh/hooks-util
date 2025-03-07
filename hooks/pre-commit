@@ -1,15 +1,9 @@
 #!/bin/bash
 # Pre-commit hook for Neovim Lua projects
-# Check if we're in a testbed project and disable strict mode if so
-if [[ "$(pwd)" == *"testbed"* ]]; then
-  # More lenient error handling for testbed projects
-  set +e
-  set +o pipefail
-else
-  # Standard strict error handling for normal projects
-  set -e
-  set -o pipefail
-fi
+# For all projects including testbeds, use strict error handling
+# Testbeds should have the strictest requirements to properly validate hooks-util
+set -e
+set -o pipefail
 
 # Determine the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

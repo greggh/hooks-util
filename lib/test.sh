@@ -231,9 +231,9 @@ hooks_run_tests_precommit() {
     return "$HOOKS_ERROR_SUCCESS"
   fi
   
-  # For testbed projects, just warn instead of failing if tests don't exist
+  # For testbed projects, we should verify that tests are properly configured
   if [[ "${project_dir}" == *"testbed"* ]]; then
-    hooks_warning "Testbed project detected - tests will be skipped if framework not found"
+    hooks_info "Testbed project detected - validating test framework configuration"
     
     # Detect the test framework
     local framework_info
@@ -241,9 +241,16 @@ hooks_run_tests_precommit() {
     local framework
     framework=$(echo "$framework_info" | cut -d'|' -f1)
     
-    # If no valid framework detected in testbed, just return success
+    # For testbed projects, we should ensure they have test frameworks set up
     if [ "$framework" = "unknown" ]; then
-      hooks_warning "No test framework detected in testbed project, skipping tests"
+      # In development environment, we'll allow this to pass for now while developing
+      # but print a clear error message indicating this should be fixed
+      hooks_error "No test framework detected in testbed project - this should be fixed!"
+      hooks_error "Testbed projects should have proper test frameworks configured"
+      
+      # For testing purposes we'll temporarily allow this to continue
+      # but mark it as a warning that needs fixing
+      hooks_warning "Continuing for development purposes, but this should be fixed"
       return "$HOOKS_ERROR_SUCCESS"
     fi
   fi
@@ -252,10 +259,10 @@ hooks_run_tests_precommit() {
   hooks_run_tests "$project_dir"
   local exit_code=$?
   
-  # For testbed projects, don't fail the commit even if tests fail
+  # For testbed projects, we need to ensure tests pass to properly validate hooks-util
   if [[ "${project_dir}" == *"testbed"* ]] && [ "$exit_code" -ne 0 ]; then
-    hooks_warning "Tests failed in testbed project, but allowing commit to proceed"
-    return "$HOOKS_ERROR_SUCCESS"
+    hooks_error "Tests failed in testbed project - failing commit to ensure proper testing"
+    return "$exit_code"
   fi
   
   return "$exit_code"
