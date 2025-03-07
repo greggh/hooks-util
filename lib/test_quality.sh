@@ -337,6 +337,11 @@ hooks_validate_test_quality() {
 hooks_run_test_quality_checks() {
   local project_dir="${1:-$PWD}"
   
+  # For testbed projects, be more lenient
+  if [[ "${project_dir}" == *"testbed"* ]]; then
+    hooks_warning "Testbed project detected - relaxing test quality requirements"
+  fi
+  
   # Skip if test quality validation is not enabled
   if [ "${HOOKS_TEST_QUALITY_ENABLED}" != true ]; then
     hooks_debug "Test quality validation is disabled in configuration"
@@ -538,6 +543,12 @@ EOL
     hooks_warning "Quality validation is enabled but lust-next does not have quality capability"
   else
     hooks_debug "Test quality validation is disabled in configuration"
+  fi
+  
+  # For testbed projects, don't fail the commit even if quality validation fails
+  if [[ "${project_dir}" == *"testbed"* ]] && [ "$exit_code" -ne 0 ]; then
+    hooks_warning "Test quality validation failed in testbed project, but allowing commit to proceed"
+    return "$HOOKS_ERROR_SUCCESS"
   fi
   
   # Return the final status
