@@ -275,7 +275,7 @@ ignore = {
       
       local rockspec_file = io.open(rockspec_path, "w")
       if rockspec_file then
-        rockspec_file:write(string.format([[
+        rockspec_file:write(string.format([=[
 package = "%s"
 version = "dev-1"
 
@@ -305,7 +305,7 @@ build = {
     -- Add more modules as needed
   }
 }
-]], 
+]=], 
           project_name, -- package name
           project_name, -- source url
           project_name, -- homepage

@@ -54,7 +54,7 @@ done
 
 # Check configuration loading
 echo "Testing configuration loading..."
-hooks_load_config
+hooks_load_config "$@"
 echo "HOOKS_STYLUA_ENABLED: ${HOOKS_STYLUA_ENABLED}"
 echo "HOOKS_LUACHECK_ENABLED: ${HOOKS_LUACHECK_ENABLED}"
 echo "HOOKS_TESTS_ENABLED: ${HOOKS_TESTS_ENABLED}"
