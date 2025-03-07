@@ -1,0 +1,46 @@
+name: Lint Markdown
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/lint-markdown.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.md'
+      - '.github/workflows/lint-markdown.yml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+      
+      - name: Create relaxed config
+        run: |
+          echo '{
+            "default": true,
+            "MD009": false,
+            "MD012": false,
+            "MD013": false,
+            "MD029": false,
+            "MD031": false,
+            "MD036": false,
+            "MD040": false,
+            "MD041": false
+          }' > .markdownlint-ci.json
+      
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --ignore node_modules --config .markdownlint-ci.json
