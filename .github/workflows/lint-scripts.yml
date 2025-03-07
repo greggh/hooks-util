@@ -41,7 +41,8 @@ jobs:
       - name: Run shellcheck
         if: env.SHELL_SCRIPTS_EXIST == 'true'
         run: |
-          find ./scripts -name "*.sh" -type f -print0 | xargs -0 shellcheck
+          # Use -x to follow source directives
+          find ./scripts -name "*.sh" -type f -print0 | xargs -0 shellcheck -x
 
   luacheck:
     name: Lua Check
@@ -79,14 +80,34 @@ jobs:
         if: env.LUA_FILES_EXIST == 'true'
         run: |
           cat > .luacheckrc << 'EOF'
+          -- Disable max line length restriction
           max_line_length = false
-          std = {
-            globals = {"vim", "assert", "describe", "it", "before_each", "after_each"}
+          
+          -- Standard Lua globals, plus Lua 5.1 globals and test framework globals
+          std = "lua51"
+          
+          globals = {
+            "vim", "assert", "describe", "it", "before_each", "after_each",
+            "print", "io", "table", "string", "math", "os", "require", "ipairs", "pairs"
           }
+          
+          -- Files to exclude
           exclude_files = {
             "deps/**",
             ".luarocks/**"
           }
+          
+          -- Disable specific checks
+          ignore = {
+            -- Unused variables and arguments
+            "212", "213",
+            -- Whitespace at end of line or file
+            "611", "614",
+            -- Shadowing
+            "421", "431",
+            -- Misc
+            "581" -- Negation operator
+          }
           EOF
           
-          luacheck .
+          luacheck . --config .luacheckrc

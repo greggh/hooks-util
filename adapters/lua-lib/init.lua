@@ -305,7 +305,15 @@ build = {
     -- Add more modules as needed
   }
 }
-]], project_name, project_name, project_name, project_name, project_name, project_name, project_name))
+]], 
+          project_name, -- package name
+          project_name, -- source url
+          project_name, -- homepage
+          project_name, -- modules name
+          project_name, -- modules file
+          project_name, -- modules.utils name 
+          project_name  -- modules.utils file
+        ))
         rockspec_file:close()
       end
     end
