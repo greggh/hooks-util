@@ -69,7 +69,7 @@ if [ ! -d "${PROJECT_ROOT}/.git" ]; then
 fi
 
 # Go back to original directory
-cd "$CURRENT_DIR"
+cd "$CURRENT_DIR" || exit 1
 
 # Function to log messages
 log() {

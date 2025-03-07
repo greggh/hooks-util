@@ -4,8 +4,9 @@
 
 # Define a function to wrap git commands that handle submodules
 git_with_hooks() {
-  # Capture the original command
-  local original_command="$@"
+  # We don't need to capture the original command, but we keep it for reference
+  # in case a future implementation needs the full command
+  # local original_command=("$@")
   
   # Execute the original git command
   git "$@"
@@ -16,7 +17,8 @@ git_with_hooks() {
     echo "Running post-submodule-update hooks..."
     
     # Find the root of the repository
-    local repo_root=$(git rev-parse --show-toplevel)
+    local repo_root
+    repo_root=$(git rev-parse --show-toplevel)
     
     # Run the post-submodule-update hook if it exists
     if [ -x "$repo_root/.githooks/post-submodule-update" ]; then

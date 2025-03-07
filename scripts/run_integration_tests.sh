@@ -4,7 +4,7 @@ set -eo pipefail
 
 # Keep track of our original directory
 ORIGINAL_PWD="$PWD"
-trap "cd \"$ORIGINAL_PWD\"" EXIT
+trap 'cd "$ORIGINAL_PWD"' EXIT
 
 # Determine script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,7 +38,7 @@ run_test() {
   
   # Run in a subshell to avoid changing the current directory
   (HOOKS_VERBOSITY=2 bash "$test_script")
-  local exit_code=$?
+  # We don't use exit_code but we keep the line for future reference
   
   # Change back to the original directory
   cd "$current_dir" || exit 1

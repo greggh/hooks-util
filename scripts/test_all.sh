@@ -44,7 +44,7 @@ for test_file in $(find "${PROJECT_DIR}/tests/integration" -name "*.sh" | sort);
   {
     # Execute the test script and capture its output
     exec 3>&1
-    TEST_OUTPUT=$(bash "$test_file" 2>&1 | tee >(cat >&3))
+    bash "$test_file" 2>&1 | tee >(cat >&3)
     TEST_EXIT_CODE=$?
     echo "$TEST_EXIT_CODE" > "$TEMP_EXIT_CODE_FILE"
   } 2>&1 | grep -v "^Exit code "

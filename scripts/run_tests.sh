@@ -2,8 +2,9 @@
 # Unit test runner for hooks-util shell scripts
 set -eo pipefail
 
-# Store the original pwd before running any commands
-ORIGINAL_PWD="$PWD"
+# We store the original pwd in case we need it for future enhancements
+# This value is currently unused but kept for reference
+# ORIGINAL_PWD="$PWD"
 
 # Determine script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

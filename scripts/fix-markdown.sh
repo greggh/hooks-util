@@ -15,7 +15,8 @@ fix_markdown_file() {
   echo "Processing $file"
   
   # Create a temp file
-  local tempfile=$(mktemp)
+  local tempfile
+  tempfile=$(mktemp)
   
   # Add trailing newline if missing
   if [ -f "$file" ] && [ "$(tail -c 1 "$file" | wc -l)" -eq 0 ]; then
