@@ -1,3 +1,4 @@
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -7,7 +8,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-03-06
+
 ### Added
+
+- Documentation Validation Tools:
+  - New `core/markdown.lua` module for markdown validation
+  - New `core/yaml.lua` module for YAML validation
+  - New `core/json.lua` module for JSON validation
+  - New `core/toml.lua` module for TOML validation
+  - Integration with markdownlint-cli, yamllint, jsonlint
+  - Comprehensive fixing scripts for common markdown issues
+  - Configuration templates for all linting tools
+
+- GitHub Workflow Management System:
+  - New `core/workflows.lua` module
+  - Base workflow templates in `ci/github/workflows/`
+  - Adapter-specific configurations in `ci/github/configs/`
+  - Workflow merging functionality using `lib/yaml_util.lua`
+  - Support for various workflow types (CI, markdown-lint, yaml-lint, etc.)
+
+- Submodule Update Mechanism:
+  - New `post-submodule-update` hook
+  - `gitmodules-hooks.sh` script to wrap git commands and detect updates
+  - Automatic update of hooks when hooks-util submodule is updated
+  - Backup and versioning system to preserve customizations
+  - Detailed documentation in `docs/submodule-update.md`
+
+- Documentation Adapter:
+  - Added a dedicated adapter for documentation projects
+  - MkDocs configuration validation
+  - Documentation structure validation
+  - Cross-reference validation
+  - Adapter-specific workflow configuration
+
+### Enhanced
+
+- Installation Script:
+  - Added proper version checking for updates
+  - File-by-file update verification
+  - Automatic backup of existing files before updating
+  - Support for check-only mode to detect needed updates
+  - Better error handling and reporting
+  - Enhanced diagnostics
+
+- Existing Adapters:
+  - Added health check, runtime path, and plugin structure validation to nvim-plugin adapter
+  - Added code coverage, LuaRocks validation, and multi-version testing to lua-lib adapter
+  - Added mock Neovim environment, config validation, and plugin loading verification to nvim-config adapter
+  - Added Lua linting and formatting support to all adapters
+
+### Documentation
+
+- Created detailed `docs/version-0.6.0-changes.md` with feature overview
+- Added `docs/submodule-update.md` with submodule usage instructions
+- Updated README.md with new features and capabilities
+
+### Integrated
+
 - Lust-Next integration for standardized testing across projects:
   - Comprehensive BDD-style testing framework
   - Automatic test discovery and setup
@@ -27,16 +85,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.2] - 2025-03-03
 
 ### Enhanced
+
 - Beautified README with badges and improved formatting
 - Added more visually appealing documentation layout
 
 ### Fixed
+
 - Replaced deprecated changelog-generator with custom extraction script
 - Improved release workflow reliability
 
 ## [0.2.1] - 2025-03-03
 
 ### Fixed
+
 - GitHub Actions Workflow Compatibility:
   - Fixed CI workflow to work in GitHub Actions environment:
     - Added diagnostic test approach that validates core functionality
@@ -52,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Enhanced cross-platform support
 
 ### Added
+
 - New utility scripts:
   - fix-markdown.sh for normalizing Markdown formatting issues
   - diagnose.sh for verifying core functionality
@@ -65,6 +127,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2025-03-02
 
 ### Enhanced
+
 - Integration tests now use real tools (StyLua, Luacheck, ShellCheck) instead of simulations:
   - Added support for detecting and using real tools when available
   - Created fallbacks to pattern matching when tools aren't installed
@@ -85,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced validation of pre-commit hook functionality
 
 ### Fixed
+
 - Pre-commit hook now correctly exits with non-zero status when errors are found
 - Integration tests now run successfully with proper error handling
 - Fixed path handling issues in test environment:
@@ -108,6 +172,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated numeric comparisons to use proper syntax
 
 ### Added
+
 - Luacheck integration for linting Lua files:
   - Automatic configuration discovery
   - Support for different Luacheck config file formats
@@ -145,6 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Structured markdown documentation
 
 ### Changed
+
 - Enhanced the configuration system:
   - Added layered configuration files (`.hooksrc.local.example` and `.hooksrc.user.example`)
   - Implemented priority-based configuration loading
@@ -160,6 +226,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Community resources and troubleshooting tips
 
 ### Improved
+
 - Core error handling with better context reporting
 - Path resolution for cross-platform compatibility
 - StyLua integration with more robust fallbacks
@@ -168,6 +235,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-03-02
 
 ### Added
+
 - Core utility functions for pre-commit hooks
 - Error handling and reporting system with fallback mechanisms
 - Path handling utilities for cross-platform compatibility
@@ -179,6 +247,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project structure based on GitHub best practices
 
 ### Planned
+
 - Support for additional hook types:
   - pre-push hooks for deployment validation
   - post-checkout hooks for environment setup
@@ -187,7 +256,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced test result reporting and formatting
 - Integration with LSP servers for better diagnostics
 
-[Unreleased]: https://github.com/greggh/hooks-util/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/greggh/hooks-util/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/greggh/hooks-util/compare/v0.2.2...v0.6.0
 [0.2.2]: https://github.com/greggh/hooks-util/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/greggh/hooks-util/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/greggh/hooks-util/compare/v0.1.0...v0.2.0
