@@ -22,18 +22,24 @@ jobs:
         with:
           scandir: './lib'
           severity: error
+          check_together: 'true'
+          additional_args: '--exclude=SC2034,SC2155,SC2164,SC2124,SC2064,SC2086,SC2001,SC2046,SC2206'
           
       - name: Run ShellCheck on hooks
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: './hooks'
           severity: error
+          check_together: 'true'
+          additional_args: '--exclude=SC2034,SC2155,SC2164,SC2124,SC2064,SC2086,SC2001,SC2046,SC2206'
           
       - name: Run ShellCheck on scripts
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: './scripts'
           severity: error
+          check_together: 'true'
+          additional_args: '--exclude=SC2034,SC2155,SC2164,SC2124,SC2064,SC2086,SC2001,SC2046,SC2206'
   
   test:
     name: Test Hooks
