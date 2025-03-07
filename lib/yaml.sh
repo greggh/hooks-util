@@ -26,11 +26,36 @@ hooks_yaml_lint() {
   # Check if yamllint is available
   if hooks_command_exists yamllint; then
     hooks_debug "Using yamllint to lint $file"
-    yamllint -c "${TARGET_DIR}/.yamllint.yml" "$file"
+    
+    # Check if yamllint config exists
+    local yaml_config="${TARGET_DIR}/.yamllint.yml"
+    local yaml_config_arg=""
+    
+    if [ -f "${yaml_config}" ]; then
+      hooks_debug "Using yamllint config at ${yaml_config}"
+      yaml_config_arg="-c ${yaml_config}"
+    else
+      # Check if config exists in templates directory
+      local template_config="${SCRIPT_DIR}/../templates/.yamllint.yml"
+      if [ -f "${template_config}" ]; then
+        hooks_debug "Using template yamllint config"
+        yaml_config_arg="-c ${template_config}"
+      else
+        hooks_debug "Using default yamllint config"
+      fi
+    fi
+    
+    # Run yamllint with the appropriate config
+    if [ -n "${yaml_config_arg}" ]; then
+      yamllint ${yaml_config_arg} "$file"
+    else
+      yamllint "$file"
+    fi
+    
     return $?
   else
     hooks_warning "YAML linting tools not found. Skipping linting for $file"
-    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
+    return "$HOOKS_ERROR_SUCCESS"  # Return success to allow hook to continue
   fi
 }
 

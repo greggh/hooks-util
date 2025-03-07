@@ -29,6 +29,11 @@ hooks_debug "Running from: ${SCRIPT_DIR}"
 TOP_LEVEL=$(hooks_git_root)
 cd "$TOP_LEVEL" || exit 1
 
+# Set TARGET_DIR for use by linting scripts
+TARGET_DIR="${TOP_LEVEL}"
+export TARGET_DIR
+hooks_debug "TARGET_DIR: ${TARGET_DIR}"
+
 # Load configuration
 hooks_load_config
 

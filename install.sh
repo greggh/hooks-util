@@ -816,5 +816,8 @@ hooks_info "- Run tests to ensure code quality"
 hooks_info ""
 hooks_info "To customize, edit: $TARGET_DIR/.hooksrc"
 hooks_info "Post-update hooks are installed to auto-update when the hooks-util submodule is updated"
+hooks_info ""
+hooks_info "NOTE: Installation creates backup files. To clean these up, run:"
+hooks_info "  ${SCRIPT_DIR}/scripts/cleanup_backups.sh ${TARGET_DIR}"
 
 exit 0

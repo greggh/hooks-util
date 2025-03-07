@@ -68,18 +68,44 @@ hooks_markdown_lint() {
     return "$HOOKS_ERROR_PATH_NOT_FOUND"
   fi
   
+  # Check for markdown config file
+  local md_config="${TARGET_DIR:-$PWD}/.markdownlint.json"
+  local md_config_arg=""
+  
+  if [ -f "${md_config}" ]; then
+    hooks_debug "Using markdownlint config at ${md_config}"
+    md_config_arg="--config ${md_config}"
+  else
+    # Check if config exists in templates directory
+    local template_config="${SCRIPT_DIR}/../templates/.markdownlint.json"
+    if [ -f "${template_config}" ]; then
+      hooks_debug "Using template markdownlint config"
+      md_config_arg="--config ${template_config}"
+    else
+      hooks_debug "Using default markdownlint config"
+    fi
+  fi
+  
   # Check if markdownlint-cli or markdownlint is available
   if hooks_command_exists markdownlint-cli; then
     hooks_debug "Using markdownlint-cli to lint $file"
-    markdownlint-cli "$file"
+    if [ -n "${md_config_arg}" ]; then
+      markdownlint-cli ${md_config_arg} "$file"
+    else
+      markdownlint-cli "$file"
+    fi
     return $?
   elif hooks_command_exists markdownlint; then
     hooks_debug "Using markdownlint to lint $file"
-    markdownlint "$file"
+    if [ -n "${md_config_arg}" ]; then
+      markdownlint ${md_config_arg} "$file"
+    else
+      markdownlint "$file"
+    fi
     return $?
   else
     hooks_warning "Markdown linting tools not found. Skipping linting for $file"
-    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
+    return "$HOOKS_ERROR_SUCCESS"  # Return success to allow hook to continue
   fi
 }
 

@@ -26,7 +26,25 @@ hooks_toml_lint() {
   # Try different TOML linting tools
   if hooks_command_exists taplo; then
     hooks_debug "Using taplo to lint $file"
-    taplo lint "$file"
+    
+    # Check if taplo config exists
+    local taplo_config="${TARGET_DIR}/.taplo.toml"
+    
+    if [ -f "${taplo_config}" ]; then
+      hooks_debug "Using taplo config at ${taplo_config}"
+      taplo lint --config "${taplo_config}" "$file"
+    else
+      # Check if config exists in templates directory
+      local template_config="${SCRIPT_DIR}/../templates/.taplo.toml"
+      if [ -f "${template_config}" ]; then
+        hooks_debug "Using template taplo config"
+        taplo lint --config "${template_config}" "$file"
+      else
+        hooks_debug "Using default taplo config"
+        taplo lint "$file"
+      fi
+    fi
+    
     return $?
   elif hooks_command_exists tomll; then
     hooks_debug "Using tomll to lint $file"
@@ -34,7 +52,7 @@ hooks_toml_lint() {
     return $?
   else
     hooks_warning "TOML linting tools not found. Skipping linting for $file"
-    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
+    return "$HOOKS_ERROR_SUCCESS"  # Return success to allow hook to continue
   fi
 }
 

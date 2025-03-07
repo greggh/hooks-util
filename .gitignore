@@ -11,7 +11,14 @@ $RECYCLE.BIN/
 *~
 *.bak
 *.swp
+*.swo
 *.tmp
+
+# Hooks-util installation backup files
+*.backup.*
+*.backup
+lib.backup*/
+*.backup.*/
 
 # IDE - VSCode
 .vscode/*
@@ -39,6 +46,9 @@ vendor/
 .bundle/
 bower_components/
 jspm_packages/
+
+# Virtual environments
+.venv/
 venv/
 env/
 ENV/
@@ -48,6 +58,7 @@ dist/
 out/
 build/
 target/
+site/
 *.o
 *.obj
 *.so
@@ -56,6 +67,8 @@ target/
 *.class
 *.pyc
 __pycache__/
+*.py[cod]
+*$py.class
 *.pyo
 *.egg-info/
 *.egg
@@ -97,8 +110,12 @@ docs/_build/
 _site/
 .docusaurus
 
-# Misc
+# Pre-commit environments
+.pre-commit-cache/
 .cache/
+.cache/pre-commit/
+
+# Misc
 temp/
 tmp/
 .tmp/

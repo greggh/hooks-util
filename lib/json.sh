@@ -26,7 +26,28 @@ hooks_json_lint() {
   # Try different JSON linting tools
   if hooks_command_exists jsonlint; then
     hooks_debug "Using jsonlint to lint $file"
-    jsonlint -c "${TARGET_DIR}/.jsonlintrc" "$file"
+    
+    # Check if jsonlint config exists
+    local json_config="${TARGET_DIR}/.jsonlintrc"
+    local json_config_arg=""
+    
+    if [ -f "${json_config}" ]; then
+      hooks_debug "Using jsonlint config at ${json_config}"
+      json_config_arg="-c ${json_config}"
+      jsonlint ${json_config_arg} "$file"
+    else
+      # Check if config exists in templates directory
+      local template_config="${SCRIPT_DIR}/../templates/.jsonlintrc"
+      if [ -f "${template_config}" ]; then
+        hooks_debug "Using template jsonlint config"
+        json_config_arg="-c ${template_config}"
+        jsonlint ${json_config_arg} "$file"
+      else
+        hooks_debug "Using default jsonlint config"
+        jsonlint "$file"
+      fi
+    fi
+    
     return $?
   elif hooks_command_exists jq; then
     hooks_debug "Using jq to lint $file"
@@ -34,7 +55,7 @@ hooks_json_lint() {
     return $?
   else
     hooks_warning "JSON linting tools not found. Skipping linting for $file"
-    return "$HOOKS_ERROR_COMMAND_NOT_FOUND"
+    return "$HOOKS_ERROR_SUCCESS"  # Return success to allow hook to continue
   fi
 }
 
