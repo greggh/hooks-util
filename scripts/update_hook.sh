@@ -98,7 +98,11 @@ else
     if [ -f "$VERSION_FILE" ]; then
         PREVIOUS_VERSION=$(cat "$VERSION_FILE")
         
-        if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+        # Check if version file is empty or different
+        if [ -z "$PREVIOUS_VERSION" ]; then
+            log "Empty version file found, installing hooks-util"
+            SHOULD_REINSTALL=true
+        elif [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
             log "hooks-util has been updated from $PREVIOUS_VERSION to $CURRENT_VERSION"
             SHOULD_REINSTALL=true
         else
@@ -239,13 +243,15 @@ rules:
         log "Successfully updated hooks-util"
         
         # Update the version file with the current commit hash
-        if [ -n "$VERSION_FILE" ]; then
-            echo "$CURRENT_VERSION" > "$VERSION_FILE"
-        else
-            log "Warning: VERSION_FILE is not defined. Cannot update version tracking file."
-            # Create a default version file in the project root
-            echo "$CURRENT_VERSION" > "${PROJECT_ROOT}/.hooks-util-version"
+        # Always ensure VERSION_FILE is defined with a default path
+        if [ -z "$VERSION_FILE" ]; then
+            VERSION_FILE="${PROJECT_ROOT}/.hooks-util-version"
+            log "Using default version file location: $VERSION_FILE"
         fi
+        
+        # Write the current version
+        echo "$CURRENT_VERSION" > "$VERSION_FILE"
+        log "Updated version tracking file with commit: $CURRENT_VERSION"
     else
         log "Error updating hooks-util"
         exit $INSTALL_RESULT
