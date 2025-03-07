@@ -1,0 +1,45 @@
+name: Lint YAML
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '.github/workflows/lint-yaml.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '.github/workflows/lint-yaml.yml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install yamllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yamllint
+      
+      - name: Create relaxed config
+        run: |
+          echo 'extends: default
+
+          rules:
+            line-length: disable
+            truthy: disable
+            trailing-spaces: disable
+            new-line-at-end-of-file: disable
+            document-start: disable
+            empty-lines: disable
+            indentation: disable' > .yamllint-ci.yml
+      
+      - name: Run yamllint
+        run: |
+          yamllint -c .yamllint-ci.yml .
