@@ -76,7 +76,7 @@ if [ "$(basename "$TARGET_DIR")" = "hooks-util" ]; then
   if [ "$VERBOSE" = true ]; then
     git -C "$TARGET_DIR" submodule update --init --recursive
   else
-    git -C "$TARGET_DIR" submodule update --init --recursive --quiet
+    git -C "$TARGET_DIR" submodule update --init --recursive
   fi
   
   # Check for lust-next specifically
@@ -100,7 +100,7 @@ else
     if [ "$VERBOSE" = true ]; then
       git -C "$TARGET_DIR" submodule update --init "$HOOKS_UTIL_PATH"
     else
-      git -C "$TARGET_DIR" submodule update --init "$HOOKS_UTIL_PATH" --quiet
+      git -C "$TARGET_DIR" submodule update --init "$HOOKS_UTIL_PATH"
     fi
     
     # Initialize submodules within hooks-util
@@ -108,7 +108,7 @@ else
     if [ "$VERBOSE" = true ]; then
       git -C "$HOOKS_UTIL_PATH" submodule update --init --recursive
     else
-      git -C "$HOOKS_UTIL_PATH" submodule update --init --recursive --quiet
+      git -C "$HOOKS_UTIL_PATH" submodule update --init --recursive
     fi
     
     # Check for lust-next specifically
