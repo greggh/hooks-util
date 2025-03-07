@@ -1,7 +1,7 @@
 #!/bin/bash
 # Version information for Neovim Hooks Utilities
 
-HOOKS_UTIL_VERSION="0.2.2"
+HOOKS_UTIL_VERSION="0.6.0"
 
 # Function to print the version
 hooks_util_version() {

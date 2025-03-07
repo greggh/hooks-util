@@ -5,8 +5,8 @@ set -eo pipefail  # Exit on error, error on pipeline failures
 # Determine the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Include library files from the parent directory (assuming hooks-util structure)
-LIB_DIR="$(cd "${SCRIPT_DIR}/../lib" && pwd)"
+# Include library files from the hooks-util lib directory
+LIB_DIR="$(cd "${SCRIPT_DIR}/lib" && pwd)"
 source "${LIB_DIR}/common.sh"
 source "${LIB_DIR}/error.sh"
 source "${LIB_DIR}/path.sh"
