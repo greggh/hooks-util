@@ -28,6 +28,12 @@ source "${LIB_DIR}/test_quality.sh"
 hooks_print_header "Neovim Hooks Utilities Pre-commit Hook v${HOOKS_UTIL_VERSION}"
 hooks_debug "Running from: ${SCRIPT_DIR}"
 
+# Add a trace flag for debugging
+if [ "${DEBUG:-0}" = "1" ]; then
+  set -x
+  hooks_info "Running in debug mode (set -x)"
+fi
+
 # Get the top level of the git repository
 TOP_LEVEL=$(hooks_git_root)
 cd "$TOP_LEVEL" || exit 1
@@ -163,7 +169,9 @@ fi
 # Print error summary and exit with appropriate code
 hooks_print_error_summary
 if [ ${HOOKS_ERROR_COUNT} -gt 0 ]; then
+  hooks_error "Pre-commit hook found ${HOOKS_ERROR_COUNT} errors (see above). Commit failed."
   exit 1
 else
+  hooks_success "All pre-commit checks passed successfully!"
   exit 0
 fi
