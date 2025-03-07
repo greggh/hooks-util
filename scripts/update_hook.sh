@@ -201,7 +201,13 @@ rules:
         log "Successfully updated hooks-util"
         
         # Update the version file with the current commit hash
-        echo "$CURRENT_VERSION" > "$VERSION_FILE"
+        if [ -n "$VERSION_FILE" ]; then
+            echo "$CURRENT_VERSION" > "$VERSION_FILE"
+        else
+            log "Warning: VERSION_FILE is not defined. Cannot update version tracking file."
+            # Create a default version file in the project root
+            echo "$CURRENT_VERSION" > "${PROJECT_ROOT}/.hooks-util-version"
+        fi
     else
         log "Error updating hooks-util"
         exit $INSTALL_RESULT
