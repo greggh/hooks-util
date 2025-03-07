@@ -35,18 +35,31 @@ CURRENT_DIR=$(pwd)
 
 # Find the root of the project and the hooks-util directory
 SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HOOKS_UTIL_DIR="$(dirname "$SCRIPT_PATH")"
+SCRIPT_DIR_NAME="$(basename "$(dirname "$SCRIPT_PATH")")"
 
-# Determine the project root by going up from the hooks-util directory
-# If hooks-util is inside .githooks, go up two levels, otherwise just one
-if [[ "$(basename "$(dirname "$HOOKS_UTIL_DIR")")" == ".githooks" ]]; then
-    # hooks-util is inside a .githooks directory (submodule case)
-    PROJECT_ROOT="$(cd "$(dirname "$(dirname "$HOOKS_UTIL_DIR")")" && pwd)"
-    HOOKS_DIR="$(dirname "$HOOKS_UTIL_DIR")"
-else
-    # hooks-util is directly inside the project (main repo case)
+# Properly determine locations based on script location
+if [[ "$SCRIPT_DIR_NAME" == "hooks-util" ]]; then
+    # Script is in hooks-util/scripts (main repo case)
+    HOOKS_UTIL_DIR="$(dirname "$SCRIPT_PATH")"
     PROJECT_ROOT="$(dirname "$HOOKS_UTIL_DIR")"
     HOOKS_DIR="${PROJECT_ROOT}/.githooks"
+elif [[ "$SCRIPT_DIR_NAME" == ".githooks" ]]; then
+    # Script is in .githooks/scripts (installed case)
+    HOOKS_DIR="$(dirname "$SCRIPT_PATH")"
+    PROJECT_ROOT="$(dirname "$HOOKS_DIR")"
+    HOOKS_UTIL_DIR="${HOOKS_DIR}/hooks-util"
+else
+    # Fallback case
+    echo -e "\033[0;31m\033[1mError:\033[0m \033[0;31mUnable to determine script location: ${SCRIPT_PATH}\033[0m"
+    exit 1
+fi
+
+# Debug output for troubleshooting
+if [ "${DEBUG:-0}" = "1" ]; then
+    echo "SCRIPT_PATH: $SCRIPT_PATH"
+    echo "HOOKS_UTIL_DIR: $HOOKS_UTIL_DIR"
+    echo "HOOKS_DIR: $HOOKS_DIR"
+    echo "PROJECT_ROOT: $PROJECT_ROOT"
 fi
 
 # Verify that PROJECT_ROOT is a git repository
