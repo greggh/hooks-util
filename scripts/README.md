@@ -1,3 +1,4 @@
+
 # Hooks-Util Testing Scripts
 
 This directory contains scripts for testing, debugging, and maintaining the hooks-util framework.
@@ -46,7 +47,8 @@ Example:
 
 ```bash
 env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_all_formats.sh
-```
+
+```text
 
 ## Required Tools
 
@@ -83,3 +85,4 @@ If you encounter issues:
 2. Verify that the configuration files (.yamllint.yml, etc.) exist or are being properly found
 3. Make sure TARGET_DIR is properly set
 4. Run scripts with increased verbosity (HOOKS_VERBOSITY=2)
+

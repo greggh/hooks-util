@@ -1,3 +1,4 @@
+
 # Submodule Update Mechanism
 
 This document explains how the hooks-util submodule update mechanism works and how to use it in your projects.
@@ -80,3 +81,4 @@ If you prefer not to modify your shell configuration, you can still ensure hooks
 
 - [Git Hooks Documentation](https://git-scm.com/docs/githooks)
 - [Git Submodules Documentation](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
+

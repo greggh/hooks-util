@@ -1,3 +1,4 @@
+
 # Hooks-Util Linting Features
 
 ## Supported File Types
@@ -29,6 +30,7 @@ Hooks-util supports the following configuration files:
 To leverage all linting features, the following tools should be installed:
 
 ```bash
+
 # Lua
 luarocks install luacheck
 cargo install stylua
@@ -48,7 +50,8 @@ pip install tomlcheck
 
 # Shell
 apt-get install shellcheck  # or equivalent for your system
-```
+
+```text
 
 ## Automatic Fixes
 
@@ -79,6 +82,7 @@ When a linting tool is not available:
 You can customize linting behavior in your `.hooksrc` file:
 
 ```bash
+
 # Enable/disable specific linting tools
 HOOKS_STYLUA_ENABLED=true
 HOOKS_LUACHECK_ENABLED=true
@@ -90,13 +94,15 @@ HOOKS_TEST_QUALITY_ENABLED=true
 
 # Set verbosity level (0=quiet, 1=normal, 2=verbose)
 HOOKS_VERBOSITY=1
-```
+
+```text
 
 ## Testing Your Setup
 
 Use the provided testing scripts to verify your configuration:
 
 ```bash
+
 # Test all format validators
 env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_all_formats.sh
 
@@ -105,7 +111,8 @@ env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_markdown.sh
 env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_yaml.sh
 env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_json.sh
 env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_toml.sh
-```
+
+```text
 
 ## Troubleshooting
 
@@ -136,3 +143,4 @@ The hooks-util installation process creates backup files when updating existing 
 3. The script will show you how many backup files were found and ask for confirmation before removing them.
 
 4. After installation, run the cleanup script to keep your project directory clean.
+

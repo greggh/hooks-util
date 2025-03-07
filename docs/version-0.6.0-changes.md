@@ -1,3 +1,4 @@
+
 # hooks-util v0.6.0 Changes
 
 This document summarizes the enhancements made in hooks-util v0.6.0, which includes significant improvements to the core functionality and adapter system.
@@ -106,7 +107,8 @@ To take advantage of these new features, run the installation script in your pro
 
 ```bash
 env -C /path/to/your/project /path/to/hooks-util/install.sh
-```
+
+```text
 
 The installation script will detect your project type and install the appropriate hooks and configurations.
 
@@ -115,3 +117,4 @@ For submodule updates, follow the instructions in `docs/submodule-update.md`.
 ## Compatibility
 
 hooks-util v0.6.0 is backward compatible with previous versions, but provides significant new functionality. Existing projects using hooks-util will automatically benefit from the new features when they update.
+

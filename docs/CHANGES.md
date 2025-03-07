@@ -1,3 +1,4 @@
+
 # Hooks-Util Changes Log
 
 ## Version 0.6.0 (2025-03-07)
@@ -70,3 +71,4 @@
 2. **Added Submodule Support**
    - Added post-update hooks
    - Added automatic detection of submodule updates
+
