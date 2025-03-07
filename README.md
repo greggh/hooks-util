@@ -15,7 +15,7 @@
 [Features](#features) •
 [Installation](#installation) •
 [Usage](#usage) •
-[Configuration](#configuration) •
+[Community](#community) •
 [Contributing](#contributing) •
 [License](#license)
 
@@ -71,8 +71,7 @@ The primary tools supported are:
 git submodule add https://github.com/greggh/hooks-util.git .hooks-util
 cd .hooks-util
 ./install.sh
-
-```text
+```
 
 ### Option 2: Direct download
 
@@ -82,8 +81,7 @@ curl -L https://github.com/greggh/hooks-util/releases/download/v0.2.1/hooks-util
 unzip hooks-util.zip -d .hooks-util
 cd .hooks-util
 ./install.sh
-
-```text
+```
 
 ## Usage
 
@@ -98,7 +96,6 @@ Hooks-util supports two configuration methods: the traditional shell-based confi
 Create a `.hooksrc` file in your project root to customize hook behavior:
 
 ```bash
-
 # .hooksrc - Hook configuration
 STYLUA_ENABLED=true           # Enable StyLua formatting
 LUACHECK_ENABLED=true         # Enable Luacheck linting
@@ -107,8 +104,7 @@ QUALITY_ENABLED=true          # Enable code quality fixes
 TEST_TIMEOUT=60000            # 60 seconds test timeout
 VERBOSITY=1                   # 0=quiet, 1=normal, 2=verbose
 SHELLCHECK_SEVERITY="error"   # ShellCheck severity level
-
-```text
+```
 
 #### Lua-Based Configuration (Recommended)
 
@@ -154,8 +150,7 @@ return {
     }
   }
 }
-
-```text
+```
 
 ### Project Type Detection and Adapters
 
@@ -165,17 +160,17 @@ Hooks-util features an adapter-based architecture that automatically detects you
   - Specialized plugin loading verification
   - Config validation
   - Mock Neovim environment support
-  
+
 - **neovim-plugin**: Neovim plugin with plugin/init.vim or lua/*/init.lua structure
   - Health check validation
   - Runtime path validation
   - Plugin structure validation
-  
+
 - **lua-lib**: Lua library with .rockspec files or certain directory structures
   - LuaRocks validation
   - Code coverage tracking
   - Multi-version testing
-  
+
 - **docs**: Documentation projects with MkDocs or similar structures
   - Documentation structure validation
   - Cross-reference validation
@@ -192,12 +187,12 @@ Hooks-util now includes comprehensive documentation validation tools:
   - Heading level consistency
   - Code block formatting
   - Comprehensive formatting checks
-  
+
 - **YAML Validation**: Using yamllint for workflow and configuration files
   - Schema validation
   - Format consistency
   - Syntax checking
-  
+
 - **JSON/TOML Validation**: For configuration files and package manifests
   - Syntax checking
   - Format validation
@@ -217,7 +212,6 @@ The hooks utility supports additional configuration files for different environm
 Example files are provided that you can copy and customize:
 
 ```bash
-
 # Create your local shell configuration
 cp templates/hooksrc.local.example .hooksrc.local
 
@@ -226,8 +220,7 @@ cp templates/hooksrc.user.example .hooksrc.user
 
 # Create your Lua configuration
 cp templates/hooks-util.lua.template .hooks-util.lua
-
-```text
+```
 
 Configuration files are loaded in order (main → local → user), with later files overriding earlier ones.
 
@@ -255,56 +248,47 @@ The hooks system will gracefully handle missing tools with appropriate warnings.
 Automatically formats Lua files according to Neovim coding conventions:
 
 ```bash
-
 # Custom StyLua path can be specified in .hooksrc
 STYLUA_PATH="/custom/path/to/stylua"
 STYLUA_ARGS="--config-path=/path/to/.stylua.toml"
-
-```text
+```
 
 ### Luacheck Integration
 
 Static analysis for your Lua code to catch errors before they occur:
 
 ```bash
-
 # Custom Luacheck path can be specified in .hooksrc
 LUACHECK_PATH="/custom/path/to/luacheck"
 LUACHECK_ARGS="--config /path/to/.luacheckrc"
-
-```text
+```
 
 ### ShellCheck Integration
 
 Validates shell scripts for common errors and best practices:
 
 ```bash
-
 # Custom ShellCheck path can be specified in .hooksrc
 SHELLCHECK_PATH="/custom/path/to/shellcheck"
 SHELLCHECK_SEVERITY="warning" # error, warning, info, style
-
-```text
+```
 
 ### Neovim Test Integration
 
 Runs your project's test suite before committing:
 
 ```bash
-
 # Test configuration in .hooksrc
 TEST_TIMEOUT=60000            # 60 seconds test timeout
 TEST_FRAMEWORK="plenary"      # plenary, busted, lust-next, or make
 TEST_COMMAND="make test"      # Custom test command
-
-```text
+```
 
 ### Lust-Next Testing Integration
 
 Hooks-util now includes comprehensive integration with lust-next, a lightweight and powerful testing framework for Lua:
 
 ```bash
-
 # Run all tests with lust-next
 ./spec/runner.lua
 
@@ -313,8 +297,7 @@ Hooks-util now includes comprehensive integration with lust-next, a lightweight 
 
 # Run tests with specific tags
 ./spec/runner.lua "" "unit"
-
-```text
+```
 
 ### Test Quality Validation
 
@@ -340,8 +323,7 @@ test_quality = {
     strict = false,    -- Strict mode (fail on first issue)
   }
 }
-
-```text
+```
 
 #### Quality Levels
 
@@ -387,8 +369,7 @@ To configure your project for lust-next testing:
 -- From your Lua code
 local lust_next = require("hooks-util.lust-next")
 lust_next.setup_project("/path/to/your/project")
-
-```text
+```
 
 This will:
 
@@ -422,8 +403,7 @@ describe("my_module", function()
     assert(not success, "Should have failed")
   end)
 end)
-
-```text
+```
 
 ### Submodule Update Mechanism
 
@@ -474,10 +454,41 @@ You can generate a CI workflow configuration for your tests:
 ```lua
 local lust_next = require("hooks-util.lust-next")
 lust_next.generate_workflow("/path/to/project", "github")  -- github, gitlab, or azure
-
-```text
+```
 
 This creates the appropriate workflow files for your CI platform, configured to run your lust-next tests.
+
+## Testing
+
+Hooks-util includes a comprehensive testing strategy to ensure reliability across different adapter types and environments.
+
+### Automated Testing
+
+The project includes several automated testing tools:
+
+```bash
+# Run the test suite on core functionality
+env -C /home/gregg/Projects/lua-library/hooks-util ./spec/runner.lua
+
+# Test across all adapter types
+env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_all_adapters.sh
+
+# Validate GitHub workflows locally
+env -C /home/gregg/Projects/lua-library/hooks-util ./scripts/test_github_workflows.sh
+```
+
+### Testing with Testbed Projects
+
+For comprehensive validation, hooks-util is tested across multiple adapter types using specialized testbed projects:
+
+- **hooks-util-testbed-lua-lib**: Tests with Lua library adapter
+- **hooks-util-testbed-nvim-plugin**: Tests with Neovim plugin adapter
+- **hooks-util-testbed-nvim-config**: Tests with Neovim config adapter
+- **hooks-util-testbed-docs**: Tests with Documentation adapter
+
+### Testing Guidelines
+
+For details on proper testing procedures, common pitfalls to avoid, and comprehensive testing strategies, see [TESTING.md](TESTING.md).
 
 ## Community
 
