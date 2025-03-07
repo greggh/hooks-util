@@ -33,18 +33,26 @@ done
 # Get current working directory
 CURRENT_DIR=$(pwd)
 
-# Find the root of the project (assumed to be parent directory of hooks-util)
-cd "$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
-# Handle both cases: direct hooks-util repository and submodule inside .githooks
-if [[ "$(basename "$(pwd)")" == ".githooks" ]]; then
-    HOOKS_DIR=$(pwd)
-    HOOKS_UTIL_DIR="${HOOKS_DIR}/hooks-util"
-    cd ..
-    PROJECT_ROOT=$(pwd)
+# Find the root of the project and the hooks-util directory
+SCRIPT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HOOKS_UTIL_DIR="$(dirname "$SCRIPT_PATH")"
+
+# Determine the project root by going up from the hooks-util directory
+# If hooks-util is inside .githooks, go up two levels, otherwise just one
+if [[ "$(basename "$(dirname "$HOOKS_UTIL_DIR")")" == ".githooks" ]]; then
+    # hooks-util is inside a .githooks directory (submodule case)
+    PROJECT_ROOT="$(cd "$(dirname "$(dirname "$HOOKS_UTIL_DIR")")" && pwd)"
+    HOOKS_DIR="$(dirname "$HOOKS_UTIL_DIR")"
 else
-    HOOKS_UTIL_DIR=$(pwd)
-    cd ..
-    PROJECT_ROOT=$(pwd)
+    # hooks-util is directly inside the project (main repo case)
+    PROJECT_ROOT="$(dirname "$HOOKS_UTIL_DIR")"
+    HOOKS_DIR="${PROJECT_ROOT}/.githooks"
+fi
+
+# Verify that PROJECT_ROOT is a git repository
+if [ ! -d "${PROJECT_ROOT}/.git" ]; then
+    echo -e "\033[0;31m\033[1mError:\033[0m \033[0;31mTarget directory is not a git repository: ${PROJECT_ROOT}\033[0m"
+    exit 1
 fi
 
 # Go back to original directory
