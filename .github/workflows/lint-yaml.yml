@@ -6,13 +6,13 @@ on:
     paths:
       - '**/*.yml'
       - '**/*.yaml'
-      - '.github/workflows/yaml-lint.yml'
+      - '.github/workflows/lint-yaml.yml'
   pull_request:
     branches: [main, develop]
     paths:
       - '**/*.yml'
       - '**/*.yaml'
-      - '.github/workflows/yaml-lint.yml'
+      - '.github/workflows/lint-yaml.yml'
   workflow_dispatch:
 
 jobs:

@@ -6,13 +6,13 @@ on:
     paths:
       - '**/*.sh'
       - '**/*.lua'
-      - '.github/workflows/scripts-lint.yml'
+      - '.github/workflows/lint-scripts.yml'
   pull_request:
     branches: [main, develop]
     paths:
       - '**/*.sh'
       - '**/*.lua'
-      - '.github/workflows/scripts-lint.yml'
+      - '.github/workflows/lint-scripts.yml'
   workflow_dispatch:
 
 jobs:
