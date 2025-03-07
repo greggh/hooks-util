@@ -191,6 +191,15 @@ if [ -d "$LIB_TARGET_DIR" ]; then
       hooks_info "Version mismatch detected - update needed"
       NEED_UPDATE=true
     fi
+    
+    # Check for required files (v0.6.0+)
+    for req_file in markdown.sh yaml.sh json.sh toml.sh; do
+      if [ ! -f "$LIB_TARGET_DIR/$req_file" ]; then
+        hooks_info "Missing required file $req_file - update needed"
+        NEED_UPDATE=true
+        break
+      fi
+    done
   else
     # No version file means old installation, update needed
     hooks_info "No version information found - update needed"
@@ -220,6 +229,8 @@ if [ ! -d "$LIB_TARGET_DIR" ] || [ "$NEED_UPDATE" = true ]; then
     for lib_file in "$SCRIPT_DIR/lib"/*.sh; do
       if [ -f "$lib_file" ]; then
         cp "$lib_file" "$LIB_TARGET_DIR/"
+        # Make sure all library files are executable
+        chmod +x "$LIB_TARGET_DIR/$(basename "$lib_file")"
       fi
     done
     

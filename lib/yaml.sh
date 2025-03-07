@@ -2,7 +2,7 @@
 # YAML validation utilities for Neovim Hooks Utilities
 
 # Include the necessary libraries
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" || exit 1
 source "${SCRIPT_DIR}/common.sh"
 source "${SCRIPT_DIR}/error.sh"
 source "${SCRIPT_DIR}/path.sh"
