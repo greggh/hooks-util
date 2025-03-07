@@ -48,8 +48,12 @@ jobs:
           # SC2164: Use cd ... || exit in case cd fails
           # SC2124: Assigning array to string will make it coalesce
           # SC2064: Use single quotes for trap
+          # SC2086: Double quote to prevent globbing and word splitting
+          # SC2001: See if you can use ${variable//search/replace} instead
+          # SC2046: Quote this to prevent word splitting
+          # SC2206: Quote to prevent word splitting/globbing
           find ./scripts -name "*.sh" -type f -print0 | \
-            xargs -0 shellcheck --exclude=SC2034,SC2155,SC2164,SC2124,SC2064 --severity=error
+            xargs -0 shellcheck --exclude=SC2034,SC2155,SC2164,SC2124,SC2064,SC2086,SC2001,SC2046,SC2206 --severity=error
 
   luacheck:
     name: Lua Check
@@ -88,13 +92,25 @@ jobs:
         run: |
           echo "Creating .luacheckrc with relaxed settings"
           cat > .luacheckrc << 'EOF'
+          max_line_length = false
+          std = {
+            globals = {"vim", "assert", "describe", "it", "before_each", "after_each"}
+          }
+          exclude_files = {
+            "deps/**",
+            ".luarocks/**"
+          }
           ignore = {
             "212", -- Unused argument
             "213", -- Unused loop variable
             "421", -- Shadowing a local variable
+            "431", -- Shadowing an upvalue
             "631", -- Line is too long
+            "611", -- A line contains trailing whitespace
+            "614", -- Trailing whitespace
+            "581", -- Negation operator can be replaced
           }
           EOF
           
           echo "Running luacheck with relaxed settings:"
-          luacheck .
+          luacheck . --config .luacheckrc

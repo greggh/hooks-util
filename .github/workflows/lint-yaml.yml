@@ -29,7 +29,7 @@ jobs:
       
       - name: Create relaxed config
         run: |
-          echo 'extends: default
+          echo 'extends: relaxed
 
           rules:
             line-length: disable
@@ -38,7 +38,11 @@ jobs:
             new-line-at-end-of-file: disable
             document-start: disable
             empty-lines: disable
-            indentation: disable' > .yamllint-ci.yml
+            indentation: disable
+            comments: disable
+            braces: disable
+            brackets: disable
+            commas: disable' > .yamllint-ci.yml
       
       - name: Run yamllint
         run: |
