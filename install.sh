@@ -4,13 +4,16 @@
 set -e
 
 # Determine the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Include library files 
-LIB_DIR="${SCRIPT_DIR}/lib"
+LIB_DIR="${ROOT_DIR}/lib"
 source "${LIB_DIR}/common.sh"
 source "${LIB_DIR}/error.sh"
 source "${LIB_DIR}/path.sh"
+
+# Make sure we preserve the root directory path
+SCRIPT_DIR="$ROOT_DIR"
 
 # Print banner
 hooks_print_header "Neovim Hooks Utilities Installation v${HOOKS_UTIL_VERSION}"
@@ -219,19 +222,166 @@ if [ "$CREATE_CONFIG" = true ]; then
   hooks_info "  cp .hooksrc.user.example .hooksrc.user"
 fi
 
+# Install documentation linting tools (markdown, yaml, json, toml)
+hooks_print_header "Installing documentation tools"
+
+# Check if the target has markdown files
+MARKDOWN_FILES=$(find "$TARGET_DIR" -name "*.md" | wc -l)
+if [ "$MARKDOWN_FILES" -gt 0 ]; then
+  if [ "$DRY_RUN" = false ]; then
+    # Install markdownlint configuration
+    cp "$SCRIPT_DIR/templates/markdownlint.json" "$TARGET_DIR/.markdownlint.json"
+    hooks_success "Installed markdown linting configuration"
+    
+    # Copy markdown fixing scripts
+    MARKDOWN_SCRIPTS_DIR="$HOOKS_DIR/scripts/markdown"
+    mkdir -p "$MARKDOWN_SCRIPTS_DIR"
+    cp "$SCRIPT_DIR/scripts/markdown/"*.sh "$MARKDOWN_SCRIPTS_DIR/"
+    chmod +x "$MARKDOWN_SCRIPTS_DIR/"*.sh
+    hooks_success "Installed markdown fixing scripts"
+  else
+    hooks_info "[DRY RUN] Would install markdown linting configuration and scripts"
+  fi
+fi
+
+# Check if the target has YAML files
+YAML_FILES=$(find "$TARGET_DIR" -name "*.yml" -o -name "*.yaml" | wc -l)
+if [ "$YAML_FILES" -gt 0 ]; then
+  if [ "$DRY_RUN" = false ]; then
+    # Install yamllint configuration
+    cp "$SCRIPT_DIR/templates/yamllint.yml" "$TARGET_DIR/.yamllint.yml"
+    hooks_success "Installed YAML linting configuration"
+  else
+    hooks_info "[DRY RUN] Would install YAML linting configuration"
+  fi
+fi
+
+# Check if the target has JSON files
+JSON_FILES=$(find "$TARGET_DIR" -name "*.json" | wc -l)
+if [ "$JSON_FILES" -gt 0 ]; then
+  if [ "$DRY_RUN" = false ]; then
+    # Install jsonlint configuration
+    cp "$SCRIPT_DIR/templates/jsonlint.json" "$TARGET_DIR/.jsonlintrc"
+    hooks_success "Installed JSON linting configuration"
+  else
+    hooks_info "[DRY RUN] Would install JSON linting configuration"
+  fi
+fi
+
+# Check if the target has TOML files
+TOML_FILES=$(find "$TARGET_DIR" -name "*.toml" | wc -l)
+if [ "$TOML_FILES" -gt 0 ]; then
+  if [ "$DRY_RUN" = false ]; then
+    # Install TOML linting configuration
+    cp "$SCRIPT_DIR/templates/tomllint.toml" "$TARGET_DIR/.tomllintrc"
+    hooks_success "Installed TOML linting configuration"
+  else
+    hooks_info "[DRY RUN] Would install TOML linting configuration"
+  fi
+fi
+
+# Install GitHub workflow files if applicable
+hooks_print_header "Setting up GitHub Workflows"
+GITHUB_DIR="$TARGET_DIR/.github"
+WORKFLOWS_DIR="$GITHUB_DIR/workflows"
+
+# Check if this is a GitHub repository
+if [ -d "$GITHUB_DIR" ] || [ -f "$TARGET_DIR/.gitlab-ci.yml" ]; then
+  if [ "$DRY_RUN" = false ]; then
+    # Create workflows directory if it doesn't exist
+    mkdir -p "$WORKFLOWS_DIR"
+    
+    # Detect project type and determine appropriate adapter
+    PROJECT_TYPE="unknown"
+    
+    # Simple project type detection
+    if [ -f "$TARGET_DIR/init.vim" ] || [ -f "$TARGET_DIR/init.lua" ]; then
+      PROJECT_TYPE="nvim-config"
+    elif [ -d "$TARGET_DIR/lua" ] && [ -d "$TARGET_DIR/plugin" ]; then
+      PROJECT_TYPE="nvim-plugin"
+    elif [ -f "$TARGET_DIR/rockspec" ] || [ -f "$TARGET_DIR/"*.rockspec ]; then
+      PROJECT_TYPE="lua-lib"
+    elif [ -f "$TARGET_DIR/mkdocs.yml" ] || [ -d "$TARGET_DIR/docs" ]; then
+      PROJECT_TYPE="docs"
+    fi
+    
+    hooks_info "Detected project type: $PROJECT_TYPE"
+    
+    # Copy base workflow files
+    for workflow in "$SCRIPT_DIR/ci/github/workflows/"*; do
+      if [ -f "$workflow" ]; then
+        workflow_name=$(basename "$workflow")
+        
+        # Determine if there's an adapter-specific configuration
+        adapter_config="$SCRIPT_DIR/ci/github/configs/$PROJECT_TYPE/${workflow_name%.*}.config.yml"
+        
+        # If adapter configuration exists, merge with base
+        if [ -f "$adapter_config" ]; then
+          hooks_info "Using adapter-specific configuration for $workflow_name"
+          # Placeholder for actual YAML merging (simplified here)
+          cat "$workflow" "$adapter_config" > "$WORKFLOWS_DIR/$workflow_name"
+        else
+          # Just copy the base workflow
+          cp "$workflow" "$WORKFLOWS_DIR/$workflow_name"
+        fi
+        
+        hooks_success "Installed workflow: $workflow_name"
+      fi
+    done
+  else
+    hooks_info "[DRY RUN] Would set up GitHub workflows for project type detection"
+  fi
+fi
+
+# Install post-update hook
+hooks_print_header "Setting up post-update hook"
+if [ "$DRY_RUN" = false ]; then
+  # Copy the post-update hook script
+  POST_UPDATE_SCRIPT="$HOOKS_DIR/scripts/update_hook.sh"
+  mkdir -p "$(dirname "$POST_UPDATE_SCRIPT")"
+  cp "$SCRIPT_DIR/scripts/update_hook.sh" "$POST_UPDATE_SCRIPT"
+  chmod +x "$POST_UPDATE_SCRIPT"
+  
+  # Set up git post-merge hook to run the update script
+  POST_MERGE_HOOK="$HOOKS_DIR/post-merge"
+  echo '#!/bin/bash
+# Auto-generated by hooks-util installer
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/scripts/update_hook.sh"
+' > "$POST_MERGE_HOOK"
+  chmod +x "$POST_MERGE_HOOK"
+  
+  # Set up git post-checkout hook to run the update script
+  POST_CHECKOUT_HOOK="$HOOKS_DIR/post-checkout"
+  echo '#!/bin/bash
+# Auto-generated by hooks-util installer
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/scripts/update_hook.sh" --quiet
+' > "$POST_CHECKOUT_HOOK"
+  chmod +x "$POST_CHECKOUT_HOOK"
+  
+  hooks_success "Installed post-update hooks"
+else
+  hooks_info "[DRY RUN] Would install post-update hooks"
+fi
+
 hooks_print_header "Installation complete"
 hooks_success "Hooks are ready to use!"
 hooks_info "Pre-commit hook will:"
 hooks_info "- Format Lua files using StyLua"
 hooks_info "- Run Luacheck for Lua code linting"
 hooks_info "- Run ShellCheck for shell script validation"
+hooks_info "- Validate Markdown files"
+hooks_info "- Validate YAML, JSON, and TOML files"
 hooks_info "- Fix common issues automatically:"
 hooks_info "  - Trailing whitespace"
 hooks_info "  - Line endings"
 hooks_info "  - Prefix unused variables with _"
 hooks_info "  - Add final newlines to files"
+hooks_info "  - Fix markdown formatting issues"
 hooks_info "- Run tests to ensure code quality"
 hooks_info ""
 hooks_info "To customize, edit: $TARGET_DIR/.hooksrc"
+hooks_info "Post-update hooks are installed to auto-update when the hooks-util submodule is updated"
 
 exit 0

@@ -2,8 +2,8 @@
 # Common utility functions for Neovim Hooks Utilities
 
 # Include the version information
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/version.sh"
+LIB_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${LIB_SCRIPT_DIR}/version.sh"
 
 # Color codes for better output formatting
 export HOOKS_COLOR_RED='\033[0;31m'
@@ -95,7 +95,7 @@ hooks_set_verbosity() {
 # Usage: hooks_load_config [path/to/.hooksrc]
 hooks_load_config() {
   local config_file="${1:-"${PWD}/.hooksrc"}"
-  local default_config_file="${SCRIPT_DIR}/../templates/hooksrc.template"
+  local default_config_file="${LIB_SCRIPT_DIR}/../templates/hooksrc.template"
   # Declare and assign separately to avoid masking return values
   local config_dir
   config_dir=$(dirname "$config_file")
